@@ -24,7 +24,7 @@
     <!-- Elsewhere Section -->
     <div class="section mb-2">
       <h2>🌐 Elsewhere</h2>
-      <p class="mt-3">I can usually be found in most places as @omdanii. Some of the most interesting ones:</p>
+      <p class="mt-3 mb-3">I can usually be found in most places as @omdanii. Some of the most interesting ones:</p>
       <ContactInfo :link="'https://github.com/Mahmoud-Emad/'" :linkText="'GitHub: @Mahmoud-Emad'" class="mr-2"
         :cols="display.mdAndUp.value" icon="mdi-github" />
       <ContactInfo :link="'https://www.linkedin.com/in/mahmoud-emad-4aa53717a/'" :linkText="'LinkedIn: @mahmoud-emad'"

@@ -1,0 +1,224 @@
+{
+  "guestbooks": [
+    {
+      "id": 1,
+      "createdAt": "2025-03-14T17:51:34.739Z",
+      "status": "created",
+      "name": "Anonymous",
+      "website": "www.com",
+      "message": "Your web site is really coool, i really enjoyed it"
+    },
+    {
+      "id": 2,
+      "createdAt": "2025-03-14T17:52:02.025Z",
+      "status": "created",
+      "name": "Anonymous",
+      "website": "",
+      "message": "Your web site is really coool, i really enjoyed it\nYour web site is really coool, i really enjoyed it \n"
+    },
+    {
+      "id": 3,
+      "createdAt": "2025-03-14T17:52:02.575Z",
+      "status": "created",
+      "name": "Anonymous",
+      "website": "www.com",
+      "message": "Your web site is really coool, i really enjoyed it"
+    },
+    {
+      "id": 4,
+      "createdAt": "2025-03-14T17:52:05.029Z",
+      "status": "created",
+      "name": "Anonymous",
+      "website": "www.com",
+      "message": "Your web site is really coool, i really enjoyed it"
+    },
+    {
+      "id": 5,
+      "createdAt": "2025-03-14T17:52:05.800Z",
+      "status": "created",
+      "name": "Anonymous",
+      "website": "www.com",
+      "message": "Your web site is really coool, i really enjoyed it"
+    },
+    {
+      "id": 6,
+      "createdAt": "2025-03-14T17:52:08.689Z",
+      "status": "created",
+      "name": "Anonymous",
+      "website": "www.com",
+      "message": "Your web site is really coool, i really enjoyed it"
+    }
+  ],
+  "posts": [
+    {
+      "id": 1,
+      "createdAt": "2025-03-04T00:28:04.896Z",
+      "status": "created",
+      "title": "A simple post created by the blog post editor",
+      "content": "# First of all we need to introduce this blog post in simple words\n\n## This section is created to be like a sub header\n\n**It's a bold text**\n\nAnd in the end of the post I would like to type some *italic sentence* "
+    },
+    {
+      "id": 2,
+      "createdAt": "2025-03-04T00:33:03.580Z",
+      "status": "created",
+      "title": "Commi: AI-powered Git Commit Message Generator",
+      "content": "# Commi: AI-powered Git Commit Message Generator\n\nCommi is an AI-powered tool that automatically generates Git commit messages based on your code changes. It uses Google's **Gemini AI** to analyze your Git diffs and suggest meaningful, descriptive commit messages. Commi helps save time and ensures your commit history is consistent and descriptive.\n\n## Features\n\n- **AI-powered commit message generation**: Suggest commit messages based on the code changes using Google's Gemini AI.\n- **Staged changes support**: Generate commit messages based on the current staged changes.\n- **Direct commit**: Generate and commit the suggested commit message directly to your repository.\n- **Clipboard integration**: Optionally copy the generated commit message to your clipboard for easy pasting.\n<!-- - **Future updates**: Integration with CI/CD pipelines, support for different languages, and customizable commit message templates. -->\n\n## Installation\n\n### Build from source\n\nTo install **Commi** manually, follow these steps:\n\n1. Clone the repository:\n\n   ```bash\n   git clone https://github.com/Mahmoud-Emad/commi.git\n   cd commi\n   ```\n\n2. Install the dependencies:\n\n   ```bash\n   poetry install\n   ```\n\n3. Build the executable:\n\n   ```bash\n   ./build.sh\n   # This aslo will move the excutable to `/usr/local/bin`\n   ```\n\n4. Run the executable:\n\n   ```bash\n   # Inside a repo you can do\n   commi --copy\n   # or run it from everywhere and pass the repo path as an argument\n   commi --repo \"/path/to/your/repo\" --commit\n   ```\n\n### Using pip\n\nYou can install **Commi** using pip:\n\n```bash\n    pip install commi\n```\n\nRun the executable:\n\n```bash\n# Inside a repo you can do\ncommi --generate\n# or run it from everywhere and pass the repo path as an argument\ncommi --repo \"/path/to/your/repo\" --generate\n```\n\n### Install the binary\n\nYou can also download the pre-built binary for your system from the [releases page](https://github.com/Mahmoud-Emad/commi/releases).\n\nNow you're ready to use **Commi**!\n\n## Usage\n\nAfter installation, you can use the command-line interface (CLI) to generate commit messages.\n\n### Basic Usage\n\nTo generate a commit message based on the latest changes in your repository:\n\n```bash\ncommi --repo \"/path/to/your/repo\"\n```\n\n### Use Staged Changes\n\nIf you want to generate a commit message based on the staged changes:\n\n```bash\ncommi --repo \"/path/to/your/repo\" --cached\n```\n\n### Set an API Key\n\nYou can provide your API key directly via the `--api-key` option:\n\n```bash\ncommi --repo \"/path/to/your/repo\" --api-key \"your_api_key\"\n```\n\nAlternatively, you can set the API key as an environment variable:\n\n```bash\nexport COMMI_API_KEY=\"your_api_key\"\ncommi --repo \"/path/to/your/repo\"\n```\n\nIf no API key is provided, a default API key will be used.\n\n### Copy the Commit Message to Clipboard\n\nTo copy the generated commit message to your clipboard, use the `--copy` flag:\n\n```bash\ncommi --repo \"/path/to/your/repo\" --copy\n```\n\nThis requires the installation of `xclip` (on Linux systems). If it's not installed, Commi will attempt to install it automatically.\n\n### Regenerate a Commit Message\n\nTo regenerate the commit message, you can simply run the command one more time:\n\n```bash\ncommi --repo \"/path/to/your/repo\"\n```\n\n### Commit the suggested Commit Message\n\nTo commit the generated commit message, use the `--commit` flag:\n\n```bash\ncommi --repo \"/path/to/your/repo\" --commit\n```\n\n## Configuration\n\nCommi uses a `.env` file to configure certain settings. You can modify the following settings:\n\n- `COMMI_API_KEY`: Your Gemini AI API key.\n- `MODEL_NAME`: The AI model to use for commit message generation (e.g., `gemini-1.5-flash`).\n\n## Contributing\n\nWe welcome contributions to Commi! If you find a bug or want to suggest a new feature, please open an issue or submit a pull request.\n\n1. Fork the repository.\n2. Create a new branch for your feature (`git checkout -b feature-name`).\n3. Commit your changes (`git commit -am 'Add new feature'`).\n4. Push to the branch (`git push origin feature-name`).\n5. Create a new pull request.\n\n## License\n\nCommi is open-source software licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.\n"
+    },
+    {
+      "id": 3,
+      "createdAt": "2025-03-04T10:31:44.210Z",
+      "status": "created",
+      "title": "Test project post",
+      "content": "\n## Markdown Basic Syntax\n\nI just love **bold text**. Italicized text is the _cat's meow_. At the command prompt, type `nano`.\n\nMy favorite markdown editor is [vue3-markdown](https://www.npmjs.com/package/vue3-markdown).\n\n1. First item\n2. Second item\n3. Third item\n\n> Dorothy followed her through many of the beautiful rooms in her castle.\n\n```js\nimport { ref } from 'vue'\nimport { VMarkdownEditor } from 'vue3-markdown'\nimport 'vue3-markdown/dist/style.css'\n\nconst handleUpload = (file) => {\n  console.log(file)\n  return 'https://i.postimg.cc/52qCzTVw/pngwing-com.png'\n}\n```\n\n## GFM Extended Syntax\n\nAutomatic URL Linking: https://www.npmjs.com/package/vue3-markdown\n\n~~The world is flat.~~ We now know that the world is round.\n\n- [x] Write the press release\n- [ ] Update the website\n- [ ] Contact the media\n\n| Syntax    | Description |\n| --------- | ----------- |\n| Header    | Title       |\n| Paragraph | Text        |\n\n## Footnotes\n\nHere's a simple footnote,[^1] and here's a longer one.[^bignote]\n\n[^1]: This is the first footnote.\n[^bignote]: Here's one with multiple paragraphs and code.\n\n    Indent paragraphs to include them in the footnote.\n\n    `{ my code }`\n\n    Add as many paragraphs as you like.\n\n## Math Equation\n\nInline math equation: $a+b$\n\n$$\n\\displaystyle \\left( \\sum_{k=1}^n a_k b_k \\right)^2 \\leq \\left( \\sum_{k=1}^n a_k^2 \\right) \\left( \\sum_{k=1}^n b_k^2 \\right)\n$$\n"
+    },
+    {
+      "id": 4,
+      "createdAt": "2025-03-04T20:02:58.444Z",
+      "status": "created",
+      "title": "A new post posted",
+      "content": "This is a simple post with # Head"
+    }
+  ],
+  "projects": [
+    {
+      "id": 1,
+      "createdAt": "2025-03-03T22:44:14.369Z",
+      "status": "created",
+      "title": "CSHR",
+      "link": "https://github.com/codescalers/CSHR",
+      "tags": [
+        "Django",
+        "Vue",
+        "Docker",
+        "TypeScript"
+      ],
+      "description": "CRM project mainly for the HR department to manage the employees.",
+      "background": "transparent",
+      "type": "project"
+    },
+    {
+      "id": 2,
+      "createdAt": "2025-03-03T22:45:25.359Z",
+      "status": "created",
+      "title": "Commi",
+      "link": "https://github.com/Mahmoud-Emad/commi",
+      "tags": [
+        "Python",
+        "Git",
+        "Commit messages"
+      ],
+      "description": "Commi is an AI-powered tool that automatically generates Git commit messages based on your code changes.",
+      "background": "transparent",
+      "type": "Open Source"
+    },
+    {
+      "id": 3,
+      "createdAt": "2025-03-03T22:46:59.171Z",
+      "status": "created",
+      "title": "Grid CLI",
+      "link": "https://github.com/Mahmoud-Emad/grid-cli",
+      "tags": [
+        "TypeScript",
+        "Java",
+        "Docker"
+      ],
+      "description": "CLI tool designed to easily deploy virtual machines (VMs) on the Threefold Grid. The project is built on top of the Grid Client, allowing users to interact with the decentralized infrastructure of the Threefold Grid for virtual machine deployment, management, and other related functionalities.",
+      "background": "transparent",
+      "type": "Open Source"
+    },
+    {
+      "id": 4,
+      "createdAt": "2025-03-03T22:48:03.350Z",
+      "status": "created",
+      "title": "Switchkeys",
+      "link": "https://github.com/Mahmoud-Emad/Switchkeys",
+      "tags": [
+        "Dart",
+        "Python",
+        "Go",
+        "TypeScript"
+      ],
+      "description": "SwitchKeys: Streamline feature flag management. Effortlessly toggle features for A/B testing phased rollouts & rapid experimentation. Drive innovation with ease.",
+      "background": "transparent",
+      "type": "project"
+    },
+    {
+      "id": 5,
+      "createdAt": "2025-03-03T22:49:37.884Z",
+      "status": "created",
+      "title": "INI Parser",
+      "link": "https://github.com/Mahmoud-Emad/INI-Parser",
+      "tags": [
+        "Python"
+      ],
+      "description": "An INI format parser and serializer for Python. Sections are treated as nested dictionaries. Items before the first heading are saved directly on the object.",
+      "background": "transparent",
+      "type": "Open Source"
+    },
+    {
+      "id": 6,
+      "createdAt": "2025-03-03T22:50:47.074Z",
+      "status": "created",
+      "title": "Whoami",
+      "link": "https://github.com/Mahmoud-Emad/Whoami",
+      "tags": [
+        "Vue",
+        "TypeScript",
+        "NodeJS",
+        "express.js"
+      ],
+      "description": "Whoami - A Customizable Portfolio, Whoami is a fully customizable portfolio template that showcases personal details, projects, contact info, problem-solving challenges, blog posts, and more. It includes an admin dashboard, secured with an admin signature, allowing easy customization and management. Clone, modify, and make it your own!",
+      "background": "transparent",
+      "type": "Project"
+    },
+    {
+      "id": 7,
+      "createdAt": "2025-03-03T22:51:44.397Z",
+      "status": "created",
+      "title": "Threefold Playground",
+      "link": "https://github.com/threefoldtech/tfgrid-sdk-ts/tree/development/packages/playground",
+      "tags": [
+        "Vue",
+        "TypeScript",
+        "NodeJS"
+      ],
+      "description": "Playground is a Vue application that helps with deploying solutions on TF Grid v3. The backend for the playground is introduced with grid client which communicates to TF Chain and TF Grid over RMB.\n",
+      "background": "transparent",
+      "type": "Project"
+    }
+  ],
+  "articles": [
+    {
+      "id": 1,
+      "createdAt": "2025-02-28T15:26:41.934Z",
+      "status": "created",
+      "link": "https://thehubpublication.com/when-you-accept-yourself-everything-else-falls-into-place-ecd635114bd0",
+      "title": "When You Accept Yourself, Everything Else Falls Into Place",
+      "description": ""
+    },
+    {
+      "id": 2,
+      "createdAt": "2025-02-28T15:26:41.934Z",
+      "status": "created",
+      "link": "https://medium.com/bytebytego-system-design-alliance/system-design-blueprint-the-ultimate-guide-e27b914bf8f1",
+      "title": "System Design Blueprint: The Ultimate Guide",
+      "description": ""
+    },
+    {
+      "id": 3,
+      "createdAt": "2025-02-28T15:26:41.934Z",
+      "status": "created",
+      "link": "https://sayedalesawy.hashnode.dev/high-performance-mysql-ch5-indexing-for-high-performance",
+      "title": "High Performance MySQL [Ch.5: Indexing for High Performance]",
+      "description": ""
+    },
+    {
+      "id": 4,
+      "createdAt": "2025-02-28T15:28:41.507Z",
+      "status": "created",
+      "link": "https://medium.com/@mahmmoud.hassanein/introducing-commi-the-ai-powered-git-commit-message-generator-db5c643210f3",
+      "title": "Introducing Commi: The AI-Powered Git Commit Message Generator",
+      "description": ""
+    }
+  ]
+}

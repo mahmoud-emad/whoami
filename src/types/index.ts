@@ -33,8 +33,8 @@ export type SettingsType = {
     host: string,
   },
   configuration: {
-    githubURL: string,
     adminDashboard: boolean,
+    displayNavbarImage: boolean,
     multipleThemes: boolean,
     enableSearch: boolean,
     searchModels: Array<'projects' | 'guestbooks' | 'articles' | 'posts'>,
@@ -45,6 +45,20 @@ export type SettingsType = {
   security: {
     debug: boolean,
     adminFingerprintSignature: string
+  },
+  personal: {
+    fullName: string,
+    email: string,
+    country: string,
+    resumeURL?: string,
+    social: {
+      github: string,
+      linkedin: string
+      twitter?: string,
+      whatsapp?: string,
+      signal?: string,
+      telegram?: string
+    },
   }
 }
 

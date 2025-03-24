@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = ["Mahmoud Emad <mahmmoud.hassanein@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.1.7"
+djangorestframework-simplejwt = "^5.5.0"
+djangorestframework = "^3.15.2"
+django-cors-headers = "^4.2.0"
+drf-yasg = "^1.21.7"
+django-debug-toolbar = "^5.0.1"
+whitenoise = "^6.9.0"
+[tool.poetry.dev-dependencies]
+black = "^24.3.0"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^7.1.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

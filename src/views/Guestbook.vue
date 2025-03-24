@@ -68,7 +68,7 @@
         <v-form v-model="validForm" @submit.prevent="writeGuestbook(newGuestbook)">
           <v-text-field v-model="newGuestbook.name" :counter="25" prepend-inner-icon="mdi-account" :rules="newGuestbook.name && newGuestbook.name.length > 0 ? nameRules({
             fieldName: 'Your Name',
-            maxLength: 25,
+            maxLength: 25,``
             minLength: 5
           }) : []" label="Your Name" hint="Your name, handle, or full name. Leave blank for 'Anonymous'."
             persistent-hint variant="outlined" class="mb-4" />
