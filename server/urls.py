@@ -13,6 +13,7 @@ urlpatterns = [
         include(
             [
                 path("guestbooks/", include("base_app.routes.guestbooks")),
+                path("articles/", include("base_app.routes.articles")),
             ]
         ),
     ),

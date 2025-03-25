@@ -6,3 +6,6 @@ install:
 
 runclient:
 	yarn dev
+
+test:
+	cd server && poetry run python manage.py test base_app.tests
