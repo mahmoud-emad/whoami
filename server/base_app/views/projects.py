@@ -35,7 +35,8 @@ class BaseProjectsAPIView(ListAPIView, APIView):
 
         if not serializer.is_valid():
             return CustomResponse.bad_request(
-                message='Make sure you entered a valid data'
+                message='Make sure you entered a valid data',
+                error=serializer.errors
             )
 
         serializer.save()
@@ -118,7 +119,8 @@ class ProjectsActionsAPIView(ListAPIView, APIView):
         serializer = self.serializer_class(instance=project, data=request.data)
         if not serializer.is_valid():
             return CustomResponse.bad_request(
-                message='Make sure you entered a valid data'
+                message='Make sure you entered a valid data',
+                error=serializer.errors
             )
 
         serializer.save()
@@ -156,7 +158,8 @@ class BaseProjectTagsAPIView(ListAPIView, APIView):
 
         if not serializer.is_valid():
             return CustomResponse.bad_request(
-                message='Make sure you entered a valid data'
+                message='Make sure you entered a valid data',
+                error=serializer.errors
             )
 
         serializer.save()

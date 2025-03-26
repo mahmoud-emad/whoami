@@ -7,8 +7,8 @@ class ProjectTypeSelector(models.TextChoices):
     Project types
     """
 
-    PROJECT = "Project", "project"
-    PACKAGE = "Package", "package"
+    PROJECT = "project"
+    PACKAGE = "package"
 
 class ProjectTags(CustomTimeStamp):
     """

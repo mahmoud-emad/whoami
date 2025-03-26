@@ -14,8 +14,8 @@ class ProjectsTestCase(TestCase):
                 'title': f'Project {i}',
                 'link': f'https://example{i}.com',
                 'description': f'Hello, world! {i}',
-                'tags': ['tag1', 'tag2', 'tag3'],
-                'type': 'open_source'
+                'tags': [],
+                'type': 'project'
                 }
             )
         self.assertEqual(response.status_code, 201)
@@ -88,8 +88,8 @@ class ProjectsTestCase(TestCase):
                 'title': 'Project 2',
                 'link': 'https://example1.com',
                 'description': 'Hello, world! 1',
-                'tags': ['tag1', 'tag2', 'tag3'],
-                'type': 'open_source'
+                'tags': [],
+                'type': 'package'
             },
             content_type='application/json'
         )
@@ -107,7 +107,7 @@ class ProjectsTestCase(TestCase):
                 'link': 'https://example2.com',
                 'description': 'Hello, world! 2',
                 'tags': ['tag1', 'tag2', 'tag3'],
-                'type': 'open_source'
+                'type': 'package'
             },
             content_type='application/json'
         )
@@ -168,6 +168,7 @@ class ProjectTagsTestCase(TestCase):
                 'description': f'Hello, world tag {i}!',
                 }
             )
+        print('response: ', response.data)
         self.assertEqual(response.status_code, 201)
         # Assert there are results key
         self.assertIn('results', response.data)

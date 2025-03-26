@@ -35,7 +35,8 @@ class BaseArticlesAPIView(ListAPIView, APIView):
 
         if not serializer.is_valid():
             return CustomResponse.bad_request(
-                message='Make sure you entered a valid data'
+                message='Make sure you entered a valid data',
+                error=serializer.errors
             )
 
         serializer.save()
@@ -117,7 +118,8 @@ class ArticlesActionsAPIView(ListAPIView, APIView):
         serializer = self.serializer_class(instance=article, data=request.data)
         if not serializer.is_valid():
             return CustomResponse.bad_request(
-                message='Make sure you entered a valid data'
+                message='Make sure you entered a valid data',
+                error=serializer.errors
             )
 
         serializer.save()
