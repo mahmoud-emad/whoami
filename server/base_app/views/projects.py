@@ -145,7 +145,7 @@ class BaseProjectTagsAPIView(ListAPIView, APIView):
         You can pass `page_size` as query param to custom pagination
         """
         page_size = self.request.query_params.get('page_size')
-        self.pagination_class.page_size = int(page_size or 10)
+        self.pagination_class.page_size = int(page_size or 50)
 
         queryset = ProjectTags.objects.all().order_by('-created_at')
         return queryset
@@ -171,8 +171,8 @@ class BaseProjectTagsAPIView(ListAPIView, APIView):
 
 class ProjectTagsActionsAPIView(APIView):
     """Project tags actions API View"""
-    serializer_class = ProjectsSerializers
-    pagination_class = ProjectPagination
+    serializer_class = ProjectTagsSerializers
+    pagination_class = ProjectTagsPagination
 
     def get(self, request: Request, id: str) -> CustomResponse:
         """

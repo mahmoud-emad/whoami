@@ -157,9 +157,9 @@ class ProjectTagsTestCase(TestCase):
     """
     Project tags tests
     """
-    def test_post_project_tags(self, i=0):
+    def test_post_project_tag(self, i=0):
         """
-        Test post projects
+        Test post project tag
         """
         response = self.client.post(
             '/api/projects/tags/',
@@ -173,3 +173,56 @@ class ProjectTagsTestCase(TestCase):
         self.assertIn('results', response.data)
         self.assertEqual(response.data['results']['name'], f'Tag {i}')
         return response.data['results']
+
+    def test_get_project_tags_with_default_pagination(self):
+        """
+        Test get project tags with pagination, default is 50
+        """
+        for i in range(50):
+            self.test_post_project_tag(i)
+
+        response = self.client.get('/api/projects/tags/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 50)
+
+    def test_get_projects_with_custom_pagination(self):
+        """
+        Test get project tags with custom pagination
+        """
+        for i in range(10):
+            self.test_post_project_tag(i)
+
+        response = self.client.get('/api/projects/tags/?page_size=5')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 5)
+
+    def test_get_project_tag(self):
+        """
+        Test get project tag
+        """
+        self.test_post_project_tag()
+        response = self.client.get('/api/projects/tags/1/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['results']['name'], 'Tag 0')
+
+    def test_get_project_tag_not_found(self):
+        """
+        Test get project not found
+        """
+        response = self.client.get('/api/projects/tags/1/')
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_project_tag(self):
+        """
+        Test delete project
+        """
+        self.test_post_project_tag()
+        response = self.client.delete('/api/projects/tags/1/')
+        self.assertEqual(response.status_code, 204)
+
+    def test_delete_project_tag_not_found(self):
+        """
+        Test delete project not found
+        """
+        response = self.client.delete('/api/projects/tags/1/')
+        self.assertEqual(response.status_code, 404)
