@@ -168,9 +168,8 @@ class ProjectTagsTestCase(TestCase):
                 'description': f'Hello, world tag {i}!',
                 }
             )
-        print('response: ', response.data)
         self.assertEqual(response.status_code, 201)
         # Assert there are results key
         self.assertIn('results', response.data)
-        self.assertEqual(response.data['results']['name'], f'Project tag {i}')
+        self.assertEqual(response.data['results']['name'], f'Tag {i}')
         return response.data['results']

@@ -46,7 +46,7 @@ class BaseProjectsAPIView(ListAPIView, APIView):
             status_code=201
         )
 
-class ProjectsActionsAPIView(ListAPIView, APIView):
+class ProjectsActionsAPIView(APIView):
     """Projects API View"""
     serializer_class = ProjectsSerializers
     pagination_class = ProjectPagination
@@ -169,7 +169,7 @@ class BaseProjectTagsAPIView(ListAPIView, APIView):
             status_code=201
         )
 
-class ProjectTagsActionsAPIView(ListAPIView, APIView):
+class ProjectTagsActionsAPIView(APIView):
     """Project tags actions API View"""
     serializer_class = ProjectsSerializers
     pagination_class = ProjectPagination
