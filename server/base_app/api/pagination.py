@@ -17,3 +17,9 @@ class ProjectPagination(PageNumberPagination):
     Custom pagination class for projects.
     """
     page_size = 10
+
+class ProjectTagsPagination(PageNumberPagination):
+    """
+    Custom pagination class for project tags.
+    """
+    page_size = 50

@@ -4,7 +4,7 @@ class ProjectsTestCase(TestCase):
     """
     Projects tests
     """
-    def test_post_projects(self, i=0):
+    def test_post_project(self, i=0):
         """
         Test post projects
         """
@@ -29,7 +29,7 @@ class ProjectsTestCase(TestCase):
         Test get projects with pagination, default is 10
         """
         for i in range(10):
-            self.test_post_projects(i)
+            self.test_post_project(i)
 
         response = self.client.get('/api/projects/')
         self.assertEqual(response.status_code, 200)
@@ -40,7 +40,7 @@ class ProjectsTestCase(TestCase):
         Test get projects with custom pagination
         """
         for i in range(10):
-            self.test_post_projects(i)
+            self.test_post_project(i)
 
         response = self.client.get('/api/projects/?page_size=5')
         self.assertEqual(response.status_code, 200)
@@ -50,7 +50,7 @@ class ProjectsTestCase(TestCase):
         """
         Test get project
         """
-        self.test_post_projects()
+        self.test_post_project()
         response = self.client.get('/api/projects/1/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['results']['title'], 'Project 0')
@@ -66,7 +66,7 @@ class ProjectsTestCase(TestCase):
         """
         Test delete project
         """
-        self.test_post_projects()
+        self.test_post_project()
         response = self.client.delete('/api/projects/1/')
         self.assertEqual(response.status_code, 204)
 
@@ -81,7 +81,7 @@ class ProjectsTestCase(TestCase):
         """
         Test put project
         """
-        self.test_post_projects()
+        self.test_post_project()
         response = self.client.put(
             '/api/projects/1/',
             data={
@@ -117,7 +117,7 @@ class ProjectsTestCase(TestCase):
         """
         Test put project invalid data
         """
-        self.test_post_projects()
+        self.test_post_project()
         response = self.client.put(
             '/api/projects/1/',
             data={
@@ -131,7 +131,7 @@ class ProjectsTestCase(TestCase):
         """
         Test put project missing data
         """
-        self.test_post_projects()
+        self.test_post_project()
         response = self.client.put(
             '/api/projects/1/',
             data={},
@@ -143,7 +143,7 @@ class ProjectsTestCase(TestCase):
         """
         Test put single project
         """
-        data = self.test_post_projects()
+        data = self.test_post_project()
         data['title'] = 'Project 2'
         response = self.client.put(
             '/api/projects/1/',
@@ -152,3 +152,24 @@ class ProjectsTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['results']['title'], 'Project 2')
+
+class ProjectTagsTestCase(TestCase):
+    """
+    Project tags tests
+    """
+    def test_post_project_tags(self, i=0):
+        """
+        Test post projects
+        """
+        response = self.client.post(
+            '/api/projects/tags/',
+            data={
+                'name': f'Tag {i}',
+                'description': f'Hello, world tag {i}!',
+                }
+            )
+        self.assertEqual(response.status_code, 201)
+        # Assert there are results key
+        self.assertIn('results', response.data)
+        self.assertEqual(response.data['results']['name'], f'Project tag {i}')
+        return response.data['results']

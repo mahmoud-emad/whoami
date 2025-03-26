@@ -4,7 +4,7 @@ class ArticlesTestCase(TestCase):
     """
     articles tests
     """
-    def test_post_articles(self, i=0):
+    def test_post_article(self, i=0):
         """
         Test post articles
         """
@@ -27,7 +27,7 @@ class ArticlesTestCase(TestCase):
         Test get articles with pagination, default is 10
         """
         for i in range(10):
-            self.test_post_articles(i)
+            self.test_post_article(i)
 
         response = self.client.get('/api/articles/')
         self.assertEqual(response.status_code, 200)
@@ -38,7 +38,7 @@ class ArticlesTestCase(TestCase):
         Test get articles with custom pagination
         """
         for i in range(10):
-            self.test_post_articles(i)
+            self.test_post_article(i)
 
         response = self.client.get('/api/articles/?page_size=5')
         self.assertEqual(response.status_code, 200)
@@ -48,7 +48,7 @@ class ArticlesTestCase(TestCase):
         """
         Test get article
         """
-        self.test_post_articles()
+        self.test_post_article()
         response = self.client.get('/api/articles/1/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['results']['title'], 'article 0')
@@ -64,7 +64,7 @@ class ArticlesTestCase(TestCase):
         """
         Test delete article
         """
-        self.test_post_articles()
+        self.test_post_article()
         response = self.client.delete('/api/articles/1/')
         self.assertEqual(response.status_code, 204)
 
@@ -79,7 +79,7 @@ class ArticlesTestCase(TestCase):
         """
         Test put article
         """
-        self.test_post_articles()
+        self.test_post_article()
         response = self.client.put(
             '/api/articles/1/',
             data={
@@ -111,7 +111,7 @@ class ArticlesTestCase(TestCase):
         """
         Test put article invalid data
         """
-        self.test_post_articles()
+        self.test_post_article()
         response = self.client.put(
             '/api/articles/1/',
             data={
@@ -125,7 +125,7 @@ class ArticlesTestCase(TestCase):
         """
         Test put article missing data
         """
-        self.test_post_articles()
+        self.test_post_article()
         response = self.client.put(
             '/api/articles/1/',
             data={},
@@ -137,7 +137,7 @@ class ArticlesTestCase(TestCase):
     #     """
     #     Test put single article
     #     """
-    #     data = self.test_post_articles()
+    #     data = self.test_post_article()
     #     data['title'] = 'article 2'
     #     response = self.client.put(
     #         '/api/articles/1/',

@@ -12,9 +12,10 @@ class ProjectTypeSelector(models.TextChoices):
 
 class ProjectTags(CustomTimeStamp):
     """
-    Project tags
+    Project tags model
     """
     name = models.CharField(max_length=25)
+    description = models.TextField(max_length=500)
 
     class Meta:
         db_table = "project_tags"

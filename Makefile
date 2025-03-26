@@ -9,3 +9,6 @@ runclient:
 
 test:
 	cd server && poetry run python manage.py test base_app.tests
+
+migrate:
+	cd server && poetry run python manage.py makemigrations && poetry run python manage.py migrate

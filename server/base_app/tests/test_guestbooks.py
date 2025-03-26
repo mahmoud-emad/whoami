@@ -4,7 +4,7 @@ class GuestbooksTestCase(TestCase):
     """
     Guestbooks tests
     """
-    def test_post_guestbooks(self, i=0):
+    def test_post_guestbook(self, i=0):
         """
         Test post guestbooks
         """
@@ -27,7 +27,7 @@ class GuestbooksTestCase(TestCase):
         Test get guestbooks with pagination, default is 10
         """
         for i in range(10):
-            self.test_post_guestbooks(i)
+            self.test_post_guestbook(i)
 
         response = self.client.get('/api/guestbooks/')
         self.assertEqual(response.status_code, 200)
@@ -38,7 +38,7 @@ class GuestbooksTestCase(TestCase):
         Test get guestbooks with custom pagination
         """
         for i in range(10):
-            self.test_post_guestbooks(i)
+            self.test_post_guestbook(i)
 
         response = self.client.get('/api/guestbooks/?page_size=5')
         self.assertEqual(response.status_code, 200)
@@ -48,7 +48,7 @@ class GuestbooksTestCase(TestCase):
         """
         Test get guestbook
         """
-        self.test_post_guestbooks()
+        self.test_post_guestbook()
         response = self.client.get('/api/guestbooks/1/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['results']['name'], 'Guestbook 0')
@@ -64,7 +64,7 @@ class GuestbooksTestCase(TestCase):
         """
         Test delete guestbook
         """
-        self.test_post_guestbooks()
+        self.test_post_guestbook()
         response = self.client.delete('/api/guestbooks/1/')
         self.assertEqual(response.status_code, 204)
 
@@ -79,7 +79,7 @@ class GuestbooksTestCase(TestCase):
         """
         Test put guestbook
         """
-        self.test_post_guestbooks()
+        self.test_post_guestbook()
         response = self.client.put(
             '/api/guestbooks/1/',
             data={
@@ -111,7 +111,7 @@ class GuestbooksTestCase(TestCase):
         """
         Test put guestbook invalid data
         """
-        self.test_post_guestbooks()
+        self.test_post_guestbook()
         response = self.client.put(
             '/api/guestbooks/1/',
             data={
@@ -125,7 +125,7 @@ class GuestbooksTestCase(TestCase):
         """
         Test put guestbook missing data
         """
-        self.test_post_guestbooks()
+        self.test_post_guestbook()
         response = self.client.put(
             '/api/guestbooks/1/',
             data={},
@@ -137,7 +137,7 @@ class GuestbooksTestCase(TestCase):
         """
         Test put single guestbook
         """
-        data = self.test_post_guestbooks()
+        data = self.test_post_guestbook()
         data['name'] = 'Guestbook 2'
         response = self.client.put(
             '/api/guestbooks/1/',
