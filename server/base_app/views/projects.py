@@ -2,19 +2,19 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.request import Request
 from base_app.api.response import CustomResponse
-from base_app.models.articles import Articles
+from base_app.models.projects import Projects
 from base_app.models.abstracts import StatusModelSelector
-from base_app.serializers.articles import ArticlesSerializers
-from base_app.api.pagination import ArticlesPagination
+from base_app.serializers.projects import ProjectsSerializers
+from base_app.api.pagination import ProjectPagination
 
 
-class BaseArticlesAPIView(ListAPIView, APIView):
-    serializer_class = ArticlesSerializers
-    pagination_class = ArticlesPagination
+class BaseProjectsAPIView(ListAPIView, APIView):
+    serializer_class = ProjectsSerializers
+    pagination_class = ProjectPagination
 
     def get_queryset(self):
         """
-        **Get articles, filter by `status` and order by `created_at`**:
+        **Get projects, filter by `status` and order by `created_at`**:
             - status: CREATED
             - order by created_at\n
         You can pass `page_size` as query param to custom pagination
@@ -22,14 +22,14 @@ class BaseArticlesAPIView(ListAPIView, APIView):
         page_size = self.request.query_params.get('page_size')
         self.pagination_class.page_size = int(page_size or 10)
 
-        queryset = Articles.objects.filter(
+        queryset = Projects.objects.filter(
             status=StatusModelSelector.CREATED
         ).order_by('-created_at')
         return queryset
 
     def post(self, request: Request) -> CustomResponse:
         """
-            Create article, pass `title`, `link` and `description`
+            Create project, pass `title`, `link`, `tags`, `description` and `type`
         """
         serializer = self.serializer_class(data=request.data)
 
@@ -41,80 +41,81 @@ class BaseArticlesAPIView(ListAPIView, APIView):
         serializer.save()
         return CustomResponse.success(
             data=serializer.data,
-            message='Article created',
+            message='Project created',
             status_code=201
         )
 
-class ArticlesActionsAPIView(ListAPIView, APIView):
-    """Articles API View"""
-    serializer_class = ArticlesSerializers
+class ProjectsActionsAPIView(ListAPIView, APIView):
+    """Projects API View"""
+    serializer_class = ProjectsSerializers
+    pagination_class = ProjectPagination
 
     def get(self, request: Request, id: str) -> CustomResponse:
         """
-        Get article by `id`
+        Get project by `id`
         """
         if not str(id).isdigit():
             return CustomResponse.bad_request(
                 message='Id must be a number'
             )
 
-        article = Articles.objects.filter(
+        project = Projects.objects.filter(
             id=id,
             status=StatusModelSelector.CREATED
         ).first()
 
-        if not article:
+        if not project:
             return CustomResponse.not_found(
-                message='Article not found'
+                message='Project not found'
             )
 
         return CustomResponse.success(
-            data=self.serializer_class(article).data,
-            message='Article found'
+            data=self.serializer_class(project).data,
+            message='Project found'
         )
 
     def delete(self, request: Request, id: str) -> CustomResponse:
-        """Delete article by `id`"""
+        """Delete project by `id`"""
         if not str(id).isdigit():
             return CustomResponse.bad_request(
                 message='Id must be a number'
             )
 
-        article = Articles.objects.filter(
+        project = Projects.objects.filter(
             id=id,
             status=StatusModelSelector.CREATED
         ).first()
 
-        if not article:
+        if not project:
             return CustomResponse.not_found(
-                message='Article not found'
+                message='Project not found'
             )
 
-        article.status = StatusModelSelector.DELETED
-        article.save()
+        project.status = StatusModelSelector.DELETED
+        project.save()
 
         return CustomResponse.success(
-            message='Articles deleted',
+            message='Projects deleted',
             status_code=204
         )
 
     def put(self, request: Request, id: str) -> CustomResponse:
-        """Update article by `id`"""
+        """Update project by `id`"""
         if not str(id).isdigit():
             return CustomResponse.bad_request(
                 message='Id must be a number'
             )
 
-        article = Articles.objects.filter(
+        project = Projects.objects.filter(
             id=id,
         ).first()
 
-        if not article:
+        if not project:
             return CustomResponse.not_found(
-                message='Article not found'
+                message='Project not found'
             )
 
-        serializer = self.serializer_class(instance=article, data=request.data)
+        serializer = self.serializer_class(instance=project, data=request.data)
         if not serializer.is_valid():
             return CustomResponse.bad_request(
                 message='Make sure you entered a valid data'
@@ -123,10 +124,10 @@ class ArticlesActionsAPIView(ListAPIView, APIView):
         serializer.save()
 
         return CustomResponse.success(
-            message='Article updated',
-            data=self.serializer_class(article).data,
+            message='Project updated',
+            data=self.serializer_class(project).data,
         )
 
     def patch(self, request: Request, id: str) -> CustomResponse:
-        """Update article by `id`"""
+        """Update project by `id`"""
         return self.put(request, id)

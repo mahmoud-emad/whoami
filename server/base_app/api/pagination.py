@@ -8,6 +8,12 @@ class GuestbooksPagination(PageNumberPagination):
 
 class ArticlesPagination(PageNumberPagination):
     """
-    Custom pagination class for Guestbooks.
+    Custom pagination class for articles.
+    """
+    page_size = 10
+
+class ProjectPagination(PageNumberPagination):
+    """
+    Custom pagination class for projects.
     """
     page_size = 10
