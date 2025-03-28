@@ -1,13 +1,14 @@
-name: Lint and Build
+name: Lint
 
 on:
   push:
-    branches: 
-      '*'
+    branches: ['*']
+  pull_request:
+    branches: ['*']
 
 jobs:
-  run-linters:
-    name: Run linters
+  lint-client:
+    name: Lint Client
     runs-on: ubuntu-latest
 
     strategy:
@@ -16,27 +17,60 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+          cache-dependency-path: 'client/yarn.lock'
 
-    #   - name: Install Dependencies
-    #     run: |
-    #       cd client
-    #       npm install -g pnpm
-    #       pnpm install
+      - name: Install Client Dependencies
+        run: |
+          cd client
+          yarn install
 
-    #   - name: Lint and Format
-    #     run: |
-    #       cd client
-    #       pnpm lint
-    #       pnpm format
+      - name: Lint Client
+        run: |
+          cd client
+          yarn lint
 
-      - name: Lint and Format Backend
+  lint-server:
+    name: Lint Server
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.12]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.7.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install Server Dependencies
         run: |
           cd server
-          poetry run python manage.py lint
-          pnpm format
+          poetry install
+
+      - name: Lint Server with Black
+        run: |
+          cd server
+          poetry run black . --exclude=__init__.py --check
+
+      - name: Lint Server with Flake8
+        run: |
+          cd server
+          poetry run flake8 . --exclude=__init__.py
