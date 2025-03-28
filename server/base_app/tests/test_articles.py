@@ -1,26 +1,28 @@
 from django.test import TestCase
 
+
 class ArticlesTestCase(TestCase):
     """
     articles tests
     """
+
     def test_post_article(self, i=0):
         """
         Test post articles
         """
         response = self.client.post(
-            '/api/articles/',
+            "/api/articles/",
             data={
-                    'title': f'article {i}',
-                    'link': f'https://example{i}.com',
-                    'description': f'Hello, world! {i}'
-                }
-            )
+                "title": f"article {i}",
+                "link": f"https://example{i}.com",
+                "description": f"Hello, world! {i}",
+            },
+        )
         self.assertEqual(response.status_code, 201)
         # Assert there are results key
-        self.assertIn('results', response.data)
-        self.assertEqual(response.data['results']['title'], f'article {i}')
-        return response.data['results']
+        self.assertIn("results", response.data)
+        self.assertEqual(response.data["results"]["title"], f"article {i}")
+        return response.data["results"]
 
     def test_get_articles_with_default_pagination(self):
         """
@@ -29,9 +31,9 @@ class ArticlesTestCase(TestCase):
         for i in range(10):
             self.test_post_article(i)
 
-        response = self.client.get('/api/articles/')
+        response = self.client.get("/api/articles/")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']), 10)
+        self.assertEqual(len(response.data["results"]), 10)
 
     def test_get_articles_with_custom_pagination(self):
         """
@@ -40,24 +42,24 @@ class ArticlesTestCase(TestCase):
         for i in range(10):
             self.test_post_article(i)
 
-        response = self.client.get('/api/articles/?page_size=5')
+        response = self.client.get("/api/articles/?page_size=5")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']), 5)
+        self.assertEqual(len(response.data["results"]), 5)
 
     def test_get_article(self):
         """
         Test get article
         """
         self.test_post_article()
-        response = self.client.get('/api/articles/1/')
+        response = self.client.get("/api/articles/1/")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['results']['title'], 'article 0')
+        self.assertEqual(response.data["results"]["title"], "article 0")
 
     def test_get_article_not_found(self):
         """
         Test get article not found
         """
-        response = self.client.get('/api/articles/1/')
+        response = self.client.get("/api/articles/1/")
         self.assertEqual(response.status_code, 404)
 
     def test_delete_article(self):
@@ -65,14 +67,14 @@ class ArticlesTestCase(TestCase):
         Test delete article
         """
         self.test_post_article()
-        response = self.client.delete('/api/articles/1/')
+        response = self.client.delete("/api/articles/1/")
         self.assertEqual(response.status_code, 204)
 
     def test_delete_article_not_found(self):
         """
         Test delete article not found
         """
-        response = self.client.delete('/api/articles/1/')
+        response = self.client.delete("/api/articles/1/")
         self.assertEqual(response.status_code, 404)
 
     def test_put_article(self):
@@ -81,29 +83,29 @@ class ArticlesTestCase(TestCase):
         """
         self.test_post_article()
         response = self.client.put(
-            '/api/articles/1/',
+            "/api/articles/1/",
             data={
-                'title': 'article 2',
-                'link': 'https://example2.com',
-                'description': 'Hello, world! 2'
+                "title": "article 2",
+                "link": "https://example2.com",
+                "description": "Hello, world! 2",
             },
-            content_type='application/json'
+            content_type="application/json",
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['results']['title'], 'article 2')
+        self.assertEqual(response.data["results"]["title"], "article 2")
 
     def test_put_article_not_found(self):
         """
         Test put article not found
         """
         response = self.client.put(
-            '/api/articles/1/',
+            "/api/articles/1/",
             data={
-                'title': 'article 2',
-                'link': 'https://example2.com',
-                'description': 'Hello, world! 2'
+                "title": "article 2",
+                "link": "https://example2.com",
+                "description": "Hello, world! 2",
             },
-            content_type='application/json'
+            content_type="application/json",
         )
         self.assertEqual(response.status_code, 404)
 
@@ -113,11 +115,11 @@ class ArticlesTestCase(TestCase):
         """
         self.test_post_article()
         response = self.client.put(
-            '/api/articles/1/',
+            "/api/articles/1/",
             data={
-                'key': 'value',
+                "key": "value",
             },
-            content_type='application/json'
+            content_type="application/json",
         )
         self.assertEqual(response.status_code, 400)
 
@@ -127,9 +129,7 @@ class ArticlesTestCase(TestCase):
         """
         self.test_post_article()
         response = self.client.put(
-            '/api/articles/1/',
-            data={},
-            content_type='application/json'
+            "/api/articles/1/", data={}, content_type="application/json"
         )
         self.assertEqual(response.status_code, 400)
 

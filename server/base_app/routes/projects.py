@@ -4,7 +4,7 @@ from base_app.views.projects import (
     BaseProjectsAPIView,
     BaseProjectTagsAPIView,
     ProjectsActionsAPIView,
-    ProjectTagsActionsAPIView
+    ProjectTagsActionsAPIView,
 )
 
 

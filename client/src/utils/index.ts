@@ -42,7 +42,7 @@ const emailRules = (options: {
 
 
 const websiteRules = () => [
-  (v: string) => v && /^(https?:\/\/)?([\w\d-]+\.)+[a-z]{2,6}(\:[0-9]+)?(\/.*)?$/.test(v) || 'Please enter a valid URL'
+  (v: string) => v && /^(https?:\/\/)?([\w\d-]+\.)+[a-z]{2,6}(:[0-9]+)?(\/.*)?$/.test(v) || 'Please enter a valid URL'
 ];
 
 const antiBotRules = () => [

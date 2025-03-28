@@ -19,35 +19,34 @@ class BaseArticlesAPIView(ListAPIView, APIView):
             - order by created_at\n
         You can pass `page_size` as query param to custom pagination
         """
-        page_size = self.request.query_params.get('page_size')
+        page_size = self.request.query_params.get("page_size")
         self.pagination_class.page_size = int(page_size or 10)
 
-        queryset = Articles.objects.filter(
-            status=StatusModelSelector.CREATED
-        ).order_by('-created_at')
+        queryset = Articles.objects.filter(status=StatusModelSelector.CREATED).order_by(
+            "-created_at"
+        )
         return queryset
 
     def post(self, request: Request) -> CustomResponse:
         """
-            Create article, pass `title`, `link` and `description`
+        Create article, pass `title`, `link` and `description`
         """
         serializer = self.serializer_class(data=request.data)
 
         if not serializer.is_valid():
             return CustomResponse.bad_request(
-                message='Make sure you entered a valid data',
-                error=serializer.errors
+                message="Make sure you entered a valid data", error=serializer.errors
             )
 
         serializer.save()
         return CustomResponse.success(
-            data=serializer.data,
-            message='Article created',
-            status_code=201
+            data=serializer.data, message="Article created", status_code=201
         )
+
 
 class ArticlesActionsAPIView(ListAPIView, APIView):
     """Articles API View"""
+
     serializer_class = ArticlesSerializers
 
     def get(self, request: Request, id: str) -> CustomResponse:
@@ -55,77 +54,58 @@ class ArticlesActionsAPIView(ListAPIView, APIView):
         Get article by `id`
         """
         if not str(id).isdigit():
-            return CustomResponse.bad_request(
-                message='Id must be a number'
-            )
+            return CustomResponse.bad_request(message="Id must be a number")
 
         article = Articles.objects.filter(
-            id=id,
-            status=StatusModelSelector.CREATED
+            id=id, status=StatusModelSelector.CREATED
         ).first()
 
         if not article:
-            return CustomResponse.not_found(
-                message='Article not found'
-            )
+            return CustomResponse.not_found(message="Article not found")
 
         return CustomResponse.success(
-            data=self.serializer_class(article).data,
-            message='Article found'
+            data=self.serializer_class(article).data, message="Article found"
         )
 
     def delete(self, request: Request, id: str) -> CustomResponse:
         """Delete article by `id`"""
         if not str(id).isdigit():
-            return CustomResponse.bad_request(
-                message='Id must be a number'
-            )
+            return CustomResponse.bad_request(message="Id must be a number")
 
         article = Articles.objects.filter(
-            id=id,
-            status=StatusModelSelector.CREATED
+            id=id, status=StatusModelSelector.CREATED
         ).first()
 
         if not article:
-            return CustomResponse.not_found(
-                message='Article not found'
-            )
+            return CustomResponse.not_found(message="Article not found")
 
         article.status = StatusModelSelector.DELETED
         article.save()
 
-        return CustomResponse.success(
-            message='Articles deleted',
-            status_code=204
-        )
+        return CustomResponse.success(message="Articles deleted", status_code=204)
 
     def put(self, request: Request, id: str) -> CustomResponse:
         """Update article by `id`"""
         if not str(id).isdigit():
-            return CustomResponse.bad_request(
-                message='Id must be a number'
-            )
+            return CustomResponse.bad_request(message="Id must be a number")
 
         article = Articles.objects.filter(
             id=id,
         ).first()
 
         if not article:
-            return CustomResponse.not_found(
-                message='Article not found'
-            )
+            return CustomResponse.not_found(message="Article not found")
 
         serializer = self.serializer_class(instance=article, data=request.data)
         if not serializer.is_valid():
             return CustomResponse.bad_request(
-                message='Make sure you entered a valid data',
-                error=serializer.errors
+                message="Make sure you entered a valid data", error=serializer.errors
             )
 
         serializer.save()
 
         return CustomResponse.success(
-            message='Article updated',
+            message="Article updated",
             data=self.serializer_class(article).data,
         )
 

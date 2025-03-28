@@ -10,10 +10,12 @@ class ProjectTypeSelector(models.TextChoices):
     PROJECT = "project"
     PACKAGE = "package"
 
+
 class ProjectTags(CustomTimeStamp):
     """
     Project tags model
     """
+
     name = models.CharField(max_length=25)
     description = models.TextField(max_length=500)
 
@@ -28,6 +30,7 @@ class Projects(CustomTimeStamp):
     """
     Projects
     """
+
     status = models.CharField(
         max_length=30,
         choices=StatusModelSelector.choices,
@@ -35,14 +38,15 @@ class Projects(CustomTimeStamp):
     )
     title = models.CharField(max_length=25)
     link = models.CharField(max_length=100)
-    tags = models.ManyToManyField("ProjectTags", blank=True, related_name="project_tags")
+    tags = models.ManyToManyField(
+        "ProjectTags", blank=True, related_name="project_tags"
+    )
     description = models.TextField(max_length=500)
     type = models.CharField(
         max_length=30,
         choices=ProjectTypeSelector.choices,
         default=ProjectTypeSelector.PROJECT,
     )
-    
 
     class Meta:
         db_table = "projects"

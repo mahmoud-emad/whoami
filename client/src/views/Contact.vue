@@ -42,7 +42,7 @@ import ContactInfo from '../components/ContactInfo.vue';
 import { useDisplay } from 'vuetify';
 
 export default {
-  name: 'Contact',
+  name: 'CustomContact',
   components: { ContactInfo },
   setup() {
     // Vuetify display utility

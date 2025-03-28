@@ -1,28 +1,30 @@
 from django.test import TestCase
 
+
 class ProjectsTestCase(TestCase):
     """
     Projects tests
     """
+
     def test_post_project(self, i=0):
         """
         Test post projects
         """
         response = self.client.post(
-            '/api/projects/',
+            "/api/projects/",
             data={
-                'title': f'Project {i}',
-                'link': f'https://example{i}.com',
-                'description': f'Hello, world! {i}',
-                'tags': [],
-                'type': 'project'
-                }
-            )
+                "title": f"Project {i}",
+                "link": f"https://example{i}.com",
+                "description": f"Hello, world! {i}",
+                "tags": [],
+                "type": "project",
+            },
+        )
         self.assertEqual(response.status_code, 201)
         # Assert there are results key
-        self.assertIn('results', response.data)
-        self.assertEqual(response.data['results']['title'], f'Project {i}')
-        return response.data['results']
+        self.assertIn("results", response.data)
+        self.assertEqual(response.data["results"]["title"], f"Project {i}")
+        return response.data["results"]
 
     def test_get_projects_with_default_pagination(self):
         """
@@ -31,9 +33,9 @@ class ProjectsTestCase(TestCase):
         for i in range(10):
             self.test_post_project(i)
 
-        response = self.client.get('/api/projects/')
+        response = self.client.get("/api/projects/")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']), 10)
+        self.assertEqual(len(response.data["results"]), 10)
 
     def test_get_projects_with_custom_pagination(self):
         """
@@ -42,24 +44,24 @@ class ProjectsTestCase(TestCase):
         for i in range(10):
             self.test_post_project(i)
 
-        response = self.client.get('/api/projects/?page_size=5')
+        response = self.client.get("/api/projects/?page_size=5")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']), 5)
+        self.assertEqual(len(response.data["results"]), 5)
 
     def test_get_project(self):
         """
         Test get project
         """
         self.test_post_project()
-        response = self.client.get('/api/projects/1/')
+        response = self.client.get("/api/projects/1/")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['results']['title'], 'Project 0')
+        self.assertEqual(response.data["results"]["title"], "Project 0")
 
     def test_get_project_not_found(self):
         """
         Test get project not found
         """
-        response = self.client.get('/api/projects/1/')
+        response = self.client.get("/api/projects/1/")
         self.assertEqual(response.status_code, 404)
 
     def test_delete_project(self):
@@ -67,14 +69,14 @@ class ProjectsTestCase(TestCase):
         Test delete project
         """
         self.test_post_project()
-        response = self.client.delete('/api/projects/1/')
+        response = self.client.delete("/api/projects/1/")
         self.assertEqual(response.status_code, 204)
 
     def test_delete_project_not_found(self):
         """
         Test delete project not found
         """
-        response = self.client.delete('/api/projects/1/')
+        response = self.client.delete("/api/projects/1/")
         self.assertEqual(response.status_code, 404)
 
     def test_put_project(self):
@@ -83,33 +85,33 @@ class ProjectsTestCase(TestCase):
         """
         self.test_post_project()
         response = self.client.put(
-            '/api/projects/1/',
+            "/api/projects/1/",
             data={
-                'title': 'Project 2',
-                'link': 'https://example1.com',
-                'description': 'Hello, world! 1',
-                'tags': [],
-                'type': 'package'
+                "title": "Project 2",
+                "link": "https://example1.com",
+                "description": "Hello, world! 1",
+                "tags": [],
+                "type": "package",
             },
-            content_type='application/json'
+            content_type="application/json",
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['results']['title'], 'Project 2')
+        self.assertEqual(response.data["results"]["title"], "Project 2")
 
     def test_put_project_not_found(self):
         """
         Test put project not found
         """
         response = self.client.put(
-            '/api/projects/1/',
+            "/api/projects/1/",
             data={
-                'title': 'Project 2',
-                'link': 'https://example2.com',
-                'description': 'Hello, world! 2',
-                'tags': ['tag1', 'tag2', 'tag3'],
-                'type': 'package'
+                "title": "Project 2",
+                "link": "https://example2.com",
+                "description": "Hello, world! 2",
+                "tags": ["tag1", "tag2", "tag3"],
+                "type": "package",
             },
-            content_type='application/json'
+            content_type="application/json",
         )
         self.assertEqual(response.status_code, 404)
 
@@ -119,11 +121,11 @@ class ProjectsTestCase(TestCase):
         """
         self.test_post_project()
         response = self.client.put(
-            '/api/projects/1/',
+            "/api/projects/1/",
             data={
-                'key': 'value',
+                "key": "value",
             },
-            content_type='application/json'
+            content_type="application/json",
         )
         self.assertEqual(response.status_code, 400)
 
@@ -133,9 +135,7 @@ class ProjectsTestCase(TestCase):
         """
         self.test_post_project()
         response = self.client.put(
-            '/api/projects/1/',
-            data={},
-            content_type='application/json'
+            "/api/projects/1/", data={}, content_type="application/json"
         )
         self.assertEqual(response.status_code, 400)
 
@@ -144,35 +144,35 @@ class ProjectsTestCase(TestCase):
         Test put single project
         """
         data = self.test_post_project()
-        data['title'] = 'Project 2'
+        data["title"] = "Project 2"
         response = self.client.put(
-            '/api/projects/1/',
-            data=data,
-            content_type='application/json'
+            "/api/projects/1/", data=data, content_type="application/json"
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['results']['title'], 'Project 2')
+        self.assertEqual(response.data["results"]["title"], "Project 2")
+
 
 class ProjectTagsTestCase(TestCase):
     """
     Project tags tests
     """
+
     def test_post_project_tag(self, i=0):
         """
         Test post project tag
         """
         response = self.client.post(
-            '/api/projects/tags/',
+            "/api/projects/tags/",
             data={
-                'name': f'Tag {i}',
-                'description': f'Hello, world tag {i}!',
-                }
-            )
+                "name": f"Tag {i}",
+                "description": f"Hello, world tag {i}!",
+            },
+        )
         self.assertEqual(response.status_code, 201)
         # Assert there are results key
-        self.assertIn('results', response.data)
-        self.assertEqual(response.data['results']['name'], f'Tag {i}')
-        return response.data['results']
+        self.assertIn("results", response.data)
+        self.assertEqual(response.data["results"]["name"], f"Tag {i}")
+        return response.data["results"]
 
     def test_get_project_tags_with_default_pagination(self):
         """
@@ -181,9 +181,9 @@ class ProjectTagsTestCase(TestCase):
         for i in range(50):
             self.test_post_project_tag(i)
 
-        response = self.client.get('/api/projects/tags/')
+        response = self.client.get("/api/projects/tags/")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']), 50)
+        self.assertEqual(len(response.data["results"]), 50)
 
     def test_get_projects_with_custom_pagination(self):
         """
@@ -192,24 +192,24 @@ class ProjectTagsTestCase(TestCase):
         for i in range(10):
             self.test_post_project_tag(i)
 
-        response = self.client.get('/api/projects/tags/?page_size=5')
+        response = self.client.get("/api/projects/tags/?page_size=5")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']), 5)
+        self.assertEqual(len(response.data["results"]), 5)
 
     def test_get_project_tag(self):
         """
         Test get project tag
         """
         self.test_post_project_tag()
-        response = self.client.get('/api/projects/tags/1/')
+        response = self.client.get("/api/projects/tags/1/")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['results']['name'], 'Tag 0')
+        self.assertEqual(response.data["results"]["name"], "Tag 0")
 
     def test_get_project_tag_not_found(self):
         """
         Test get project not found
         """
-        response = self.client.get('/api/projects/tags/1/')
+        response = self.client.get("/api/projects/tags/1/")
         self.assertEqual(response.status_code, 404)
 
     def test_delete_project_tag(self):
@@ -217,12 +217,12 @@ class ProjectTagsTestCase(TestCase):
         Test delete project
         """
         self.test_post_project_tag()
-        response = self.client.delete('/api/projects/tags/1/')
+        response = self.client.delete("/api/projects/tags/1/")
         self.assertEqual(response.status_code, 204)
 
     def test_delete_project_tag_not_found(self):
         """
         Test delete project not found
         """
-        response = self.client.delete('/api/projects/tags/1/')
+        response = self.client.delete("/api/projects/tags/1/")
         self.assertEqual(response.status_code, 404)

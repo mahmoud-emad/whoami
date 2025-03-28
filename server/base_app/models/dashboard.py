@@ -1,33 +1,28 @@
 from django.db import models
 from base_app.models.abstracts import CustomTimeStamp
 
+
 class AdminConfiguration(CustomTimeStamp):
     display_admin_dashboard = models.BooleanField(
-        default=True,
-        help_text="Enable admin dashboard"
+        default=True, help_text="Enable admin dashboard"
     )
     display_navbar_image = models.BooleanField(
-        default=True,
-        help_text="Show image in navigation bar"
+        default=True, help_text="Show image in navigation bar"
     )
     multiple_themes = models.BooleanField(
-        default=False,
-        help_text="Allow multiple theme selection"
+        default=False, help_text="Allow multiple theme selection"
     )
     enable_search = models.BooleanField(
-        default=True,
-        help_text="Enable search functionality"
+        default=True, help_text="Enable search functionality"
     )
     SEARCH_MODELS_CHOICES = (
-        ('projects', 'Projects'),
-        ('guestbooks', 'Guestbooks'),
-        ('articles', 'Articles'),
-        ('posts', 'Posts'),
+        ("projects", "Projects"),
+        ("guestbooks", "Guestbooks"),
+        ("articles", "Articles"),
+        ("posts", "Posts"),
     )
     search_models = models.JSONField(
-        default=list,
-        help_text="List of searchable models",
-        blank=True
+        default=list, help_text="List of searchable models", blank=True
     )
 
     class Meta:
@@ -46,15 +41,17 @@ class ThemeSelector(models.TextChoices):
     DARK = "Dark", "dark"
     LIGHT = "Light", "light"
 
+
 class Theme(models.Model):
     """
     Site theme configuration
     """
+
     default_theme = models.CharField(
         max_length=30,
         choices=ThemeSelector,
         default=ThemeSelector.LIGHT,
-        help_text="Default site theme"
+        help_text="Default site theme",
     )
 
     class Meta:
@@ -69,14 +66,14 @@ class Security(models.Model):
     """
     Site security configuration
     """
+
     debug = models.BooleanField(
-        default=False,
-        help_text="Enable debug mode (not recommended for production)"
+        default=False, help_text="Enable debug mode (not recommended for production)"
     )
     admin_fingerprint_signature = models.CharField(
         max_length=255,
         help_text="Security signature for admin authentication",
-        blank=True
+        blank=True,
     )
 
     class Meta:
@@ -91,37 +88,23 @@ class SocialProfile(models.Model):
     """
     Social profile configuration
     """
-    github = models.URLField(
-        max_length=255,
-        help_text="GitHub profile URL"
-    )
-    linkedin = models.URLField(
-        max_length=255,
-        help_text="LinkedIn profile URL"
-    )
+
+    github = models.URLField(max_length=255, help_text="GitHub profile URL")
+    linkedin = models.URLField(max_length=255, help_text="LinkedIn profile URL")
     twitter = models.URLField(
         max_length=255,
         blank=True,
         null=True,
-        help_text="Twitter profile URL (optional)"
+        help_text="Twitter profile URL (optional)",
     )
     whatsapp = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-        help_text="WhatsApp number (optional)"
+        max_length=50, blank=True, null=True, help_text="WhatsApp number (optional)"
     )
     signal = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-        help_text="Signal number (optional)"
+        max_length=50, blank=True, null=True, help_text="Signal number (optional)"
     )
     telegram = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-        help_text="Telegram handle (optional)"
+        max_length=50, blank=True, null=True, help_text="Telegram handle (optional)"
     )
 
     class Meta:
@@ -136,28 +119,18 @@ class PersonalSettings(models.Model):
     """
     Personal profile configuration
     """
-    full_name = models.CharField(
-        max_length=100,
-        help_text="Full name"
-    )
-    email = models.EmailField(
-        help_text="Contact email address"
-    )
-    country = models.CharField(
-        max_length=100,
-        help_text="Country of residence"
-    )
+
+    full_name = models.CharField(max_length=100, help_text="Full name")
+    email = models.EmailField(help_text="Contact email address")
+    country = models.CharField(max_length=100, help_text="Country of residence")
     resume_url = models.URLField(
-        max_length=255,
-        blank=True,
-        null=True,
-        help_text="URL to resume (optional)"
+        max_length=255, blank=True, null=True, help_text="URL to resume (optional)"
     )
     social = models.OneToOneField(
         SocialProfile,
         on_delete=models.CASCADE,
         related_name="personal_settings",
-        help_text="Social media profiles"
+        help_text="Social media profiles",
     )
 
     class Meta:
@@ -170,24 +143,16 @@ class PersonalSettings(models.Model):
 
 class SiteSettings(models.Model):
     configuration = models.OneToOneField(
-        AdminConfiguration,
-        on_delete=models.CASCADE,
-        related_name="site_settings"
+        AdminConfiguration, on_delete=models.CASCADE, related_name="site_settings"
     )
     theme = models.OneToOneField(
-        Theme,
-        on_delete=models.CASCADE,
-        related_name="site_settings"
+        Theme, on_delete=models.CASCADE, related_name="site_settings"
     )
     security = models.OneToOneField(
-        Security,
-        on_delete=models.CASCADE,
-        related_name="site_settings"
+        Security, on_delete=models.CASCADE, related_name="site_settings"
     )
     personal = models.OneToOneField(
-        PersonalSettings,
-        on_delete=models.CASCADE,
-        related_name="site_settings"
+        PersonalSettings, on_delete=models.CASCADE, related_name="site_settings"
     )
 
     class Meta:

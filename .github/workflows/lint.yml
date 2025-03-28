@@ -1,0 +1,42 @@
+name: Lint and Build
+
+on:
+  push:
+    branches: 
+      '*'
+
+jobs:
+  run-linters:
+    name: Run linters
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+    #   - name: Install Dependencies
+    #     run: |
+    #       cd client
+    #       npm install -g pnpm
+    #       pnpm install
+
+    #   - name: Lint and Format
+    #     run: |
+    #       cd client
+    #       pnpm lint
+    #       pnpm format
+
+      - name: Lint and Format Backend
+        run: |
+          cd server
+          poetry run python manage.py lint
+          pnpm format

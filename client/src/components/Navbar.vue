@@ -75,7 +75,7 @@ interface NavLink {
 }
 
 export default defineComponent({
-  name: "Navbar",
+  name: "CustomNavbar",
   setup() {
     // Vuetify display utility
     const display = useDisplay();

@@ -146,6 +146,5 @@ profile_image/
 terraform/.terraform.lock.hcl
 terraform/.terraform.tfstate.lock.info
 terraform/.terraform.script
-package.json
 node_modules
 staticfiles

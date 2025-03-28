@@ -2,6 +2,7 @@
 
 from django.db import models
 
+
 class StatusModelSelector(models.TextChoices):
     """
     Status model selector

@@ -1,10 +1,12 @@
 from django.db import models
 from base_app.models.abstracts import CustomTimeStamp, StatusModelSelector
 
+
 class Articles(CustomTimeStamp):
     """
     Articles Model, extends from CustomTimeStamp
     """
+
     status = models.CharField(
         max_length=30,
         choices=StatusModelSelector.choices,
@@ -13,7 +15,6 @@ class Articles(CustomTimeStamp):
     title = models.CharField(max_length=25)
     link = models.CharField(max_length=100)
     description = models.TextField(max_length=500)
-    
 
     class Meta:
         db_table = "articles"

@@ -19,35 +19,34 @@ class BaseGuestbooksAPIView(ListAPIView, APIView):
             - order by created_at\n
         You can pass `page_size` as query param to custom pagination
         """
-        page_size = self.request.query_params.get('page_size')
+        page_size = self.request.query_params.get("page_size")
         self.pagination_class.page_size = int(page_size or 10)
 
         queryset = Guestbooks.objects.filter(
             status=StatusModelSelector.CREATED
-        ).order_by('-created_at')
+        ).order_by("-created_at")
         return queryset
 
     def post(self, request: Request) -> CustomResponse:
         """
-            Create guestbook, pass `name`, `website` and `message`
+        Create guestbook, pass `name`, `website` and `message`
         """
         serializer = self.serializer_class(data=request.data)
 
         if not serializer.is_valid():
             return CustomResponse.bad_request(
-                message='Make sure you entered a valid data',
-                error=serializer.errors
+                message="Make sure you entered a valid data", error=serializer.errors
             )
 
         serializer.save()
         return CustomResponse.success(
-            data=serializer.data,
-            message='Guestbook created',
-            status_code=201
+            data=serializer.data, message="Guestbook created", status_code=201
         )
+
 
 class GuestbooksActionsAPIView(ListAPIView, APIView):
     """Guestbooks API View"""
+
     serializer_class = GuestbooksSerializers
 
     def get(self, request: Request, id: str) -> CustomResponse:
@@ -55,77 +54,58 @@ class GuestbooksActionsAPIView(ListAPIView, APIView):
         Get guestbook by `id`
         """
         if not str(id).isdigit():
-            return CustomResponse.bad_request(
-                message='Id must be a number'
-            )
+            return CustomResponse.bad_request(message="Id must be a number")
 
         guestbook = Guestbooks.objects.filter(
-            id=id,
-            status=StatusModelSelector.CREATED
+            id=id, status=StatusModelSelector.CREATED
         ).first()
 
         if not guestbook:
-            return CustomResponse.not_found(
-                message='Guestbook not found'
-            )
+            return CustomResponse.not_found(message="Guestbook not found")
 
         return CustomResponse.success(
-            data=self.serializer_class(guestbook).data,
-            message='Guestbook found'
+            data=self.serializer_class(guestbook).data, message="Guestbook found"
         )
 
     def delete(self, request: Request, id: str) -> CustomResponse:
         """Delete guestbook by `id`"""
         if not str(id).isdigit():
-            return CustomResponse.bad_request(
-                message='Id must be a number'
-            )
+            return CustomResponse.bad_request(message="Id must be a number")
 
         guestbook = Guestbooks.objects.filter(
-            id=id,
-            status=StatusModelSelector.CREATED
+            id=id, status=StatusModelSelector.CREATED
         ).first()
 
         if not guestbook:
-            return CustomResponse.not_found(
-                message='Guestbook not found'
-            )
+            return CustomResponse.not_found(message="Guestbook not found")
 
         guestbook.status = StatusModelSelector.DELETED
         guestbook.save()
 
-        return CustomResponse.success(
-            message='Guestbook deleted',
-            status_code=204
-        )
+        return CustomResponse.success(message="Guestbook deleted", status_code=204)
 
     def put(self, request: Request, id: str) -> CustomResponse:
         """Update guestbook by `id`"""
         if not str(id).isdigit():
-            return CustomResponse.bad_request(
-                message='Id must be a number'
-            )
+            return CustomResponse.bad_request(message="Id must be a number")
 
         guestbook = Guestbooks.objects.filter(
             id=id,
         ).first()
 
         if not guestbook:
-            return CustomResponse.not_found(
-                message='Guestbook not found'
-            )
+            return CustomResponse.not_found(message="Guestbook not found")
 
         serializer = self.serializer_class(instance=guestbook, data=request.data)
         if not serializer.is_valid():
             return CustomResponse.bad_request(
-                message='Make sure you entered a valid data',
-                error=serializer.errors
+                message="Make sure you entered a valid data", error=serializer.errors
             )
 
         serializer.save()
 
         return CustomResponse.success(
-            message='Guestbook updated',
+            message="Guestbook updated",
             data=self.serializer_class(guestbook).data,
         )
 

@@ -43,7 +43,7 @@ import { useAPILoading } from '../store';
 import LoadingComponent from '../components/LoadingComponent.vue';
 
 export default {
-  name: 'Projects',
+  name: 'CustomProjects',
   components: { ProjectCard, LoadingComponent },
   setup() {
     const projects: Ref<ProjectType[]> = ref([]);

@@ -25,7 +25,7 @@ import { type PropType } from 'vue';
 
 
 export default {
-  name: 'Card',
+  name: 'ProjectCard',
   props: {
     project: {
       type: Object as PropType<ProjectType>,

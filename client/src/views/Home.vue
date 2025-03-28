@@ -25,7 +25,7 @@ import ProjectsSection from '../components/home/ProjectsSection.vue';
 
 
 export default {
-  name: 'Home',
+  name: 'CustomHome',
   components: {
     IntroSection,
     ArticleSection,

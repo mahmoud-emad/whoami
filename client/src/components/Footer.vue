@@ -23,7 +23,7 @@ import { onMounted, ref, watch } from 'vue';
 import { SettingsType } from '../types';
 
 export default {
-  name: 'Footer',
+  name: 'CustomFooter',
   setup() {
     const isDark = useDark();
     const theme = useTheme();

@@ -32,9 +32,23 @@ const useSettingsStore = defineStore('settingsStore', {
             configuration: {
                 adminDashboard: false,
                 enableSearch: false,
-                githubURL: "",
                 multipleThemes: false,
                 searchModels: [],
+                displayNavbarImage: false
+            },
+            personal: {
+                country: '',
+                email: '',
+                fullName: '',
+                social: {
+                    github: '',
+                    linkedin: '',
+                    twitter: '',
+                    whatsapp: '',
+                    signal: '',
+                    telegram: ''
+                },
+                resumeURL: '',
             },
             security: {
                 adminFingerprintSignature: '',
@@ -118,7 +132,7 @@ const useSettingsStore = defineStore('settingsStore', {
             throw new Error(`Setting ${key} not found`)
         },
 
-        getSettings() {
+        getSettings(): SettingsType {
             if (!this.isSettingsLoaded()) {
                 throw new Error('Settings are not loaded')
             }
@@ -127,7 +141,9 @@ const useSettingsStore = defineStore('settingsStore', {
                 configuration: this.configuration,
                 security: this.security,
                 theme: this.theme,
-                server: this.server
+                server: this.server,
+                personal: this.personal
+
             }
         },
 
