@@ -39,4 +39,4 @@ jobs:
       - name: Run Server Tests
         run: |
           cd server
-          poetry run python3 manage.py test
+          make test
