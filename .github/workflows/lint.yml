@@ -65,12 +65,6 @@ jobs:
           cd server
           poetry install
 
-      - name: Lint Server with Black
+      - name: Lint Server with Black, Flake8
         run: |
-          cd server
-          poetry run black . --exclude=__init__.py --check
-
-      - name: Lint Server with Flake8
-        run: |
-          cd server
-          poetry run flake8 . --exclude=__init__.py
+          make lint
