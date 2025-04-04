@@ -55,7 +55,7 @@ endif
 
 
 test:
-	$(server_dir) && $(CMD) python3 manage.py test
+	$(server_dir) && $(CMD) python3 manage.py test base_app.tests
 lint:
 	$(server_dir) && $(CMD) black .  --exclude=__init__.py
 	$(server_dir) && $(CMD) flake8 .  --exclude=__init__.py

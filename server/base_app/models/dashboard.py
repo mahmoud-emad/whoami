@@ -29,6 +29,7 @@ class AdminConfiguration(CustomTimeStamp):
     class Meta:
         verbose_name = "Admin Configuration"
         verbose_name_plural = "Configurations"
+        db_table = "admin_configurations"
 
     def __str__(self):
         return "Site Configuration"
@@ -58,6 +59,7 @@ class Theme(CustomTimeStamp):
     class Meta:
         verbose_name = "Theme"
         verbose_name_plural = "Themes"
+        db_table = "themes"
 
     def __str__(self):
         return f"Default Theme: {self.default_theme}"
@@ -80,6 +82,7 @@ class Security(CustomTimeStamp):
     class Meta:
         verbose_name = "Security Setting"
         verbose_name_plural = "Security Settings"
+        db_table = "security"
 
     def __str__(self):
         return "Security Configuration"
@@ -111,6 +114,7 @@ class SocialProfile(CustomTimeStamp):
     class Meta:
         verbose_name = "Social Profile"
         verbose_name_plural = "Social Profiles"
+        db_table = "social_profiles"
 
     def __str__(self):
         return f"Social Profile (GitHub: {self.github})"
@@ -139,6 +143,7 @@ class PersonalSettings(CustomTimeStamp):
     class Meta:
         verbose_name = "Personal Setting"
         verbose_name_plural = "Personal Settings"
+        db_table = "personal_settings"
 
     def __str__(self):
         return self.full_name
@@ -161,6 +166,7 @@ class SiteSettings(CustomTimeStamp):
     class Meta:
         verbose_name = "Site Setting"
         verbose_name_plural = "Site Settings"
+        db_table = "site_settings"
 
     def __str__(self):
         return "Site Settings"

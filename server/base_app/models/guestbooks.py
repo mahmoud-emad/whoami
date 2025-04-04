@@ -13,6 +13,7 @@ class Guestbooks(CustomTimeStamp):
     message = models.TextField(max_length=500)
 
     class Meta:
+        app_label = "base_app"
         db_table = "guestbooks"
 
     def __str__(self):
