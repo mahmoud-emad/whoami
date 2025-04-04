@@ -10,7 +10,7 @@
       }
     )" v-model="project.title" title="Project Title" class="mb-4" label="Project Title" variant="outlined"
       hide-details="auto"></v-text-field>
-    <v-text-field type="url" :rules="websiteRules()" v-model="project.link" title="Project Link" class="mb-4"
+    <v-text-field type="url" :rules="isValidURL()" v-model="project.link" title="Project Link" class="mb-4"
       label="Project Link" variant="outlined" hide-details="auto"></v-text-field>
 
     <v-select hide-details="auto" variant="outlined" :label="'Project Type'" v-model="project.type" class="mb-4"
@@ -38,7 +38,7 @@
 <script lang="ts">
 import { ref } from 'vue';
 import { ProjectType } from '../../types';
-import { nameRules, websiteRules, longTextRules, validateProjectTagsRules } from '../../utils';
+import { nameRules, isValidURL, longTextRules, validateProjectTagsRules } from '../../utils';
 import { useAPILoading } from '../../store';
 
 export default {
@@ -111,7 +111,7 @@ export default {
       projectTypes,
       createNewProject,
       nameRules,
-      websiteRules,
+      isValidURL,
       longTextRules,
       validateProjectTagsRules
     };

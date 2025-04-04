@@ -2,6 +2,7 @@ from django.db import models
 from base_app.models.abstracts import CustomTimeStamp
 
 
+
 class AdminConfiguration(CustomTimeStamp):
     display_admin_dashboard = models.BooleanField(
         default=True, help_text="Enable admin dashboard"
@@ -42,7 +43,7 @@ class ThemeSelector(models.TextChoices):
     LIGHT = "Light", "light"
 
 
-class Theme(models.Model):
+class Theme(CustomTimeStamp):
     """
     Site theme configuration
     """
@@ -62,7 +63,7 @@ class Theme(models.Model):
         return f"Default Theme: {self.default_theme}"
 
 
-class Security(models.Model):
+class Security(CustomTimeStamp):
     """
     Site security configuration
     """
@@ -84,7 +85,7 @@ class Security(models.Model):
         return "Security Configuration"
 
 
-class SocialProfile(models.Model):
+class SocialProfile(CustomTimeStamp):
     """
     Social profile configuration
     """
@@ -115,7 +116,7 @@ class SocialProfile(models.Model):
         return f"Social Profile (GitHub: {self.github})"
 
 
-class PersonalSettings(models.Model):
+class PersonalSettings(CustomTimeStamp):
     """
     Personal profile configuration
     """
@@ -141,7 +142,7 @@ class PersonalSettings(models.Model):
         return self.full_name
 
 
-class SiteSettings(models.Model):
+class SiteSettings(CustomTimeStamp):
     configuration = models.OneToOneField(
         AdminConfiguration, on_delete=models.CASCADE, related_name="site_settings"
     )

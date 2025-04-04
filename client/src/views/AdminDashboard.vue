@@ -4,7 +4,7 @@
     ❌ You cannot access this page; the admin has decided to close the admin dashboard service.
   </v-card>
   <div v-else>
-    <v-alert color="primary" class="head-card pa-4" title="📊 Admin Dashboard" variant="tonal" />
+    <v-alert class="pa-2 mt-2 mb-2 head-card" title="📊 Admin Dashboard" />
 
     <div class="d-flex flex-row">
       <!-- Sidebar Navigation -->
@@ -51,12 +51,17 @@ export default {
     const siteSettings = ref<SettingsType>({} as SettingsType);
 
     onMounted(async () => {
-      apiLoadingStore.setLoading(true)
-      if (!settingsStore.isSettingsLoaded()) {
-        await settingsStore.loadSettings();
+      try {
+        apiLoadingStore.setLoading(true)
+        if (!settingsStore.isSettingsLoaded()) {
+          await settingsStore.loadSettings();
+        }
+        siteSettings.value = settingsStore.getSettings();
+      } catch (error) {
+        console.error("Failed to load settings:", error);
+      } finally {
+        apiLoadingStore.setLoading(false)
       }
-      siteSettings.value = settingsStore.getSettings();
-      apiLoadingStore.setLoading(false)
     })
 
     const tabs = [

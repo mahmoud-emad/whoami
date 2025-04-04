@@ -20,7 +20,7 @@
   <v-form v-model="validForm" :disabled="apiLoadingStore.isLoading()">
     <v-text-field :loading="apiLoadingStore.isLoading()" v-model="siteSettings.configuration.githubURL"
       title="Your GitHub Link" class="mb-4" label="Your GitHub Link" type="url" variant="outlined" hide-details="auto"
-      :rules="[...websiteRules(), ...githubWebsiteRules()]"></v-text-field>
+      :rules="[...isValidURL(), ...githubWebsiteRules()]"></v-text-field>
     <v-text-field :loading="apiLoadingStore.isLoading()" type="password" :rules="longTextRules({
       fieldName: 'Admin Fingerprint Signature',
       maxLength: 400,
@@ -46,7 +46,7 @@
 import { onMounted, ref } from 'vue';
 import { useAPILoading, useSettingsStore } from '../../store';
 import { SettingsType } from '../../types';
-import { longTextRules, websiteRules, githubWebsiteRules } from '../../utils';
+import { longTextRules, isValidURL, githubWebsiteRules } from '../../utils';
 
 
 export default {
@@ -125,7 +125,7 @@ export default {
       validForm,
       githubWebsiteRules,
       longTextRules,
-      websiteRules,
+      isValidURL,
       saveSettings,
       support2Themes,
     };

@@ -8,7 +8,7 @@
             minLength: 10,
         })" v-model="article.title" title="Article Title" class="mb-4" label="Article Title" variant="outlined"
             hide-details="auto"></v-text-field>
-        <v-text-field type="url" :loading="apiLoadingStore.isLoading()" v-model="article.link" :rules="websiteRules()"
+        <v-text-field type="url" :loading="apiLoadingStore.isLoading()" v-model="article.link" :rules="isValidURL()"
             title="Article Link" class="mb-4" label="Article Link" variant="outlined"
             hide-details="auto"></v-text-field>
         <v-textarea :loading="apiLoadingStore.isLoading()" type="text" :rules="article.description?.length ? longTextRules({
@@ -27,7 +27,7 @@
 <script lang="ts">
 import { ref } from 'vue';
 import { ArticleType } from '../../types';
-import { nameRules, websiteRules, longTextRules } from '../../utils';
+import { nameRules, isValidURL, longTextRules } from '../../utils';
 import { useAPILoading } from '../../store';
 
 
@@ -78,7 +78,7 @@ export default {
             responseMessage,
             responseType,
             nameRules,
-            websiteRules,
+            isValidURL,
             longTextRules,
             postNewArticle,
         };

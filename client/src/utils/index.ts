@@ -18,6 +18,10 @@ const githubWebsiteRules = () => [
   (v: string) => v && v.includes('github.com') || 'Please enter a valid GitHub profile URL',
 ];
 
+const requiredRule = () => [
+  (v: string) => v && v.length > 0 || 'This field is required'
+];
+
 const longTextRules = (options: {
   fieldName: string,
   minLength: number,
@@ -41,7 +45,7 @@ const emailRules = (options: {
   ];
 
 
-const websiteRules = () => [
+const isValidURL = () => [
   (v: string) => v && /^(https?:\/\/)?([\w\d-]+\.)+[a-z]{2,6}(:[0-9]+)?(\/.*)?$/.test(v) || 'Please enter a valid URL'
 ];
 
@@ -75,7 +79,8 @@ export {
   githubWebsiteRules,
   nameRules,
   longTextRules,
-  websiteRules,
+  isValidURL,
+  requiredRule,
   antiBotRules,
   formatData,
   emailRules,

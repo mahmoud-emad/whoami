@@ -8,7 +8,7 @@
   <!-- Form for user settings -->
   <v-form v-model="validForm" :disabled="apiLoading.isLoading()" @submit.prevent="saveUserSettings">
     <div v-for="(input, index) in inputs" :key="index">
-      <template v-if="input.type === 'text' || input.type === 'email'">
+      <template v-if="input.type === 'text' || input.type === 'email' || input.type === 'link'">
         <v-text-field v-model="input.value" :rules="input.rules" :type="input.type" :label="input.label"
           :title="input.title" variant="outlined" hide-details="auto" :aria-label="input.label"
           :aria-describedby="`${input.label}-description`" :append-icon="input.icon">
@@ -25,6 +25,13 @@
         <v-file-input :label="input.label" :title="input.title" variant="outlined" hide-details="auto"
           :rules="input.rules" show-size :append-icon="input.icon" prepend-icon=""></v-file-input>
       </template>
+
+      <template v-else-if="input.type === 'select'">
+        <v-autocomplete :rules="input.rules" v-model="input.value" :title="input.title" class="mb-4"
+          :label="input.label" variant="outlined" :append-icon="input.icon" hide-details="auto" :hint="input.hint"
+          :items="input.items" item-value="code" item-title="title">
+        </v-autocomplete>
+      </template>
     </div>
 
     <!-- Save button -->
@@ -38,7 +45,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue';
 import { useAPILoading } from '../../store';
-import { nameRules, emailRules } from '../../utils';
+import { nameRules, emailRules, isValidURL, requiredRule } from '../../utils';
 
 // Define interfaces for better type safety
 interface UserSettings {
@@ -54,6 +61,8 @@ interface InputField {
   label: string;
   description?: string;
   icon?: string;
+  hint?: string;
+  items?: { title: string; code: string }[];
 }
 
 // Initialize reactive state
@@ -61,6 +70,14 @@ const validForm = ref(false);
 const apiLoading = useAPILoading();
 const responseType = ref<'success' | 'error'>('success');
 const responseMessage = ref<string | null>(null);
+const countries = ref<{ title: string, code: string }[]>([]);
+
+// Load initial user settings on component mount
+// Fetch countries
+onMounted(() => {
+  fetchUserSettings();
+  getCountries();
+});
 
 // Define input fields with proper validation rules
 const inputs = ref<InputField[]>([
@@ -93,13 +110,40 @@ const inputs = ref<InputField[]>([
   {
     title: 'Resume',
     value: '',
-    rules: [],
-    type: 'input',
-    label: 'Upload Resume',
+    rules: isValidURL(),
+    type: 'link',
+    label: 'Resume URL',
     description: 'Upload your resume',
-    icon: 'mdi-upload',
+    icon: 'mdi-link',
+  },
+  {
+    title: 'Countery',
+    value: '',
+    rules: [...requiredRule()],
+    type: 'select',
+    items: countries.value,
+    label: 'Countery',
+    description: 'Upload your resume',
+    icon: 'mdi-earth',
   },
 ]);
+
+// Fetch countries
+function getCountries(lang = 'en') {
+  const A = 65
+  const Z = 90
+  const countryName = new Intl.DisplayNames([lang], { type: 'region' });
+  for (let i = A; i <= Z; ++i) {
+    for (let j = A; j <= Z; ++j) {
+      let code = String.fromCharCode(i) + String.fromCharCode(j)
+      let name = countryName.of(code)
+      if (code !== name) {
+        countries.value.push({ title: name as string, code: code })
+      }
+    }
+  }
+  return countries
+}
 
 // Map input values to user settings object
 const userSettings = computed<UserSettings>(() => ({
@@ -170,10 +214,6 @@ const clearResponseMessage = () => {
   responseMessage.value = null;
 };
 
-// Load initial user settings on component mount
-onMounted(() => {
-  fetchUserSettings();
-});
 </script>
 
 <style scoped>

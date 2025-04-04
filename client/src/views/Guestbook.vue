@@ -73,7 +73,7 @@
           }) : []" label="Your Name" hint="Your name, handle, or full name. Leave blank for 'Anonymous'."
             persistent-hint variant="outlined" class="mb-4" />
           <v-text-field v-model="newGuestbook.website" :counter="100" prepend-inner-icon="mdi-web"
-            :rules="newGuestbook.website?.length ? websiteRules() : []" label="Your Website/Github (Optional)"
+            :rules="newGuestbook.website?.length ? isValidURL() : []" label="Your Website/Github (Optional)"
             hint="If provided, we'll validate and link it." persistent-hint variant="outlined" class="mb-4" />
           <v-textarea v-model="newGuestbook.message" :counter="500" prepend-inner-icon="mdi-message" :rules="longTextRules({
             fieldName: 'Your Message',
@@ -101,7 +101,7 @@
 
 <script lang="ts">
 import { onMounted, ref } from 'vue';
-import { nameRules, antiBotRules, websiteRules, longTextRules } from '../utils';
+import { nameRules, antiBotRules, isValidURL, longTextRules } from '../utils';
 import { type GuestBookType } from '../types';
 import LoadingComponent from '../components/LoadingComponent.vue';
 import { useAPILoading } from '../store';
@@ -190,7 +190,7 @@ export default {
       formatData,
       normalizeUrl,
       longTextRules,
-      websiteRules,
+      isValidURL,
       antiBotRules,
       scrollToGuestbook,
       nameRules,
