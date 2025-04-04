@@ -3,7 +3,7 @@
     <h2 class="title" title="Last Projects">🎨 Last Projects</h2>
     <div class="pa-2">
       <p class="text-light-gray">
-        Checkout my last projects.
+        Build projects is a good way to learn and grow as a developer. Checkout my last projects.
       </p>
     </div>
 
@@ -28,8 +28,9 @@
           </small>
         </div>
         <div class="" v-else>
-          <v-alert type="info" variant="tonal" class="mb-4">
-            No projects found
+          <!-- No projects found -->
+          <v-alert class="pa-2 mt-2 mb-2 head-card">
+            🎨 No projects found.
           </v-alert>
         </div>
       </div>
@@ -66,8 +67,9 @@
           </small>
         </div>
         <div class="" v-else>
-          <v-alert type="info" variant="tonal" class="mb-4">
-            No open source contributions found
+          <!-- No open source contributions found -->
+          <v-alert class="pa-2 mt-2 mb-2 head-card">
+            🌟 No open source contributions found
           </v-alert>
         </div>
       </div>

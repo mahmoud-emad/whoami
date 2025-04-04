@@ -1,6 +1,11 @@
 <template>
   <div class="articles mt-3">
-    <h2 class="title" title="Favourite Articles">🌟 Favourite Articles</h2>
+    <h2 class="title" title="Favourite Articles">🧾 Favourite Articles</h2>
+    <div class="pa-2">
+      <p class="text-light-gray">
+        Reading articles is a great way to learn and grow as a developer. Checkout my favourite articles.
+      </p>
+    </div>
     <LoadingComponent type="article" :content-length="2" :content-name="'Favourite Articles'"
       v-if="apiLoadingStore.isLoading()" />
 
@@ -21,8 +26,9 @@
         </v-row>
       </div>
       <div class="" v-else>
-        <v-alert type="info" variant="tonal" class="mb-4">
-          No articles found
+        <!-- No articles found -->
+        <v-alert class="pa-2 mt-2 mb-2 head-card">
+          🧾 No articles found.
         </v-alert>
       </div>
     </div>

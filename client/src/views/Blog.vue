@@ -2,7 +2,7 @@
   <div class="page-body">
     <div class="section mb-4">
       <h1>Blog Posts</h1>
-      <v-alert class="pa-2 mt-2 mb-2 head-card">
+      <v-alert v-if="posts && posts.length" class="pa-2 mt-2 mb-2 head-card">
         ✍️ Dive into My Blog: <strong>Insights</strong>, <strong>Tutorials</strong>, and <strong>Musings</strong>
       </v-alert>
     </div>
@@ -11,9 +11,11 @@
     <LoadingComponent type="article" :content-length="8" content-name="Blog Posts" v-if="apiLoading.isLoading()" />
 
     <!-- No Posts Found -->
-    <v-alert class="pa-2 mt-2 mb-2 head-card" v-else-if="posts.length === 0">
-      📭 No blog posts found.
-    </v-alert>
+    <div v-else-if="posts.length === 0" class="no-content-height">
+      <v-alert class="pa-2 mt-2 mb-2 head-card">
+        📭 No blog posts found.
+      </v-alert>
+    </div>
 
     <!-- Blog Posts -->
     <div class="posts" v-else>

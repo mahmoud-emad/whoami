@@ -245,3 +245,7 @@ a:hover {
   padding: 15px;
   padding-bottom: 0px !important;
 }
+
+.no-content-height {
+  height: 40rem !important;
+}
