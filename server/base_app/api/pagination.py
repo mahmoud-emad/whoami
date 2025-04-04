@@ -31,3 +31,10 @@ class ProjectTagsPagination(PageNumberPagination):
     """
 
     page_size = 50
+
+class UserSettingsPagination(PageNumberPagination):
+    """
+    Custom pagination class for user settings.
+    """
+
+    page_size = 10

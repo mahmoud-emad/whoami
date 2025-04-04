@@ -1,5 +1,5 @@
 from django.db import models
-from base_app.models.abstracts import CustomTimeStamp
+from base_app.models.abstracts import CustomTimeStamp, StatusModelSelector
 
 
 
@@ -124,7 +124,11 @@ class PersonalSettings(CustomTimeStamp):
     """
     Personal profile configuration
     """
-
+    status = models.CharField(
+        max_length=30,
+        choices=StatusModelSelector.choices,
+        default=StatusModelSelector.CREATED,
+    )
     full_name = models.CharField(max_length=100, help_text="Full name")
     email = models.EmailField(help_text="Contact email address")
     country = models.CharField(max_length=100, help_text="Country of residence")
