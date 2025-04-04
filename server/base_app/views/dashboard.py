@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 
 from base_app.api.response import CustomResponse
-from base_app.serializers.dashboard_settings import UserSettingsSerializer
+from base_app.serializers.dashboard import UserSettingsSerializer
 
 class UserSettingsAPIView(APIView):
     """

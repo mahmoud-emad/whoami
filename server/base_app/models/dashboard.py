@@ -132,6 +132,8 @@ class PersonalSettings(CustomTimeStamp):
         on_delete=models.CASCADE,
         related_name="personal_settings",
         help_text="Social media profiles",
+        null=True,
+        blank=True,
     )
 
     class Meta:

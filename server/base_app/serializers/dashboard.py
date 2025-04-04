@@ -10,6 +10,4 @@ class UserSettingsSerializer(ModelSerializer):
 
     class Meta:
         model = PersonalSettings
-
-
-        
+        fields = ['full_name', 'email', 'country', 'resume_url']
