@@ -12,27 +12,32 @@ const useGuestbooksStore = defineStore('guestbooksStore', {
     actions: {
         async fetchGuestbooks() {
             const data = await GuestbooksAPI.getGuestbooks();
-            this.guestbooks = data;
+            if (data) {
+                this.guestbooks = data;
+            }
         },
 
         async createGuestbook(guestbook: GuestBookType) {
-            const data = await GuestbooksAPI.createGuestbook(guestbook)
-            this.guestbooks.push(data);
+            const data = await GuestbooksAPI.createGuestbook(guestbook);
+            if (data) {
+                this.guestbooks.push(data);
+            }
         },
 
         async updateGuestbook(guestbook: GuestBookType) {
-            const data = await GuestbooksAPI.updateGuestbook(guestbook)
-            this.guestbooks = this.guestbooks.map((p) => {
-                if (p.id === data.id) {
-                    return data;
-                }
-                return p;
-            });
+            const data = await GuestbooksAPI.updateGuestbook(guestbook);
+            if (data) {
+                this.guestbooks = this.guestbooks.map((p) =>
+                    p.id === data.id ? data : p
+                );
+            }
         },
 
         async deleteGuestbook(guestbook: GuestBookType) {
-            await GuestbooksAPI.deleteGuestbook(guestbook);
-            this.guestbooks = this.guestbooks.filter((p) => p.id !== guestbook.id);
+            const success = await GuestbooksAPI.deleteGuestbook(guestbook);
+            if (success !== false) {
+                this.guestbooks = this.guestbooks.filter((p) => p.id !== guestbook.id);
+            }
         }
     },
 });

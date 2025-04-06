@@ -12,27 +12,32 @@ const useProjectsStore = defineStore('projectsStore', {
     actions: {
         async fetchProjects() {
             const data = await ProjectsAPI.getProjects();
-            this.projects = data;
+            if (data) {
+                this.projects = data;
+            }
         },
 
         async createProject(project: ProjectType) {
-            const data = await ProjectsAPI.createProject(project)
-            this.projects.push(data);
+            const data = await ProjectsAPI.createProject(project);
+            if (data) {
+                this.projects.push(data);
+            }
         },
 
         async updateProject(project: ProjectType) {
-            const data = await ProjectsAPI.updateProject(project)
-            this.projects = this.projects.map((p) => {
-                if (p.id === data.id) {
-                    return data;
-                }
-                return p;
-            });
+            const data = await ProjectsAPI.updateProject(project);
+            if (data) {
+                this.projects = this.projects.map((p) =>
+                    p.id === data.id ? data : p
+                );
+            }
         },
 
         async deleteProject(project: ProjectType) {
-            await ProjectsAPI.deleteProject(project);
-            this.projects = this.projects.filter((p) => p.id !== project.id);
+            const success = await ProjectsAPI.deleteProject(project);
+            if (success !== false) {
+                this.projects = this.projects.filter((p) => p.id !== project.id);
+            }
         },
 
         getProjectsByType(type: string) {

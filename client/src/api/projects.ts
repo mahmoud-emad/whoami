@@ -2,7 +2,6 @@ import { CustomResponse, ProjectType } from "../types"
 import { axios } from "./axios"
 import ServerErrorNotification from "./notifications"
 
-
 class ProjectsAPI {
     /**
      * Get all projects
@@ -16,10 +15,9 @@ class ProjectsAPI {
             const res = response.data as CustomResponse<ProjectType[]>
             return res.results
         } catch (error: any) {
-            // Display notification with the error message
             ServerErrorNotification.show({
                 title: 'Error',
-                message: error.message,
+                message: error.response?.data?.message || error.message,
                 type: 'error'
             });
             return []
@@ -29,47 +27,74 @@ class ProjectsAPI {
     /**
      * Get a project by id
      * @param {number} id
-     * @returns {Promise<ProjectType>}
+     * @returns {Promise<ProjectType | null>}
      * @static     
     */
-    static async getProject(id: number): Promise<ProjectType> {
-        const response = await axios.get(`/api/projects/${id}/`)
-        const res = response.data as CustomResponse<ProjectType>
-        return res.results
+    static async getProject(id: number): Promise<ProjectType | null> {
+        try {
+            const response = await axios.get(`/api/projects/${id}/`)
+            const res = response.data as CustomResponse<ProjectType>
+            return res.results
+        } catch (error: any) {
+            ServerErrorNotification.show({
+                title: 'Error',
+                message: error.response?.data?.message || error.message,
+                type: 'error'
+            });
+            return null
+        }
     }
 
     /**
      * Create a project
      * @param {ProjectType} project
-     * @returns {Promise<ProjectType>}
+     * @returns {Promise<ProjectType | null>}
      * @static
     */
-    static async createProject(project: ProjectType): Promise<ProjectType> {
-        const response = await axios.post('/api/projects/', {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            data: JSON.stringify(project),
-        })
-        const res = response.data as CustomResponse<ProjectType>
-        return res.results
+    static async createProject(project: ProjectType): Promise<ProjectType | null> {
+        try {
+            const response = await axios.post('/api/projects/', {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                data: JSON.stringify(project),
+            })
+            const res = response.data as CustomResponse<ProjectType>
+            return res.results
+        } catch (error: any) {
+            ServerErrorNotification.show({
+                title: 'Error',
+                message: error.response?.data?.message || error.message,
+                type: 'error'
+            });
+            return null
+        }
     }
 
     /**
      * Update a project
      * @param {ProjectType} project
-     * @returns {Promise<ProjectType>}
+     * @returns {Promise<ProjectType | null>}
      * @static
     */
-    static async updateProject(project: ProjectType): Promise<ProjectType> {
-        const response = await axios.put(`/api/projects/${project.id}/`, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(project),
-        })
-        const res = response.data as CustomResponse<ProjectType>
-        return res.results
+    static async updateProject(project: ProjectType): Promise<ProjectType | null> {
+        try {
+            const response = await axios.put(`/api/projects/${project.id}/`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(project),
+            })
+            const res = response.data as CustomResponse<ProjectType>
+            return res.results
+        } catch (error: any) {
+            ServerErrorNotification.show({
+                title: 'Error',
+                message: error.response?.data?.message || error.message,
+                type: 'error'
+            });
+            return null
+        }
     }
 
     /**
@@ -78,8 +103,18 @@ class ProjectsAPI {
      * @returns {Promise<void>}
      * @static
     */
-    static async deleteProject(project: ProjectType): Promise<void> {
-        await axios.delete(`/api/projects/${project.id}/`)
+    static async deleteProject(project: ProjectType): Promise<boolean> {
+        try {
+            await axios.delete(`/api/projects/${project.id}/`)
+            return true
+        } catch (error: any) {
+            ServerErrorNotification.show({
+                title: 'Error',
+                message: error.response?.data?.message || error.message,
+                type: 'error'
+            });
+            return false
+        }
     }
 }
 

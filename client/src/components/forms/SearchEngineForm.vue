@@ -30,7 +30,7 @@
 <script lang="ts">
 import { onMounted, ref } from 'vue';
 import { SettingsType } from '../../types';
-import { useAPILoading, useSettingsStore } from '../../store';
+import { useAPILoading, useSiteSettingsStore } from '../../store';
 
 
 export default {
@@ -43,7 +43,7 @@ export default {
     const searchArticles = ref(false);
     const responseType = ref('success');
     const responseMessage = ref();
-    const settingsStore = useSettingsStore();
+    const settingsStore = useSiteSettingsStore();
     const siteSettings = ref<SettingsType>({
       configuration: {
         adminDashboard: false,

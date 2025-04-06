@@ -48,7 +48,7 @@
 import { onMounted, ref } from 'vue';
 import md5 from 'md5';
 import { validateAdminSignature } from '../utils';
-import { useAPILoading, useSettingsStore } from "../store/index";
+import { useAPILoading, useSiteSettingsStore } from "../store/index";
 import { SettingsType } from '../types';
 
 export default {
@@ -56,7 +56,7 @@ export default {
   setup() {
     const showPassword = ref(false)
     const apiLoadingStore = useAPILoading();
-    const settingsStore = useSettingsStore();
+    const settingsStore = useSiteSettingsStore();
     const siteSettings = ref<SettingsType>({} as SettingsType);
     const signature = ref('');
     const showInvalidAlert = ref(false)

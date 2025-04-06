@@ -12,27 +12,32 @@ const useArticlesStore = defineStore('articlesStore', {
     actions: {
         async fetchArticles() {
             const data = await ArticlesAPI.getArticles();
-            this.articles = data;
+            if (data) {
+                this.articles = data;
+            }
         },
 
         async createArticle(article: ArticleType) {
-            const data = await ArticlesAPI.createArticle(article)
-            this.articles.push(data);
+            const data = await ArticlesAPI.createArticle(article);
+            if (data) {
+                this.articles.push(data);
+            }
         },
 
         async updateArticle(article: ArticleType) {
-            const data = await ArticlesAPI.updateArticle(article)
-            this.articles = this.articles.map((p) => {
-                if (p.id === data.id) {
-                    return data;
-                }
-                return p;
-            });
+            const data = await ArticlesAPI.updateArticle(article);
+            if (data) {
+                this.articles = this.articles.map((p) =>
+                    p.id === data.id ? data : p
+                );
+            }
         },
 
         async deleteArticle(article: ArticleType) {
-            await ArticlesAPI.deleteArticle(article);
-            this.articles = this.articles.filter((p) => p.id !== article.id);
+            const success = await ArticlesAPI.deleteArticle(article);
+            if (success !== false) {
+                this.articles = this.articles.filter((p) => p.id !== article.id);
+            }
         }
     },
 });

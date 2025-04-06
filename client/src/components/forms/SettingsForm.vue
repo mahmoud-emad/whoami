@@ -44,7 +44,7 @@
 
 <script lang="ts">
 import { onMounted, ref } from 'vue';
-import { useAPILoading, useSettingsStore } from '../../store';
+import { useAPILoading, useSiteSettingsStore } from '../../store';
 import { SettingsType } from '../../types';
 import { longTextRules, isValidURL, githubWebsiteRules } from '../../utils';
 
@@ -53,7 +53,7 @@ export default {
   name: 'SettingsForm',
   setup() {
     const apiLoadingStore = useAPILoading();
-    const settingsStore = useSettingsStore();
+    const settingsStore = useSiteSettingsStore();
     const adminDashboard = ref(false)
     const support2Themes = ref(false)
     const siteSettings = ref<SettingsType>({

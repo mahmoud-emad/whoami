@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { ref, defineAsyncComponent, onMounted } from 'vue';
-import { useAPILoading, useSettingsStore } from '../store';
+import { useAPILoading, useSiteSettingsStore } from '../store';
 import { SettingsType } from '../types';
 
 // Lazy-loaded form components
@@ -46,7 +46,7 @@ const SettingsForm = defineAsyncComponent(() => import('../components/forms/Sett
 export default {
   setup() {
     const activeTab = ref('user-settings');
-    const settingsStore = useSettingsStore();
+    const settingsStore = useSiteSettingsStore();
     const apiLoadingStore = useAPILoading();
     const siteSettings = ref<SettingsType>({} as SettingsType);
 

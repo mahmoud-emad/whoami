@@ -17,8 +17,14 @@ const useSettingssStore = defineStore('settingsStore', {
 
         async updateSettings(settings: SettingsType) {
             const data = await SettingsAPI.updateSettings(settings)
-            this.settings = data
+            if (data) {
+                this.settings = data
+            }
         },
+
+        isSettingsLoaded() {
+            return Object.keys(this.settings).length > 0
+        }
     },
 });
 

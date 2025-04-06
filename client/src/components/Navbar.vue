@@ -65,7 +65,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref, computed, watch } from "vue";
 import { useDisplay } from "vuetify";
-import { useAPILoading, useSettingsStore } from "../store";
+import { useAPILoading, useSiteSettingsStore } from "../store";
 
 // Define interfaces for type safety
 interface NavLink {
@@ -88,7 +88,7 @@ export default defineComponent({
     const adminDashboard = ref(false);
 
     // Store
-    const settingsStore = useSettingsStore();
+    const settingsStore = useSiteSettingsStore();
 
     // Navigation Links Configuration
     const navBarLinks = ref<NavLink[]>([

@@ -18,7 +18,7 @@
 <script lang="ts">
 import { useDark } from '@vueuse/core';
 import { useTheme } from 'vuetify';
-import { useSettingsStore } from '../store';
+import { useSiteSettingsStore } from '../store';
 import { onMounted, ref, watch } from 'vue';
 import { SettingsType } from '../types';
 
@@ -27,7 +27,7 @@ export default {
   setup() {
     const isDark = useDark();
     const theme = useTheme();
-    const settingsStore = useSettingsStore();
+    const settingsStore = useSiteSettingsStore();
     // const serverUrl = import.meta.env.VITE_SERVER_URL;
     const siteSettings = ref<SettingsType>({} as SettingsType);
 
