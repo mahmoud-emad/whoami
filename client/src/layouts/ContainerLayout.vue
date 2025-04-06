@@ -17,6 +17,10 @@ watch(currentRoute, () => {
             <CNavbar></CNavbar>
             <slot name="layout-child"></slot>
             <CFooter></CFooter>
+            <div id="notification-card" class="notification-card">
+                <div id="notification-title" class="notification-title"></div>
+                <div id="notification-message" class="notification-message"></div>
+            </div>
         </v-container>
     </template>
     <template v-else>

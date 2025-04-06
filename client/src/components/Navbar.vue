@@ -136,23 +136,23 @@ export default defineComponent({
       activeLink.value =
         window.location.pathname.length > 0 ? window.location.pathname : "/";
 
-      const serverUrl = import.meta.env.VITE_SERVER_URL;
-      if (!serverUrl) {
-        throw new Error("VITE_SERVER_URL is not defined");
-      }
+      // const serverUrl = import.meta.env.VITE_SERVER_URL;
+      // if (!serverUrl) {
+      //   throw new Error("VITE_SERVER_URL is not defined");
+      // }
 
-      try {
-        const url = new URL(serverUrl);
-        settingsStore.server.host = url.hostname;
-        settingsStore.server.port =
-          Number(url.port) || (url.protocol === "https:" ? 443 : 80);
+      // try {
+      //   const url = new URL(serverUrl);
+      //   settingsStore.server.host = url.hostname;
+      //   settingsStore.server.port =
+      //     Number(url.port) || (url.protocol === "https:" ? 443 : 80);
 
-        await settingsStore.loadSettings();
-        adminDashboard.value =
-          settingsStore.getSettings().configuration.adminDashboard;
-      } catch (error) {
-        console.error("Failed to initialize settings:", error);
-      }
+      //   await settingsStore.loadSettings();
+      //   adminDashboard.value =
+      //     settingsStore.getSettings().configuration.adminDashboard;
+      // } catch (error) {
+      //   console.error("Failed to initialize settings:", error);
+      // }
     });
 
     // Watchers

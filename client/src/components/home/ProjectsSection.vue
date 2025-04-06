@@ -144,7 +144,7 @@ export default {
         //   console.error("Error adding project:", result.error);
         // }
       } catch (error) {
-        console.error("Error adding project:", error);
+        console.error("Error loading projects:", error);
       } finally {
         apiLoadingStore.setLoading(false)
       }

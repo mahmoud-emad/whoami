@@ -67,25 +67,25 @@ export default {
     });
 
     const loadPosts = async () => {
-      try {
-        apiLoading.setLoading(true);
-        errorMessage.value = null;
+      // try {
+      //   apiLoading.setLoading(true);
+      //   errorMessage.value = null;
 
-        const serverUrl = import.meta.env.VITE_SERVER_URL;
-        const res = await fetch(`${serverUrl}/posts`);
-        const result = await res.json();
+      //   const serverUrl = import.meta.env.VITE_SERVER_URL;
+      //   const res = await fetch(`${serverUrl}/posts`);
+      //   const result = await res.json();
 
-        if (!res.ok) {
-          throw new Error(result.message || 'Failed to fetch posts');
-        }
+      //   if (!res.ok) {
+      //     throw new Error(result.message || 'Failed to fetch posts');
+      //   }
 
-        posts.value = result.total > 0 ? result.data : [];
-      } catch (error) {
-        console.error('Error loading posts:', error);
-        errorMessage.value = 'Failed to load blog posts. Please try again later.';
-      } finally {
-        apiLoading.setLoading(false);
-      }
+      //   posts.value = result.total > 0 ? result.data : [];
+      // } catch (error) {
+      //   console.error('Error loading posts:', error);
+      //   errorMessage.value = 'Failed to load blog posts. Please try again later.';
+      // } finally {
+      //   apiLoading.setLoading(false);
+      // }
     };
 
     // Toggle "Read More" state per post

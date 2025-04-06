@@ -1,5 +1,6 @@
 import { ProjectType } from "../types"
 import { axios } from "./axios"
+import ServerErrorNotification from "./notifications"
 
 
 class ProjectsAPI {
@@ -9,10 +10,20 @@ class ProjectsAPI {
      * @static
     */
     static async getProjects(): Promise<ProjectType[]> {
-        console.log('getProjects')
-        const response = await axios.get('/api/projects/', { timeout: 10000000 })
-        console.log({ response })
-        return response.data.json()
+        try {
+            console.log('getProjects')
+            const response = await axios.get('/api/projects/')
+            console.log({ response })
+            return response.data.json()
+        } catch (error: any) {
+            // Display notification with the error message
+            ServerErrorNotification.show({
+                title: 'Error',
+                message: error.message,
+                type: 'error'
+            });
+            return []
+        }
     }
 
     /**

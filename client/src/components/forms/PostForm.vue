@@ -63,36 +63,36 @@ export default {
     };
 
     const savePost = async () => {
-      try {
-        apiLoading.setLoading(true);
-        const serverUrl = import.meta.env.VITE_SERVER_URL;
-        post.value.content = content.value;
-        const res = await fetch(`${serverUrl}/posts`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(post.value),
-        });
+      // try {
+      //   apiLoading.setLoading(true);
+      //   // const serverUrl = import.meta.env.VITE_SERVER_URL;
+      //   post.value.content = content.value;
+      //   const res = await fetch(`${serverUrl}/posts`, {
+      //     method: 'POST',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify(post.value),
+      //   });
 
-        const result = await res.json();
-        if (res.ok) {
-          responseType.value = 'success';
-          responseMessage.value = result.message;
-        } else {
-          responseType.value = 'error';
-          responseMessage.value = result.message;
-          console.error('Error adding post:', result.error);
-        }
-      } catch (error) {
-        console.error('Failed to write guestbook:', error);
-        responseType.value = 'error';
-        responseMessage.value = 'Failed to save the post.';
-      } finally {
-        apiLoading.setLoading(false);
-        setTimeout(() => {
-          responseType.value = 'success';
-          responseMessage.value = undefined;
-        }, 3000);
-      }
+      //   const result = await res.json();
+      //   if (res.ok) {
+      //     responseType.value = 'success';
+      //     responseMessage.value = result.message;
+      //   } else {
+      //     responseType.value = 'error';
+      //     responseMessage.value = result.message;
+      //     console.error('Error adding post:', result.error);
+      //   }
+      // } catch (error) {
+      //   console.error('Failed to write guestbook:', error);
+      //   responseType.value = 'error';
+      //   responseMessage.value = 'Failed to save the post.';
+      // } finally {
+      //   apiLoading.setLoading(false);
+      //   setTimeout(() => {
+      //     responseType.value = 'success';
+      //     responseMessage.value = undefined;
+      //   }, 3000);
+      // }
     };
 
     return {

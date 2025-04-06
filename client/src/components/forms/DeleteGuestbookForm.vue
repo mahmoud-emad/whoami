@@ -20,50 +20,50 @@ export default {
         const guestbooks = ref([]);
         const selectedGuestbookID = ref(null);
         const apiLoadingStore = useAPILoading()
-        const serverUrl = import.meta.env.VITE_SERVER_URL;
+        // const serverUrl = import.meta.env.VITE_SERVER_URL;
         const hintMessage = ref('');
         const hintType = ref<'error' | 'info' | 'success' | 'warning'>('info');
 
         onMounted(async () => {
-            try {
-                apiLoadingStore.setLoading(true)
-                const res = await fetch(`${serverUrl}/guestbooks`, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                });
-                const result = await res.json();
-                guestbooks.value = result.data;
-                if (guestbooks.value.length === 0) {
-                    hintMessage.value = 'No guestbooks found';
-                    hintType.value = 'error';
-                }
-            } catch (error) {
-                console.error("Failed to load guestbooks:", error);
-            } finally {
-                apiLoadingStore.setLoading(false)
-            }
+            // try {
+            //     apiLoadingStore.setLoading(true)
+            //     const res = await fetch(`${serverUrl}/guestbooks`, {
+            //         method: "GET",
+            //         headers: { "Content-Type": "application/json" },
+            //     });
+            //     const result = await res.json();
+            //     guestbooks.value = result.data;
+            //     if (guestbooks.value.length === 0) {
+            //         hintMessage.value = 'No guestbooks found';
+            //         hintType.value = 'error';
+            //     }
+            // } catch (error) {
+            //     console.error("Failed to load guestbooks:", error);
+            // } finally {
+            //     apiLoadingStore.setLoading(false)
+            // }
         })
 
         const deleteSelectedGuestbook = async () => {
-            try {
-                apiLoadingStore.setLoading(true)
-                await fetch(`${serverUrl}/guestbooks/${selectedGuestbookID.value}`, {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
-                });
-                guestbooks.value = guestbooks.value.filter((guestbook: GuestBookType) => guestbook.id !== selectedGuestbookID.value);
-                selectedGuestbookID.value = null;
-                hintMessage.value = 'Guestbook deleted successfully';
-                hintType.value = 'success';
-            } catch (error) {
-                console.error("Failed to delete guestbook:", error);
-            } finally {
-                apiLoadingStore.setLoading(false)
-                setTimeout(() => {
-                    hintMessage.value = '';
-                    hintType.value = 'info';
-                }, 3000);
-            }
+            // try {
+            //     apiLoadingStore.setLoading(true)
+            //     await fetch(`${serverUrl}/guestbooks/${selectedGuestbookID.value}`, {
+            //         method: "DELETE",
+            //         headers: { "Content-Type": "application/json" },
+            //     });
+            //     guestbooks.value = guestbooks.value.filter((guestbook: GuestBookType) => guestbook.id !== selectedGuestbookID.value);
+            //     selectedGuestbookID.value = null;
+            //     hintMessage.value = 'Guestbook deleted successfully';
+            //     hintType.value = 'success';
+            // } catch (error) {
+            //     console.error("Failed to delete guestbook:", error);
+            // } finally {
+            //     apiLoadingStore.setLoading(false)
+            //     setTimeout(() => {
+            //         hintMessage.value = '';
+            //         hintType.value = 'info';
+            //     }, 3000);
+            // }
         }
 
         return {

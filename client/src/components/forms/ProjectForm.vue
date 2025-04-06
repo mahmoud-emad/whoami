@@ -72,34 +72,34 @@ export default {
     });
 
     const createNewProject = async (project: ProjectType) => {
-      try {
-        apiLoading.setLoading(true)
-        const serverUrl = import.meta.env.VITE_SERVER_URL;
-        const res = await fetch(`${serverUrl}/projects`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(project),
-        });
+      // try {
+      //   apiLoading.setLoading(true)
+      //   const serverUrl = import.meta.env.VITE_SERVER_URL;
+      //   const res = await fetch(`${serverUrl}/projects`, {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify(project),
+      //   });
 
-        const result = await res.json();
-        if (res.ok) {
-          responseType.value = 'success';
-          responseMessage.value = result.message;
-          // We need to handle projects store
-        } else {
-          responseType.value = 'error';
-          responseMessage.value = result.message;
-          console.error("Error adding project:", result.error);
-        }
-      } catch (error) {
-        console.error("Failed to write guestbook:", error);
-      } finally {
-        apiLoading.setLoading(false)
-        setTimeout(() => {
-          responseType.value = 'success';
-          responseMessage.value = undefined;
-        }, 3000);
-      }
+      //   const result = await res.json();
+      //   if (res.ok) {
+      //     responseType.value = 'success';
+      //     responseMessage.value = result.message;
+      //     // We need to handle projects store
+      //   } else {
+      //     responseType.value = 'error';
+      //     responseMessage.value = result.message;
+      //     console.error("Error adding project:", result.error);
+      //   }
+      // } catch (error) {
+      //   console.error("Failed to write guestbook:", error);
+      // } finally {
+      //   apiLoading.setLoading(false)
+      //   setTimeout(() => {
+      //     responseType.value = 'success';
+      //     responseMessage.value = undefined;
+      //   }, 3000);
+      // }
     }
 
     return {

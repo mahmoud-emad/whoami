@@ -68,24 +68,24 @@ export default {
       sort?: boolean;
     }) => {
       apiLoadingStore.setLoading(true)
-      try {
-        const serverUrl = import.meta.env.VITE_SERVER_URL;
-        const res = await fetch(`${serverUrl}/projects?page=${options.page}&limit=${options.limit}&sort=${options.sort}`);
-        const result = await res.json();
-        if (res.ok) {
-          if (result.total === 0) {
-            // TODO: No projects found, Handle it
-            return;
-          }
-          projects.value = result.data;
-          pageSize.value = Math.ceil(result.total / 10);
-        } else {
-          throw new Error(result.message || 'Failed to fetch projects');
-          // console.error("Error adding project:", result.error);
-        }
-      } catch (error) {
-        console.error("Error adding project:", error);
-      }
+      // try {
+      //   const serverUrl = import.meta.env.VITE_SERVER_URL;
+      //   const res = await fetch(`${serverUrl}/projects?page=${options.page}&limit=${options.limit}&sort=${options.sort}`);
+      //   const result = await res.json();
+      //   if (res.ok) {
+      //     if (result.total === 0) {
+      //       // TODO: No projects found, Handle it
+      //       return;
+      //     }
+      //     projects.value = result.data;
+      //     pageSize.value = Math.ceil(result.total / 10);
+      //   } else {
+      //     throw new Error(result.message || 'Failed to fetch projects');
+      //     // console.error("Error adding project:", result.error);
+      //   }
+      // } catch (error) {
+      //   console.error("Error adding project:", error);
+      // }
       apiLoadingStore.setLoading(false)
     }
 

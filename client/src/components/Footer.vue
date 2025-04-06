@@ -28,24 +28,24 @@ export default {
     const isDark = useDark();
     const theme = useTheme();
     const settingsStore = useSettingsStore();
-    const serverUrl = import.meta.env.VITE_SERVER_URL;
+    // const serverUrl = import.meta.env.VITE_SERVER_URL;
     const siteSettings = ref<SettingsType>({} as SettingsType);
 
     onMounted(async () => {
-      if (!settingsStore.isSettingsLoaded()) {
-        if (serverUrl) {
-          const url = new URL(serverUrl);
-          settingsStore.server.host = url.hostname;
-          settingsStore.server.port = Number(url.port) || (url.protocol === 'https:' ? 443 : 80);
-        } else {
-          throw new Error('VITE_SERVER_URL is not defined');
-        }
-        await settingsStore.loadSettings();
-      }
+      // if (!settingsStore.isSettingsLoaded()) {
+      //   if (serverUrl) {
+      //     const url = new URL(serverUrl);
+      //     settingsStore.server.host = url.hostname;
+      //     settingsStore.server.port = Number(url.port) || (url.protocol === 'https:' ? 443 : 80);
+      //   } else {
+      //     throw new Error('VITE_SERVER_URL is not defined');
+      //   }
+      //   await settingsStore.loadSettings();
+      // }
 
-      siteSettings.value = settingsStore.getSettings();
-      isDark.value = siteSettings.value.theme.defaultTheme === 'dark';
-      theme.global.name.value = isDark.value ? 'dark' : 'light';
+      // siteSettings.value = settingsStore.getSettings();
+      // isDark.value = siteSettings.value.theme.defaultTheme === 'dark';
+      // theme.global.name.value = isDark.value ? 'dark' : 'light';
     });
 
     function toggleTheme() {

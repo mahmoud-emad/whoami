@@ -20,50 +20,50 @@ export default {
         const projects = ref([]);
         const selectedProjectID = ref(null);
         const apiLoadingStore = useAPILoading()
-        const serverUrl = import.meta.env.VITE_SERVER_URL;
+        // const serverUrl = import.meta.env.VITE_SERVER_URL;
         const hintMessage = ref('');
         const hintType = ref<'error' | 'info' | 'success' | 'warning'>('info');
 
         onMounted(async () => {
-            try {
-                apiLoadingStore.setLoading(true)
-                const res = await fetch(`${serverUrl}/projects`, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                });
-                const result = await res.json();
-                projects.value = result.data;
-                if (projects.value.length === 0) {
-                    hintMessage.value = 'No projects found';
-                    hintType.value = 'error';
-                }
-            } catch (error) {
-                console.error("Failed to load projects:", error);
-            } finally {
-                apiLoadingStore.setLoading(false)
-            }
+            // try {
+            //     apiLoadingStore.setLoading(true)
+            //     const res = await fetch(`${serverUrl}/projects`, {
+            //         method: "GET",
+            //         headers: { "Content-Type": "application/json" },
+            //     });
+            //     const result = await res.json();
+            //     projects.value = result.data;
+            //     if (projects.value.length === 0) {
+            //         hintMessage.value = 'No projects found';
+            //         hintType.value = 'error';
+            //     }
+            // } catch (error) {
+            //     console.error("Failed to load projects:", error);
+            // } finally {
+            //     apiLoadingStore.setLoading(false)
+            // }
         })
 
         const deleteSelectedProject = async () => {
-            try {
-                apiLoadingStore.setLoading(true)
-                await fetch(`${serverUrl}/projects/${selectedProjectID.value}`, {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
-                });
-                projects.value = projects.value.filter((project: ProjectType) => project.id !== selectedProjectID.value);
-                selectedProjectID.value = null;
-                hintMessage.value = 'Project deleted successfully';
-                hintType.value = 'success';
-            } catch (error) {
-                console.error("Failed to delete project:", error);
-            } finally {
-                apiLoadingStore.setLoading(false)
-                setTimeout(() => {
-                    hintMessage.value = '';
-                    hintType.value = 'info';
-                }, 3000);
-            }
+            // try {
+            //     apiLoadingStore.setLoading(true)
+            //     await fetch(`${serverUrl}/projects/${selectedProjectID.value}`, {
+            //         method: "DELETE",
+            //         headers: { "Content-Type": "application/json" },
+            //     });
+            //     projects.value = projects.value.filter((project: ProjectType) => project.id !== selectedProjectID.value);
+            //     selectedProjectID.value = null;
+            //     hintMessage.value = 'Project deleted successfully';
+            //     hintType.value = 'success';
+            // } catch (error) {
+            //     console.error("Failed to delete project:", error);
+            // } finally {
+            //     apiLoadingStore.setLoading(false)
+            //     setTimeout(() => {
+            //         hintMessage.value = '';
+            //         hintType.value = 'info';
+            //     }, 3000);
+            // }
         }
 
         return {

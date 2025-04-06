@@ -61,7 +61,7 @@ export default {
     const signature = ref('');
     const showInvalidAlert = ref(false)
     const validForm = ref(false);
-    const serverUrl = import.meta.env.VITE_SERVER_URL;
+    // const serverUrl = import.meta.env.VITE_SERVER_URL;
     const enableAdminDashboard = ref(false);
 
 
@@ -71,20 +71,20 @@ export default {
 
     // Load settings from backend
     const loadSettings = async () => {
-      try {
-        apiLoadingStore.setLoading(true);
-        const res = await fetch(`${serverUrl}/settings`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        const result = await res.json();
-        siteSettings.value = result.data;
-        settingsStore.saveSettings(result.data);
-      } catch (error) {
-        console.error("Failed to load settings:", error);
-      } finally {
-        apiLoadingStore.setLoading(false);
-      }
+      // try {
+      //   apiLoadingStore.setLoading(true);
+      //   const res = await fetch(`${serverUrl}/settings`, {
+      //     method: "GET",
+      //     headers: { "Content-Type": "application/json" },
+      //   });
+      //   const result = await res.json();
+      //   siteSettings.value = result.data;
+      //   settingsStore.saveSettings(result.data);
+      // } catch (error) {
+      //   console.error("Failed to load settings:", error);
+      // } finally {
+      //   apiLoadingStore.setLoading(false);
+      // }
     };
 
     const login = () => {

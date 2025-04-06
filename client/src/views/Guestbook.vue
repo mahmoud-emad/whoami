@@ -114,7 +114,7 @@ export default {
   setup() {
     const validForm = ref(false);
     const newGuestbook = ref<GuestBookType>({ name: '', website: '', message: '' });
-    const serverUrl = import.meta.env.VITE_SERVER_URL;
+    // const serverUrl = import.meta.env.VITE_SERVER_URL;
     const guestbooks = ref<GuestBookType[]>([]);
     const apiLoadingStore = useAPILoading();
     const themeMode = useTheme();
@@ -129,42 +129,42 @@ export default {
     };
 
     const loadGuestbooks = async () => {
-      try {
-        apiLoadingStore.setLoading(true);
-        const res = await fetch(`${serverUrl}/guestbooks`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (!res.ok) throw new Error('Network response was not ok');
-        const result = await res.json();
-        guestbooks.value = result.data.sort((a: GuestBookType, b: GuestBookType) =>
-          new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
-        );
-      } catch (error) {
-        console.error('Failed to load guestbooks:', error);
-      } finally {
-        apiLoadingStore.setLoading(false);
-      }
+      // try {
+      //   apiLoadingStore.setLoading(true);
+      //   const res = await fetch(`${serverUrl}/guestbooks`, {
+      //     method: 'GET',
+      //     headers: { 'Content-Type': 'application/json' },
+      //   });
+      //   if (!res.ok) throw new Error('Network response was not ok');
+      //   const result = await res.json();
+      //   guestbooks.value = result.data.sort((a: GuestBookType, b: GuestBookType) =>
+      //     new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
+      //   );
+      // } catch (error) {
+      //   console.error('Failed to load guestbooks:', error);
+      // } finally {
+      //   apiLoadingStore.setLoading(false);
+      // }
     };
 
     const writeGuestbook = async (guestbook: GuestBookType) => {
-      try {
-        apiLoadingStore.setLoading(true);
-        const submission = { ...guestbook, name: guestbook.name || 'Anonymous' };
-        const res = await fetch(`${serverUrl}/guestbooks`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(submission),
-        });
-        if (!res.ok) throw new Error('Failed to submit');
-        const result = await res.json();
-        guestbooks.value.unshift({ ...result.data, createdAt: new Date().toISOString() });
-        newGuestbook.value = { name: '', website: '', message: '' };
-      } catch (error) {
-        console.error('Failed to write guestbook:', error);
-      } finally {
-        apiLoadingStore.setLoading(false);
-      }
+      // try {
+      //   apiLoadingStore.setLoading(true);
+      //   const submission = { ...guestbook, name: guestbook.name || 'Anonymous' };
+      //   const res = await fetch(`${serverUrl}/guestbooks`, {
+      //     method: 'POST',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify(submission),
+      //   });
+      //   if (!res.ok) throw new Error('Failed to submit');
+      //   const result = await res.json();
+      //   guestbooks.value.unshift({ ...result.data, createdAt: new Date().toISOString() });
+      //   newGuestbook.value = { name: '', website: '', message: '' };
+      // } catch (error) {
+      //   console.error('Failed to write guestbook:', error);
+      // } finally {
+      //   apiLoadingStore.setLoading(false);
+      // }
     };
 
     const scrollToGuestbook = () => {

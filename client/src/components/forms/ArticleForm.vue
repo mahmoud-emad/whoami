@@ -44,31 +44,31 @@ export default {
         });
 
         const postNewArticle = async (article_: ArticleType) => {
-            try {
-                apiLoadingStore.setLoading(true);
-                const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/articles`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(article_),
-                })
-                if (res.ok) {
-                    const result = await res.json();
-                    article.value = result.data;
-                    responseMessage.value = result.message;
-                    responseType.value = 'success';
-                }
-            } catch (error: any) {
-                console.error(error);
-                responseMessage.value = "Failed to create article: " + error.message;
-                responseType.value = 'error';
-            } finally {
-                apiLoadingStore.setLoading(false);
-                if (responseType.value == 'success') {
-                    setTimeout(() => {
-                        responseMessage.value = undefined;
-                    }, 3000);
-                }
-            }
+            // try {
+            //     apiLoadingStore.setLoading(true);
+            //     const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/articles`, {
+            //         method: 'POST',
+            //         headers: { 'Content-Type': 'application/json' },
+            //         body: JSON.stringify(article_),
+            //     })
+            //     if (res.ok) {
+            //         const result = await res.json();
+            //         article.value = result.data;
+            //         responseMessage.value = result.message;
+            //         responseType.value = 'success';
+            //     }
+            // } catch (error: any) {
+            //     console.error(error);
+            //     responseMessage.value = "Failed to create article: " + error.message;
+            //     responseType.value = 'error';
+            // } finally {
+            //     apiLoadingStore.setLoading(false);
+            //     if (responseType.value == 'success') {
+            //         setTimeout(() => {
+            //             responseMessage.value = undefined;
+            //         }, 3000);
+            //     }
+            // }
         };
 
         return {
