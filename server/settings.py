@@ -1,21 +1,18 @@
 from datetime import timedelta
 import os
 from pathlib import Path
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+from components import BASE_DIR, config
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-u4*h6cj0e0p%s!w518!5-83)$=s!fauun5wnn^w3t210d3$&4n"
+SECRET_KEY = config("DJANGO_SECRET_KEY")
+DEBUG = config("DJANGO_DEBUG") == "True"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "0.0.0.0",
+    config("SERVER_URL"),
+    config("CLIENT_URL"),
+]
 
 
 # Application definition
@@ -166,3 +163,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, "server", "staticfiles")
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CORS_ALLOWED_ORIGINS = [
+    config("SERVER_URL"),
+    config("CLIENT_URL"),
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    config("SERVER_URL"),
+    config("CLIENT_URL")
+]

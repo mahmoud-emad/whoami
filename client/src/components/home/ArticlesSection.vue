@@ -63,22 +63,22 @@ export default {
 
     const loadArticles = async () => {
       apiLoadingStore.setLoading(true)
-      try {
-        const serverUrl = import.meta.env.VITE_SERVER_URL;
-        const res = await fetch(`${serverUrl}/articles`);
-        const result = await res.json();
-        if (res.ok) {
-          if (result.total === 0) {
-            // TODO: No articles found, Handle it
-            return;
-          }
-          articles.value = result.data;
-        } else {
-          console.error("Error adding article:", result.error);
-        }
-      } catch (error) {
-        console.error("Error adding article:", error);
-      }
+      // try {
+      //   const serverUrl = import.meta.env.VITE_SERVER_URL;
+      //   const res = await fetch(`${serverUrl}/articles`);
+      //   const result = await res.json();
+      //   if (res.ok) {
+      //     if (result.total === 0) {
+      //       // TODO: No articles found, Handle it
+      //       return;
+      //     }
+      //     articles.value = result.data;
+      //   } else {
+      //     console.error("Error adding article:", result.error);
+      //   }
+      // } catch (error) {
+      //   console.error("Error adding article:", error);
+      // }
       apiLoadingStore.setLoading(false)
     }
 

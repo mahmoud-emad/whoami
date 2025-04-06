@@ -85,6 +85,7 @@ import { ProjectType } from '../../types';
 import { useAPILoading } from '../../store';
 import LoadingComponent from '../LoadingComponent.vue';
 import { formatData } from '../../utils';
+import useProjectsStore from '../../store/projects';
 
 
 export default {
@@ -92,52 +93,56 @@ export default {
   components: { ProjectCard, LoadingComponent },
 
   setup() {
-    onMounted(async () => {
-      await loadProjects();
-    });
-
     const apiLoadingStore = useAPILoading()
+    const projectsStore = useProjectsStore();
     // Projects Data
     const projects: Ref<ProjectType[]> = ref([]);
     // Open Source Data
     const opensource: Ref<ProjectType[]> = ref([]);
 
+    onMounted(async () => {
+      await loadProjects();
+    });
+
+
     const loadProjects = async () => {
       try {
         apiLoadingStore.setLoading(true)
-        const serverUrl = import.meta.env.VITE_SERVER_URL;
-        const res = await fetch(`${serverUrl}/projects`);
-        const result = await res.json();
-        if (res.ok) {
-          if (result.total === 0) {
-            // TODO: No projects found, Handle it
-            return;
-          }
+        const p = await projectsStore.fetchProjects();
+        console.log('p', p)
 
-          // Load only the last inserted 2 projects if their type is project
-          const responseData = result.data
-          const isProject = (project: ProjectType) => project.type.toLowerCase() == 'project';
-          const projectsData = responseData.filter((project: ProjectType) => isProject(project)) as ProjectType[];
+        // const res = await fetch(`${serverUrl}/projects`);
+        // const result = await res.json();
+        // if (res.ok) {
+        //   if (result.total === 0) {
+        //     // TODO: No projects found, Handle it
+        //     return;
+        //   }
 
-          if (projectsData.length > 2) {
-            // Get the last 2 projects in the array
-            projects.value = projectsData.slice(Math.max(projectsData.length - 2, 0))
-          } else {
-            projects.value = projectsData;
-          }
+        //   // Load only the last inserted 2 projects if their type is project
+        //   const responseData = result.data
+        //   const isProject = (project: ProjectType) => project.type.toLowerCase() == 'project';
+        //   const projectsData = responseData.filter((project: ProjectType) => isProject(project)) as ProjectType[];
 
-          // Load only the last inserted 2 packages
-          const isOpenSource = (project: ProjectType) => project.type.toLowerCase() == 'open source';
-          const openSourceProjects = responseData.filter((project: ProjectType) => isOpenSource(project));
+        //   if (projectsData.length > 2) {
+        //     // Get the last 2 projects in the array
+        //     projects.value = projectsData.slice(Math.max(projectsData.length - 2, 0))
+        //   } else {
+        //     projects.value = projectsData;
+        //   }
 
-          if (openSourceProjects.length > 2) {
-            opensource.value = openSourceProjects.slice(-2);
-          } else {
-            opensource.value = openSourceProjects;
-          }
-        } else {
-          console.error("Error adding project:", result.error);
-        }
+        //   // Load only the last inserted 2 packages
+        //   const isOpenSource = (project: ProjectType) => project.type.toLowerCase() == 'open source';
+        //   const openSourceProjects = responseData.filter((project: ProjectType) => isOpenSource(project));
+
+        //   if (openSourceProjects.length > 2) {
+        //     opensource.value = openSourceProjects.slice(-2);
+        //   } else {
+        //     opensource.value = openSourceProjects;
+        //   }
+        // } else {
+        //   console.error("Error adding project:", result.error);
+        // }
       } catch (error) {
         console.error("Error adding project:", error);
       } finally {

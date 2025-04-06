@@ -17,7 +17,7 @@ run:
 ifeq ($(server), backend)
 	$(server_dir) && $(CMD) python3 manage.py runserver
 else ifeq ($(server), frontend)
-	$(client_dir) && yarn dev
+	$(client_dir) && yarn dev --port 8080
 endif
 
 # docker-up:
