@@ -76,3 +76,11 @@ export type NavLink = {
   title: string,
   show: boolean,
 }
+
+export type CustomResponse<T> = {
+  count?: number,
+  next?: string,
+  previous?: string,
+  results: T,
+  error?: any
+}

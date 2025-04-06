@@ -36,6 +36,7 @@ MIDDLEWARE = [
     # "whitenoise.middleware.WhiteNoiseMiddleware",  # Commented out to fix test issues
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -165,11 +166,15 @@ STATIC_ROOT = os.path.join(BASE_DIR, "server", "staticfiles")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOWED_ORIGINS = [
-    config("SERVER_URL"),
-    config("CLIENT_URL"),
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    f'https://{config("SERVER_URL")}',
+    f'https://{config("CLIENT_URL")}',
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    config("SERVER_URL"),
-    config("CLIENT_URL")
-]
+CSRF_TRUSTED_ORIGINS = [f'https://{config("SERVER_URL")}']
+
+CORS_ORIGIN_ALLOW_ALL = True
+APPEND_SLASH = True
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

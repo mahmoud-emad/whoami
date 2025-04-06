@@ -1,4 +1,4 @@
-import { ProjectType } from "../types"
+import { CustomResponse, ProjectType } from "../types"
 import { axios } from "./axios"
 import ServerErrorNotification from "./notifications"
 
@@ -13,8 +13,8 @@ class ProjectsAPI {
         try {
             console.log('getProjects')
             const response = await axios.get('/api/projects/')
-            console.log({ response })
-            return response.data.json()
+            const res = response.data as CustomResponse<ProjectType[]>
+            return res.results
         } catch (error: any) {
             // Display notification with the error message
             ServerErrorNotification.show({
@@ -33,10 +33,9 @@ class ProjectsAPI {
      * @static     
     */
     static async getProject(id: number): Promise<ProjectType> {
-        const response = await axios.get(`/api/projects/${id}/`, {
-            timeout: 10000000
-        })
-        return response.data.json()
+        const response = await axios.get(`/api/projects/${id}/`)
+        const res = response.data as CustomResponse<ProjectType>
+        return res.results
     }
 
     /**
@@ -52,7 +51,8 @@ class ProjectsAPI {
             },
             data: JSON.stringify(project),
         })
-        return response.data.json()
+        const res = response.data as CustomResponse<ProjectType>
+        return res.results
     }
 
     /**
@@ -68,7 +68,8 @@ class ProjectsAPI {
             },
             body: JSON.stringify(project),
         })
-        return response.data.json()
+        const res = response.data as CustomResponse<ProjectType>
+        return res.results
     }
 
     /**
