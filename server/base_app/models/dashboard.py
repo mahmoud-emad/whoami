@@ -40,8 +40,8 @@ class ThemeSelector(models.TextChoices):
     Project types
     """
 
-    DARK = "Dark", "dark"
-    LIGHT = "Light", "light"
+    DARK = "dark"
+    LIGHT = "light"
 
 
 class Theme(CustomTimeStamp):
@@ -140,8 +140,6 @@ class PersonalSettings(CustomTimeStamp):
         on_delete=models.CASCADE,
         related_name="personal_settings",
         help_text="Social media profiles",
-        null=True,
-        blank=True,
     )
 
     class Meta:
@@ -155,16 +153,24 @@ class PersonalSettings(CustomTimeStamp):
 
 class SiteSettings(CustomTimeStamp):
     configuration = models.OneToOneField(
-        AdminConfiguration, on_delete=models.CASCADE, related_name="site_settings"
+        AdminConfiguration,
+        on_delete=models.CASCADE,
+        related_name="site_settings_configuration",
     )
     theme = models.OneToOneField(
-        Theme, on_delete=models.CASCADE, related_name="site_settings"
+        Theme,
+        on_delete=models.CASCADE,
+        related_name="site_settings_theme",
     )
     security = models.OneToOneField(
-        Security, on_delete=models.CASCADE, related_name="site_settings"
+        Security,
+        on_delete=models.CASCADE,
+        related_name="site_settings_security",
     )
     personal = models.OneToOneField(
-        PersonalSettings, on_delete=models.CASCADE, related_name="site_settings"
+        PersonalSettings,
+        on_delete=models.CASCADE,
+        related_name="site_settings_personal",
     )
 
     class Meta:

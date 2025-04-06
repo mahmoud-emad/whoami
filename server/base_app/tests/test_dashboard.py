@@ -1,136 +1,198 @@
 from django.test import TestCase
 
 
-class PersonalSettingsTestCase(TestCase):
+class SiteSettingsTestCase(TestCase):
     """
-    Personal settings tests
+    Site settings tests
     """
-
-    def test_post_user_settings(self, i=0):
+    def test_create_new_site_settings(self):
         """
-        Test post user settings
+        Test create new site settings
         """
-        response = self.client.post(
-            "/api/dashboard/user_info/",
-            data={
-                "full_name": f"user {i}",
-                "resume_link": f"https://example{i}.com",
-                "email": f"user_{i}@example.com",
-                "country": "United States",
+        data = {
+            "configuration": {
+                "display_admin_dashboard": True,
+                "display_navbar_image": True,
+                "enable_search": True,
+                "multiple_themes": False,
+                "search_models": [
+                    "projects",
+                    "guestbooks",
+                    "articles",
+                    "posts"
+                ],
             },
+            "theme":{
+                "default_theme": "dark"
+            },
+            "security": {
+                "debug": False,
+                "admin_fingerprint_signature": "test_signature"
+            },
+            "personal": {
+                "full_name": "John Doe",
+                "email": "x0qMn@example.com",
+                "country": "United States",
+                "resume_url": "https://example.com/resume.pdf",
+                "social": {
+                    "github": "https://github.com/johndoe",
+                    "linkedin": "https://linkedin.com/in/johndoe",
+                    "twitter": "https://twitter.com/johndoe",
+                    "whatsapp": "https://wa.me/1234567890",
+                    "signal": "https://signal.me/1234567890",
+                    "telegram": "https://t.me/johndoe"
+                }
+            }
+        }
+
+        response = self.client.post(
+            "/api/dashboard/",
+            data=data,
+            content_type="application/json",
         )
+        results = response.data['results']
         self.assertEqual(response.status_code, 201)
-        # Assert there are results key
-        self.assertIn("results", response.data)
-        self.assertEqual(response.data["results"]["full_name"], f"user {i}")
-        return response.data["results"]
+        self.assertEqual(results["configuration"]["display_admin_dashboard"], True)
+        self.assertEqual(results["configuration"]["display_navbar_image"], True)
+        self.assertEqual(results["configuration"]["enable_search"], True)
+        self.assertEqual(results["configuration"]["multiple_themes"], False)
+        self.assertEqual(results["configuration"]["search_models"], ["projects", "guestbooks", "articles", "posts"])
+        self.assertEqual(results["theme"]["default_theme"], "dark")
+        self.assertEqual(results["security"]["debug"], False)
+        self.assertEqual(results["security"]["admin_fingerprint_signature"], "test_signature")
+        self.assertEqual(results["personal"]["full_name"], "John Doe")
+        self.assertEqual(results["personal"]["email"], "x0qMn@example.com")
+        self.assertEqual(results["personal"]["country"], "United States")
+        self.assertEqual(results["personal"]["resume_url"], "https://example.com/resume.pdf")
+        self.assertEqual(results["personal"]["social"]["github"], "https://github.com/johndoe")
+        self.assertEqual(results["personal"]["social"]["linkedin"], "https://linkedin.com/in/johndoe")
+        self.assertEqual(results["personal"]["social"]["twitter"], "https://twitter.com/johndoe")
+        self.assertEqual(results["personal"]["social"]["whatsapp"], "https://wa.me/1234567890")
+        self.assertEqual(results["personal"]["social"]["signal"], "https://signal.me/1234567890")
+        self.assertEqual(results["personal"]["social"]["telegram"], "https://t.me/johndoe")
 
-    def test_post_invalid_user_settings(self, i=0):
+    def test_post_empty_data(self):
         """
-        Test post invalid user settings
+        Test post empty data
         """
+        response = self.client.post("/api/dashboard/", data={}, content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+
+    def test_post_invalid_site_settings(self):
+        """
+        Test post invalid site settings
+        """
+        data = {
+            "theme": {
+                "default_theme": "dark",
+            },
+            "security": {
+                "debug": False,
+                "admin_fingerprint_signature": "test_signature",
+            },
+        }
+
         response = self.client.post(
-            "/api/dashboard/user_info/",
-            data={
-                "resume_link": f"https://example{i}.com",
-                "email": f"user_{i}@example.com",
-                "country": "United States",
-            },
-        )
-        self.assertEqual(response.status_code, 400)
-
-    def test_get_user_settings(self):
-        """
-        Test get user settings
-        """
-        self.test_post_user_settings()
-        response = self.client.get("/api/dashboard/user_info/")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data["results"]), 1)
-        self.assertEqual(response.data["results"][0]["full_name"], "user 0")
-
-    def test_get_user_settings_with_pagination(self):
-        """
-        Test get user settings with pagination
-        """
-        for i in range(10):
-            self.test_post_user_settings(i)
-
-        response = self.client.get("/api/dashboard/user_info/?page_size=5")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data["results"]), 5)
-
-    def test_get_user_settings_with_id(self):
-        """
-        Test get user settings with id
-        """
-        self.test_post_user_settings()
-        response = self.client.get("/api/dashboard/user_info/1/")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["results"]["full_name"], "user 0")
-
-    def test_get_user_settings_with_invalid_id(self):
-        """
-        Test get user settings with invalid id
-        """
-        response = self.client.get("/api/dashboard/user_info/1/")
-        self.assertEqual(response.status_code, 404)
-
-    def test_delete_user_settings(self):
-        """
-        Test delete user settings
-        """
-        self.test_post_user_settings()
-        response = self.client.delete("/api/dashboard/user_info/1/")
-        self.assertEqual(response.status_code, 204)
-
-    def test_update_user_settings(self):
-        """
-        Test update user settings
-        """
-        self.test_post_user_settings()
-        response = self.client.put(
-            "/api/dashboard/user_info/1/",
-            data={
-                "full_name": "user 1",
-                "resume_link": "https://example.com",
-                "email": "M7kYl@example.com",
-                "country": "United States",
-            },
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.get("/api/dashboard/user_info/1/")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["results"]["full_name"], "user 1")
-
-    def test_update_user_settings_with_invalid_id(self):
-        """
-        Test update user settings with invalid id
-        """
-        response = self.client.put(
-            "/api/dashboard/user_info/1/",
-            data={
-                "full_name": "user 1",
-                "resume_link": "https://example.com",
-                "email": "M7kYl@example.com",
-                "country": "United States",
-            },
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 404)
-
-    def test_update_user_settings_with_invalid_data(self):
-        """
-        Test update user settings with invalid data
-        """
-        self.test_post_user_settings()
-        response = self.client.put(
-            "/api/dashboard/user_info/1/",
-            data={
-                "full_name": "user 1",
-            },
+            "/api/dashboard/",
+            data=data,
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 400)
+
+    def test_get_site_settings(self):
+        """
+        Test get site settings
+        """
+        self.test_create_new_site_settings()
+        response = self.client.get("/api/dashboard/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["results"]["configuration"]["display_admin_dashboard"], True)
+        self.assertEqual(response.data["results"]["configuration"]["display_navbar_image"], True)
+        self.assertEqual(response.data["results"]["configuration"]["enable_search"], True)
+        self.assertEqual(response.data["results"]["configuration"]["multiple_themes"], False)
+        self.assertEqual(response.data["results"]["configuration"]["search_models"], ["projects", "guestbooks", "articles", "posts"])
+        self.assertEqual(response.data["results"]["theme"]["default_theme"], "dark")
+        self.assertEqual(response.data["results"]["security"]["debug"], False)
+        self.assertEqual(response.data["results"]["security"]["admin_fingerprint_signature"], "test_signature")
+        self.assertEqual(response.data["results"]["personal"]["full_name"], "John Doe")
+        self.assertEqual(response.data["results"]["personal"]["email"], "x0qMn@example.com")
+        self.assertEqual(response.data["results"]["personal"]["country"], "United States")
+        self.assertEqual(response.data["results"]["personal"]["resume_url"], "https://example.com/resume.pdf")
+        self.assertEqual(response.data["results"]["personal"]["social"]["github"], "https://github.com/johndoe")
+        self.assertEqual(response.data["results"]["personal"]["social"]["linkedin"], "https://linkedin.com/in/johndoe")
+        self.assertEqual(response.data["results"]["personal"]["social"]["twitter"], "https://twitter.com/johndoe")
+        self.assertEqual(response.data["results"]["personal"]["social"]["whatsapp"], "https://wa.me/1234567890")
+        self.assertEqual(response.data["results"]["personal"]["social"]["signal"], "https://signal.me/1234567890")
+        self.assertEqual(response.data["results"]["personal"]["social"]["telegram"], "https://t.me/johndoe")
+
+    def test_get_not_exist_site_settings(self):
+        """
+        Test get not exist site settings
+        """
+        response = self.client.get("/api/dashboard/")
+        self.assertEqual(response.status_code, 404)
+
+    def test_patch_site_settings(self):
+        """
+        Test patch site settings
+        """
+        self.test_create_new_site_settings()
+        data = {
+            "configuration": {
+                "display_admin_dashboard": False,
+                "search_models": ["projects", "articles"],
+            },
+            "theme": {
+                "default_theme": "light",
+            },
+        }
+
+        response = self.client.patch(
+            "/api/dashboard/",
+            data=data,
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["results"]["configuration"]["display_admin_dashboard"], False)
+        self.assertEqual(response.data["results"]["configuration"]["display_navbar_image"], True)
+        self.assertEqual(response.data["results"]["configuration"]["enable_search"], True)
+        self.assertEqual(response.data["results"]["configuration"]["multiple_themes"], False)
+        self.assertEqual(response.data["results"]["configuration"]["search_models"], ["projects", "articles"])
+        self.assertEqual(response.data["results"]["theme"]["default_theme"], "light")
+        self.assertEqual(response.data["results"]["security"]["debug"], False)
+        self.assertEqual(response.data["results"]["security"]["admin_fingerprint_signature"], "test_signature")
+        self.assertEqual(response.data["results"]["personal"]["full_name"], "John Doe")
+        self.assertEqual(response.data["results"]["personal"]["email"], "x0qMn@example.com")
+        self.assertEqual(response.data["results"]["personal"]["country"], "United States")
+        self.assertEqual(response.data["results"]["personal"]["resume_url"], "https://example.com/resume.pdf")
+        self.assertEqual(response.data["results"]["personal"]["social"]["github"], "https://github.com/johndoe")
+        self.assertEqual(response.data["results"]["personal"]["social"]["linkedin"], "https://linkedin.com/in/johndoe")
+        self.assertEqual(response.data["results"]["personal"]["social"]["twitter"], "https://twitter.com/johndoe")
+        self.assertEqual(response.data["results"]["personal"]["social"]["whatsapp"], "https://wa.me/1234567890")
+        self.assertEqual(response.data["results"]["personal"]["social"]["signal"], "https://signal.me/1234567890")
+        self.assertEqual(response.data["results"]["personal"]["social"]["telegram"], "https://t.me/johndoe")
+
+    def test_patch_invalid_field(self):
+        self.test_create_new_site_settings()
+        data = {
+            "nonexistent_field": "oops"
+        }
+        response = self.client.patch("/api/dashboard/", data=data, content_type="application/json")
+        self.assertEqual(response.status_code, 200)  # Should still succeed unless you validate keys
+        self.assertNotIn("nonexistent_field", response.data["results"])
+
+    def test_put_site_settings(self):
+        self.test_create_new_site_settings()
+        data = {
+            "theme": {
+                "default_theme": "solarized",
+            },
+            "personal": {
+                "full_name": "Jane Smith",
+                "email": "jane@example.com"
+            }
+        }
+        response = self.client.put("/api/dashboard/", data=data, content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["results"]["theme"]["default_theme"], "solarized")
+        self.assertEqual(response.data["results"]["personal"]["full_name"], "Jane Smith")
