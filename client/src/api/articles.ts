@@ -32,7 +32,7 @@ class ArticlesAPI {
      * @returns {Promise<ArticleType>}
      * @static     
     */
-    static async getProject(id: number): Promise<ArticleType> {
+    static async getArticle(id: number): Promise<ArticleType> {
         const response = await axios.get(`/api/articles/${id}/`)
         const res = response.data as CustomResponse<ArticleType>
         return res.results
@@ -44,7 +44,7 @@ class ArticlesAPI {
      * @returns {Promise<ArticleType>}
      * @static
     */
-    static async createProject(article: ArticleType): Promise<ArticleType> {
+    static async createArticle(article: ArticleType): Promise<ArticleType> {
         const response = await axios.post('/api/articles/', {
             headers: {
                 'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ class ArticlesAPI {
      * @returns {Promise<ArticleType>}
      * @static
     */
-    static async updateProject(article: ArticleType): Promise<ArticleType> {
+    static async updateArticle(article: ArticleType): Promise<ArticleType> {
         const response = await axios.put(`/api/articles/${article.id}/`, {
             headers: {
                 'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ class ArticlesAPI {
      * @returns {Promise<void>}
      * @static
     */
-    static async deleteProject(article: ArticleType): Promise<void> {
+    static async deleteArticle(article: ArticleType): Promise<void> {
         await axios.delete(`/api/articles/${article.id}/`)
     }
 }

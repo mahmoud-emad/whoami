@@ -15,13 +15,13 @@ const useArticlesStore = defineStore('articlesStore', {
             this.articles = data;
         },
 
-        async createProject(article: ArticleType) {
-            const data = await ArticlesAPI.createProject(article)
+        async createArticle(article: ArticleType) {
+            const data = await ArticlesAPI.createArticle(article)
             this.articles.push(data);
         },
 
-        async updateProject(article: ArticleType) {
-            const data = await ArticlesAPI.updateProject(article)
+        async updateArticle(article: ArticleType) {
+            const data = await ArticlesAPI.updateArticle(article)
             this.articles = this.articles.map((p) => {
                 if (p.id === data.id) {
                     return data;
@@ -30,8 +30,8 @@ const useArticlesStore = defineStore('articlesStore', {
             });
         },
 
-        async deleteProject(article: ArticleType) {
-            await ArticlesAPI.deleteProject(article);
+        async deleteArticle(article: ArticleType) {
+            await ArticlesAPI.deleteArticle(article);
             this.articles = this.articles.filter((p) => p.id !== article.id);
         }
     },
