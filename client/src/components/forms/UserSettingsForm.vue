@@ -8,7 +8,7 @@
   <!-- Form for user settings -->
   <v-form v-model="validForm" :disabled="apiLoading.isLoading()" @submit.prevent="saveUserSettings">
     <div v-for="(input, index) in inputs" :key="index">
-      <template v-if="input.type === 'text' || input.type === 'email' || input.type === 'link'">
+      <template v-if="input.type === 'text' || input.type === 'email' || input.type === 'url'">
         <v-text-field v-model="input.value" :rules="input.rules" :type="input.type" :label="input.label"
           :title="input.title" variant="outlined" hide-details="auto" :aria-label="input.label"
           :aria-describedby="`${input.label}-description`" :append-icon="input.icon">
@@ -35,15 +35,30 @@
     </div>
 
     <!-- Save button -->
-    <v-btn :disabled="apiLoading.isLoading() || !validForm" :loading="apiLoading.isLoading()" title="Save Settings"
-      class="mb-4" color="primary" variant="tonal" type="submit">
+    <!-- Save button - hidden in setup mode -->
+    <v-btn v-if="!props.setupMode" :disabled="apiLoading.isLoading() || !validForm" :loading="apiLoading.isLoading()"
+      title="Save Settings" class="mb-4" color="primary" variant="tonal" type="submit">
       Save Settings
     </v-btn>
   </v-form>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, defineEmits, defineProps, watch } from 'vue';
+
+// Define props and emits
+const props = defineProps({
+  setupMode: {
+    type: Boolean,
+    default: false
+  },
+  introMode: {
+    type: Boolean,
+    default: false
+  }
+});
+
+const emit = defineEmits(['settings-saved', 'form-data-changed']);
 import { useAPILoading } from '../../store';
 import { nameRules, emailRules, isValidURL, requiredRule } from '../../utils';
 
@@ -77,6 +92,19 @@ const countries = ref<{ title: string, code: string }[]>([]);
 onMounted(() => {
   fetchUserSettings();
   getCountries();
+  // Watch for changes in the form data and emit to parent
+  watch(inputs, () => {
+    const formData = {
+      fullName: inputs.value.find((input) => input.label === 'Full Name')?.value || '',
+      email: inputs.value.find((input) => input.label === 'Email Address')?.value || '',
+      resumeUrl: inputs.value.find((input) => input.label === 'Resume URL')?.value || '',
+      country: inputs.value.find((input) => input.label === 'Country')?.value || '',
+    };
+
+    console.log("formData", formData);
+
+    emit('form-data-changed', formData);
+  }, { deep: true });
 });
 
 // Define input fields with proper validation rules
@@ -111,19 +139,19 @@ const inputs = ref<InputField[]>([
     title: 'Resume',
     value: '',
     rules: isValidURL(),
-    type: 'link',
+    type: 'url',
     label: 'Resume URL',
     description: 'Upload your resume',
     icon: 'mdi-link',
   },
   {
-    title: 'Countery',
+    title: 'Country',
     value: '',
     rules: [...requiredRule()],
     type: 'select',
     items: countries.value,
-    label: 'Countery',
-    description: 'Upload your resume',
+    label: 'Country',
+    description: 'Your country of residence',
     icon: 'mdi-earth',
   },
 ]);
@@ -153,48 +181,83 @@ const userSettings = computed<UserSettings>(() => ({
 
 // Fetch initial user settings (if applicable)
 const fetchUserSettings = async () => {
-  // try {
-  //     apiLoading.setLoading(true);
-  //     const response = await fetch('/api/user/settings', {
-  //         method: 'GET',
-  //         headers: {
-  //             'Content-Type': 'application/json',
-  //         },
-  //     });
+  try {
+    apiLoading.setLoading(true);
 
-  //     if (!response.ok) throw new Error('Failed to fetch user settings');
+    // Import settings store dynamically to avoid circular dependencies
+    const { useSiteSettingsStore } = await import('../../store');
+    const settingsStore = useSiteSettingsStore();
 
-  //     const data = await response.json();
-  //     inputs.value.forEach((input) => {
-  //         if (data[input.label.toLowerCase().replace(/\s+/g, '')]) {
-  //             input.value = data[input.label.toLowerCase().replace(/\s+/g, '')];
-  //         }
-  //     });
-  // } catch (error) {
-  //     handleError(error, 'Failed to load user settings');
-  // } finally {
-  //     apiLoading.setLoading(false);
-  // }
+    if (!settingsStore.isSettingsLoaded()) {
+      await settingsStore.loadSettings();
+    }
+
+    const settings = settingsStore.getSettings;
+
+    // Always update input values, even with default settings
+    const fullNameInput = inputs.value.find(input => input.label === 'Full Name');
+    if (fullNameInput) fullNameInput.value = settings.personal?.fullName || '';
+
+    const emailInput = inputs.value.find(input => input.label === 'Email Address');
+    if (emailInput) emailInput.value = settings.personal?.email || '';
+
+    const resumeInput = inputs.value.find(input => input.label === 'Resume URL');
+    if (resumeInput) resumeInput.value = settings.personal?.resumeURL || '';
+
+    const countryInput = inputs.value.find(input => input.label === 'Country');
+    if (countryInput) countryInput.value = settings.personal?.country || '';
+
+    // Emit form data to parent
+    const formData = {
+      fullName: fullNameInput?.value || '',
+      email: emailInput?.value || '',
+      resumeUrl: resumeInput?.value || '',
+      country: countryInput?.value || ''
+    };
+
+    emit('form-data-changed', formData);
+  } catch (error) {
+    console.warn('Using default settings:', error);
+    // Don't show error to user, just use defaults
+  } finally {
+    apiLoading.setLoading(false);
+  }
 };
 
 // Save user settings to the API
 const saveUserSettings = async () => {
   try {
     apiLoading.setLoading(true);
-    const response = await fetch('/api/user/settings', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userSettings.value),
-    });
 
-    const data = await response.json();
+    // Import settings store dynamically to avoid circular dependencies
+    const { useSiteSettingsStore } = await import('../../store');
+    const settingsStore = useSiteSettingsStore();
 
-    if (!response.ok) throw new Error(data.message || 'Failed to save settings');
+    if (!settingsStore.isSettingsLoaded()) {
+      await settingsStore.loadSettings();
+    }
+
+    const currentSettings = settingsStore.getSettings || {} as any;
+
+    // Create updated settings object
+    const updatedSettings = {
+      ...currentSettings,
+      personal: {
+        ...(currentSettings.personal || {}),
+        fullName: inputs.value.find(input => input.label === 'Full Name')?.value || '',
+        email: inputs.value.find(input => input.label === 'Email Address')?.value || '',
+        resumeURL: inputs.value.find(input => input.label === 'Resume URL')?.value || '',
+        country: inputs.value.find(input => input.label === 'Country')?.value || '',
+      }
+    };
+
+    await settingsStore.updateSettings(updatedSettings);
 
     responseType.value = 'success';
-    responseMessage.value = data.message || 'Settings saved successfully';
+    responseMessage.value = 'Settings saved successfully';
+
+    // Emit event to notify parent component that settings were saved
+    emit('settings-saved');
   } catch (error) {
     handleError(error, 'Failed to save settings');
   } finally {

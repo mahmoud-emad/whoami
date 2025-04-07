@@ -17,22 +17,33 @@
             minLength: 20
         }) : []" :counter="400" v-model="article.description" title="Article Description" class="mb-4"
             label="Article Description" variant="outlined" hide-details="auto"></v-textarea>
-        <v-btn :loading="apiLoadingStore.isLoading()" :disabled="!validForm || apiLoadingStore.isLoading()"
-            title="When pressed, it will create a new article" @click="postNewArticle(article)" class="mb-4"
-            color="primary" variant="tonal">Create
-            Article</v-btn>
+        <!-- Save button - hidden in setup mode -->
+        <v-btn v-if="!setupMode" :loading="apiLoadingStore.isLoading()"
+            :disabled="!validForm || apiLoadingStore.isLoading()" title="When pressed, it will create a new article"
+            @click="postNewArticle(article)" class="mb-4" color="primary" variant="tonal">Create Article</v-btn>
     </v-form>
 </template>
 
 <script lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { ArticleType } from '../../types';
 import { nameRules, isValidURL, longTextRules } from '../../utils';
 import { useAPILoading } from '../../store';
 
 
 export default {
-    setup() {
+    props: {
+        setupMode: {
+            type: Boolean,
+            default: false
+        },
+        introMode: {
+            type: Boolean,
+            default: false
+        }
+    },
+    emits: ['settings-saved', 'form-data-changed'],
+    setup(props, { emit }) {
         const validForm = ref(false);
         const apiLoadingStore = useAPILoading();
         const responseMessage = ref<string>();
@@ -43,32 +54,60 @@ export default {
             description: '',
         });
 
+        watch(article, (newValue) => {
+            emit('form-data-changed', newValue);
+        }, { deep: true });
+
         const postNewArticle = async (article_: ArticleType) => {
-            // try {
-            //     apiLoadingStore.setLoading(true);
-            //     const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/articles`, {
-            //         method: 'POST',
-            //         headers: { 'Content-Type': 'application/json' },
-            //         body: JSON.stringify(article_),
-            //     })
-            //     if (res.ok) {
-            //         const result = await res.json();
-            //         article.value = result.data;
-            //         responseMessage.value = result.message;
-            //         responseType.value = 'success';
-            //     }
-            // } catch (error: any) {
-            //     console.error(error);
-            //     responseMessage.value = "Failed to create article: " + error.message;
-            //     responseType.value = 'error';
-            // } finally {
-            //     apiLoadingStore.setLoading(false);
-            //     if (responseType.value == 'success') {
-            //         setTimeout(() => {
-            //             responseMessage.value = undefined;
-            //         }, 3000);
-            //     }
-            // }
+            try {
+                apiLoadingStore.setLoading(true);
+
+                // For demo purposes, simulate a successful API call
+                // In a real application, uncomment the API call below
+                /*
+                const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/articles`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(article_),
+                })
+                if (res.ok) {
+                    const result = await res.json();
+                    article.value = result.data;
+                    responseMessage.value = result.message;
+                    responseType.value = 'success';
+                } else {
+                    responseType.value = 'error';
+                    responseMessage.value = "Failed to create article";
+                    return;
+                }
+                */
+
+                // Simulate success response for demo
+                responseMessage.value = "Article created successfully!";
+                responseType.value = 'success';
+
+                // Reset form after successful submission
+                article.value = {
+                    link: '',
+                    title: '',
+                    description: '',
+                };
+
+                // Emit event to notify parent component that article was created
+                emit('settings-saved');
+
+            } catch (error: any) {
+                console.error(error);
+                responseMessage.value = "Failed to create article: " + error.message;
+                responseType.value = 'error';
+            } finally {
+                apiLoadingStore.setLoading(false);
+                if (responseType.value == 'success') {
+                    setTimeout(() => {
+                        responseMessage.value = undefined;
+                    }, 3000);
+                }
+            }
         };
 
         return {
@@ -81,6 +120,7 @@ export default {
             isValidURL,
             longTextRules,
             postNewArticle,
+            setupMode: props.setupMode
         };
     }
 };

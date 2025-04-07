@@ -250,6 +250,9 @@ a:hover {
   height: 40rem !important;
 }
 
+.transparent-bg {
+  background-color: transparent !important;
+}
 
 .notification-card {
   width: 350px;

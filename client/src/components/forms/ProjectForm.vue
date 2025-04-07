@@ -29,20 +29,31 @@
       minLength: 60
     })" :counter="400" v-model="project.description" title="Project Description" class="mb-4"
       label="Project Description" variant="outlined" hide-details="auto"></v-textarea>
-    <v-btn :disabled="!validForm" @click="createNewProject(project)" title="Create Project" class="mb-4" color="primary"
-      variant="tonal">Create
-      Project</v-btn>
+    <!-- Save button - hidden in setup mode -->
+    <v-btn v-if="!setupMode" :disabled="!validForm" @click="createNewProject(project)" title="Create Project"
+      class="mb-4" color="primary" variant="tonal">Create Project</v-btn>
   </v-form>
 </template>
 
 <script lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { ProjectType } from '../../types';
 import { nameRules, isValidURL, longTextRules, validateProjectTagsRules } from '../../utils';
 import { useAPILoading } from '../../store';
 
 export default {
-  setup() {
+  props: {
+    setupMode: {
+      type: Boolean,
+      default: false
+    },
+    introMode: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ['settings-saved', 'form-data-changed'],
+  setup(props, { emit }) {
     const apiLoading = useAPILoading();
     const validForm = ref(false);
     const responseType = ref('success');
@@ -71,35 +82,62 @@ export default {
       type: 'project'
     });
 
-    const createNewProject = async (project: ProjectType) => {
-      // try {
-      //   apiLoading.setLoading(true)
-      //   const serverUrl = import.meta.env.VITE_SERVER_URL;
-      //   const res = await fetch(`${serverUrl}/projects`, {
-      //     method: "POST",
-      //     headers: { "Content-Type": "application/json" },
-      //     body: JSON.stringify(project),
-      //   });
+    // Watch for changes and emit to parent
+    watch(project, (newValue) => {
+      emit('form-data-changed', newValue);
+    }, { deep: true });
 
-      //   const result = await res.json();
-      //   if (res.ok) {
-      //     responseType.value = 'success';
-      //     responseMessage.value = result.message;
-      //     // We need to handle projects store
-      //   } else {
-      //     responseType.value = 'error';
-      //     responseMessage.value = result.message;
-      //     console.error("Error adding project:", result.error);
-      //   }
-      // } catch (error) {
-      //   console.error("Failed to write guestbook:", error);
-      // } finally {
-      //   apiLoading.setLoading(false)
-      //   setTimeout(() => {
-      //     responseType.value = 'success';
-      //     responseMessage.value = undefined;
-      //   }, 3000);
-      // }
+    const createNewProject = async (project: ProjectType) => {
+      try {
+        apiLoading.setLoading(true);
+
+        // For demo purposes, simulate a successful API call
+        // In a real application, uncomment the API call below
+        /*
+        const serverUrl = import.meta.env.VITE_SERVER_URL;
+        const res = await fetch(`${serverUrl}/projects`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(project),
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          responseType.value = 'success';
+          responseMessage.value = result.message;
+        } else {
+          responseType.value = 'error';
+          responseMessage.value = result.message;
+          console.error("Error adding project:", result.error);
+          return;
+        }
+        */
+
+        // Simulate success response for demo
+        responseType.value = 'success';
+        responseMessage.value = 'Project created successfully!';
+
+        // Reset form after successful submission
+        project.title = '';
+        project.link = '';
+        project.tags = [];
+        project.description = '';
+
+        // Emit event to notify parent component that project was created
+        emit('settings-saved');
+
+      } catch (error) {
+        responseType.value = 'error';
+        responseMessage.value = 'Failed to create project';
+        console.error("Failed to create project:", error);
+      } finally {
+        apiLoading.setLoading(false);
+        if (responseType.value === 'success') {
+          setTimeout(() => {
+            responseMessage.value = undefined;
+          }, 3000);
+        }
+      }
     }
 
     return {
@@ -113,7 +151,8 @@ export default {
       nameRules,
       isValidURL,
       longTextRules,
-      validateProjectTagsRules
+      validateProjectTagsRules,
+      setupMode: props.setupMode
     };
   }
 };

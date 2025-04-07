@@ -28,10 +28,6 @@ export type GuestBookType = {
 };
 
 export type SettingsType = {
-  server: {
-    port: number,
-    host: string,
-  },
   configuration: {
     adminDashboard: boolean,
     displayNavbarImage: boolean,
@@ -83,4 +79,24 @@ export type CustomResponse<T> = {
   previous?: string,
   results: T,
   error?: any
+}
+
+export interface FieldGuide {
+  field: string;
+  description: string;
+}
+
+export interface TabDefinition {
+  label: string;
+  value: string;
+  icon: string;
+  component: any;
+  componentName: string;
+  description: string;
+  setupInstructions?: string;
+  setupStep: number | null;
+  required: boolean;
+  enabled: boolean;
+  introMessage?: string;
+  fieldGuides?: FieldGuide[];
 }

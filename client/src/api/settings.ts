@@ -8,18 +8,21 @@ class SettingsAPI {
      * @returns {Promise<SettingsType>}
      * @static
      */
-    static async getSettings(): Promise<SettingsType> {
+    static async getSettings(): Promise<SettingsType | null> {
         try {
             const response = await axios.get('/api/dashboard/')
             const res = response.data as CustomResponse<SettingsType>
             return res.results
         } catch (error: any) {
-            ServerErrorNotification.show({
-                title: 'Error',
-                message: error.response?.data?.message || error.message,
-                type: 'error'
-            });
-            return {} as SettingsType
+            // Don't show error notification for 404 (settings not found)
+            if (error.response?.status !== 404) {
+                ServerErrorNotification.show({
+                    title: 'Error',
+                    message: error.response?.data?.message || error.message,
+                    type: 'error'
+                });
+            }
+            return null
         }
     }
 
@@ -31,11 +34,10 @@ class SettingsAPI {
      */
     static async updateSettings(settings: SettingsType): Promise<SettingsType | null> {
         try {
-            const response = await axios.put('/api/dashboard/', {
+            const response = await axios.put('/api/dashboard/', settings, {
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(settings),
+                }
             })
             const res = response.data as CustomResponse<SettingsType>
             return res.results

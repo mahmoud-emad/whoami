@@ -14,10 +14,18 @@ const nameRules = (options: {
   ];
 
 const githubWebsiteRules = () => [
-  (v: string) => v && v.length > 0 || 'GitHub profile URL is required',
-  (v: string) => v && v.includes('github.com') || 'Please enter a valid GitHub profile URL',
-];
+  (v: string) =>
+    !!v || 'GitHub profile URL is required',
 
+  (v: string) =>
+    /^(https?:\/\/)?(www\.)?github\.com\/[a-zA-Z0-9-]+$/.test(v) ||
+    'Please enter a valid GitHub profile URL',
+
+  (v: string) => {
+    const parts = v?.replace(/^https?:\/\//, '').split('/');
+    return parts.length === 2 || 'GitHub URL must be in the format: github.com/username';
+  },
+];
 const requiredRule = () => [
   (v: string) => v && v.length > 0 || 'This field is required'
 ];
