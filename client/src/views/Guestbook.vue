@@ -20,7 +20,7 @@
     </div>
 
     <!-- Messages Intro -->
-    <div class="section">
+    <div class="section" v-if="guestbooks.length">
       <v-alert class="mb-6 intro-alert" type="info" variant="tonal" density="comfortable">
         <p class="text-body-1">
           Below are heartfelt notes from amazing visitors. Each message brings a smile to my face and truly makes my day

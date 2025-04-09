@@ -1,6 +1,6 @@
 <template>
   <div class="c-header">
-    <v-row class="d-flex justify-space-between align-center ml-1 mr-1">
+    <v-row class="d-flex justify-space-between align-center ml-1 mr-1" v-if="settingsStore.isSettingsLoaded()">
       <!-- Logo and Username Section -->
       <v-col md="6" cols="10" class="image pb-0">
         <div class="d-flex align-center">
@@ -85,10 +85,8 @@ export default defineComponent({
     const apiLoadingStore = useAPILoading()
     const activeLink = ref("/");
     const navbarHeight = ref(40);
-    const adminDashboard = ref(false);
-
-    // Store
     const settingsStore = useSiteSettingsStore();
+    const adminDashboard = ref(false);
 
     // Navigation Links Configuration
     const navBarLinks = ref<NavLink[]>([
@@ -185,6 +183,7 @@ export default defineComponent({
     // Return reactive properties and methods
     return {
       navbarClicked,
+      settingsStore,
       navBarLinks,
       navbarHeight,
       display,

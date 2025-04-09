@@ -4,13 +4,10 @@
     <div class="sections">
       <!-- intro -->
       <IntroSection />
-      <div class="long-line opacity-80 mt-2 mb-2"></div>
       <!-- Last Projects -->
       <ProjectsSection />
-      <div class="long-line opacity-80 mt-2 mb-2"></div>
       <!-- Problem Solving -->
       <ProplemSolvingSection />
-      <div class="long-line opacity-80 mt-2 mb-2"></div>
       <!-- Favourite Articles -->
       <ArticleSection />
     </div>

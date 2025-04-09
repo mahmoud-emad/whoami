@@ -1,6 +1,6 @@
 <template>
   <!-- Problem Solving -->
-  <div class="problem-solving mt-3">
+  <div class="problem-solving mt-3" v-if="settingsStore.isSettingsLoaded()">
     <h2 class="title" title="Problem Solving">🧠 Problem Solving</h2>
     <div class="pa-2">
       <p class="text-light-gray">
@@ -18,15 +18,18 @@
       </p>
     </div>
   </div>
+  <!-- <div class="long-line opacity-80 mt-2 mb-2"></div> -->
 </template>
 
 <script lang="ts">
-
+import { useSiteSettingsStore } from '../../store';
 
 export default {
   name: 'ProblemSolvingSection',
   setup() {
+    const settingsStore = useSiteSettingsStore();
     return {
+      settingsStore
     };
   },
 };
