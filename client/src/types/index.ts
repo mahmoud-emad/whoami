@@ -90,7 +90,7 @@ export interface TabDefinition {
   label: string;
   value: string;
   icon: string;
-  component: any;
+  component?: any;
   componentName: string;
   description: string;
   setupInstructions?: string;

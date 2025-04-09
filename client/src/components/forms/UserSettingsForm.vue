@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, defineEmits, defineProps, watch } from 'vue';
+import { ref, onMounted, defineEmits, defineProps, watch } from 'vue';
 
 // Define props and emits
 const props = defineProps({
@@ -61,12 +61,6 @@ const props = defineProps({
 const emit = defineEmits(['settings-saved', 'form-data-changed']);
 import { useAPILoading } from '../../store';
 import { nameRules, emailRules, isValidURL, requiredRule } from '../../utils';
-
-// Define interfaces for better type safety
-interface UserSettings {
-  name: string;
-  email: string;
-}
 
 interface InputField {
   title: string;
@@ -173,12 +167,6 @@ function getCountries(lang = 'en') {
   return countries
 }
 
-// Map input values to user settings object
-const userSettings = computed<UserSettings>(() => ({
-  name: inputs.value.find((input) => input.label === 'Full Name')?.value || '',
-  email: inputs.value.find((input) => input.label === 'Email Address')?.value || '',
-}));
-
 // Fetch initial user settings (if applicable)
 const fetchUserSettings = async () => {
   try {
@@ -189,10 +177,10 @@ const fetchUserSettings = async () => {
     const settingsStore = useSiteSettingsStore();
 
     if (!settingsStore.isSettingsLoaded()) {
-      await settingsStore.loadSettings();
+      // await settingsStore.loadSettings();
     }
 
-    const settings = settingsStore.getSettings;
+    const settings = settingsStore.settings;
 
     // Always update input values, even with default settings
     const fullNameInput = inputs.value.find(input => input.label === 'Full Name');
@@ -237,7 +225,7 @@ const saveUserSettings = async () => {
       await settingsStore.loadSettings();
     }
 
-    const currentSettings = settingsStore.getSettings || {} as any;
+    const currentSettings = settingsStore.settings || {} as any;
 
     // Create updated settings object
     const updatedSettings = {

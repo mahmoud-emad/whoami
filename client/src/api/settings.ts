@@ -14,14 +14,11 @@ class SettingsAPI {
             const res = response.data as CustomResponse<SettingsType>
             return res.results
         } catch (error: any) {
-            // Don't show error notification for 404 (settings not found)
-            if (error.response?.status !== 404) {
-                ServerErrorNotification.show({
-                    title: 'Error',
-                    message: error.response?.data?.message || error.message,
-                    type: 'error'
-                });
-            }
+            ServerErrorNotification.show({
+                title: 'Error',
+                message: error.response?.data?.message || error.message,
+                type: 'error'
+            });
             return null
         }
     }

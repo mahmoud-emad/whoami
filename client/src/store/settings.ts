@@ -43,15 +43,6 @@ const useSettingssStore = defineStore('settingsStore', {
         settings: {} as SettingsType,
         isInitialized: false
     }),
-    getters: {
-        getSettings: (state): SettingsType => {
-            // Return default settings if not initialized
-            if (!state.isInitialized || Object.keys(state.settings).length === 0) {
-                return createDefaultSettings();
-            }
-            return state.settings;
-        },
-    },
     actions: {
         async loadSettings() {
             try {
@@ -59,16 +50,9 @@ const useSettingssStore = defineStore('settingsStore', {
                 if (data) {
                     this.settings = data;
                     this.isInitialized = true;
-                } else {
-                    // If no settings found, use default settings
-                    this.settings = createDefaultSettings();
-                    this.isInitialized = true;
                 }
             } catch (error) {
-                console.log('Settings not found, using defaults');
-                this.settings = createDefaultSettings();
-                this.isInitialized = true;
-                // Don't throw the error, just use defaults
+                throw error;
             }
         },
 

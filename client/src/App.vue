@@ -1,32 +1,52 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import ContainerLayout from "./layouts/ContainerLayout.vue";
 import { useAPILoading, useSiteSettingsStore } from "./store";
-import router from "./router";
 
-onMounted(async () => {
-  const settingsStore = useSiteSettingsStore();
-  const apiLoading = useAPILoading();
-  if (!settingsStore.isSettingsLoaded()) {
+const apiLoading = useAPILoading();
+const settingsStore = useSiteSettingsStore();
+const router = useRouter();
+const isDashboard = ref(false);
+
+const checkAndLoadSettings = async () => {
+  try {
     apiLoading.setLoading(true);
-    // Load settings from backend
-    try {
+    isDashboard.value = router.currentRoute.value.name === 'admin-dashboard';
+
+    if (!settingsStore.isSettingsLoaded() && !isDashboard.value) {
       await settingsStore.loadSettings();
-    } catch (error: any) {
-      if (error.message.toLocaleLowerCase().includes('site settings not found')) {
-        setTimeout(() => {
-          router.push(
-            {
-              name: 'admin-dashboard',
-              query: { 'intro': 'true' }
-            }
-          );
-        }, 3000);
-      }
     }
+  } catch (error: any) {
+    await handleSettingsError(error);
+  } finally {
     apiLoading.setLoading(false);
   }
-})
+};
+
+const handleSettingsError = async (error: Error) => {
+  if (error.message.toLowerCase().includes('site settings not found')) {
+    await redirectToDashboardWithDelay();
+  }
+};
+
+const redirectToDashboardWithDelay = async () => {
+  return new Promise<void>((resolve) => {
+    apiLoading.setLoading(true);
+    setTimeout(() => {
+      router.push({
+        name: 'admin-dashboard',
+        query: { intro: 'true' }
+      });
+      apiLoading.setLoading(false);
+      resolve();
+    }, 5000);
+  });
+};
+
+onMounted(() => {
+  setTimeout(checkAndLoadSettings, 1000);
+});
 </script>
 
 <template>

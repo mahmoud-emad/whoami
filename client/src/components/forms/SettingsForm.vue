@@ -98,7 +98,7 @@ onMounted(async () => {
       await settingsStore.loadSettings();
     }
 
-    siteSettings.value = settingsStore.getSettings;
+    siteSettings.value = settingsStore.settings;
 
     if (siteSettings.value && siteSettings.value.configuration) {
       adminDashboard.value = siteSettings.value.configuration.adminDashboard;
@@ -167,7 +167,7 @@ const saveSettings = async () => {
     }
 
     await settingsStore.updateSettings(siteSettings.value);
-    siteSettings.value = settingsStore.getSettings;
+    siteSettings.value = settingsStore.settings;
     responseMessage.value = 'Settings saved successfully';
     responseType.value = 'success';
 

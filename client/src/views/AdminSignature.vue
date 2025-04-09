@@ -99,7 +99,7 @@ export default {
 
         if (enableAdminDashboard.value) {
           siteSettings.value.configuration.adminDashboard = true
-          settingsStore.saveSettings(siteSettings.value)
+          // settingsStore.saveSettings(siteSettings.value)
         }
         showInvalidAlert.value = false
         window.location.href = '/admin-dashboard'
