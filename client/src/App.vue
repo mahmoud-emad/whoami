@@ -34,10 +34,10 @@ const redirectToDashboardWithDelay = async () => {
   return new Promise<void>((resolve) => {
     apiLoading.setLoading(true);
     setTimeout(() => {
-      // router.push({
-      //   name: 'admin-dashboard',
-      //   query: { intro: 'true' }
-      // });
+      router.push({
+        name: 'admin-dashboard',
+        query: { intro: 'true' }
+      });
       apiLoading.setLoading(false);
       resolve();
     }, 5000);

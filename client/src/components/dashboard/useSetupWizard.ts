@@ -1,9 +1,11 @@
 import { ref, computed } from 'vue';
 import { useSiteSettingsStore } from '../../store';
 import { TabDefinition, SettingsType } from '../../types';
+import { useRouter } from 'vue-router';
 
 export function useSetupWizard(tabs: TabDefinition[], settingsStore: ReturnType<typeof useSiteSettingsStore>) {
-	const setupMode = ref(true);
+	const router = useRouter();
+	const setupMode = ref(router.currentRoute.value.query['intro'] === 'true');
 	const setupComplete = ref(false);
 	const currentStep = ref(1);
 	const completedTabs = ref<Record<string, boolean>>({});

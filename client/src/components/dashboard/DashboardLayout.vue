@@ -3,7 +3,7 @@
     <div class="sidebar-container">
       <slot name="sidebar"></slot>
     </div>
-    <div class="mobile-nav d-md-none mb-4">
+    <div class="mobile-nav d-md-none">
       <slot name="mobile-nav"></slot>
     </div>
     <div class="content-container">

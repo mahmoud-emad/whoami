@@ -5,14 +5,22 @@
     {{ responseMessage }}
   </v-alert>
 
+  <v-alert :type="'info'" class="mb-4" variant="tonal" dismissible>
+    In case you are using a custom avatar, It's recommended to use avatar in Ghibli's style
+  </v-alert>
+
   <!-- Form for user settings -->
   <v-form v-model="validForm" :disabled="apiLoading.isLoading()" @submit.prevent="saveUserSettings">
     <div v-for="(input, index) in inputs" :key="index">
       <template v-if="input.type === 'text' || input.type === 'email' || input.type === 'url'">
-        <v-text-field v-model="input.value" :rules="input.rules" :type="input.type" :label="input.label"
-          :title="input.title" variant="outlined" hide-details="auto" :aria-label="input.label"
-          :aria-describedby="`${input.label}-description`" :append-icon="input.icon">
+        <v-text-field base-color="primary" color="primary" item-color="primary"
+          bg-color="rgb(var(--v-theme-box-bg-color))" v-model="input.value" :rules="input.rules" :type="input.type"
+          :label="input.label" :title="input.title" variant="outlined" hide-details="auto" :aria-label="input.label"
+          :aria-describedby="`${input.label}-description`">
           <!-- Optional description for accessibility -->
+          <template #append>
+            <v-icon color="primary">{{ input.icon }}</v-icon>
+          </template>
           <template #details>
             <span :id="`${input.label}-description`" class="sr-only">
               {{ input.description || `Enter your ${input.label.toLowerCase()}` }}
@@ -22,14 +30,23 @@
       </template>
 
       <template v-else-if="input.type === 'input'">
-        <v-file-input :label="input.label" :title="input.title" variant="outlined" hide-details="auto"
-          :rules="input.rules" show-size :append-icon="input.icon" prepend-icon=""></v-file-input>
+        <v-file-input base-color="primary" color="primary" item-color="primary"
+          bg-color="rgb(var(--v-theme-box-bg-color))" :label="input.label" :title="input.title" variant="outlined"
+          hide-details="auto" :rules="input.rules" show-size prepend-icon="" class="mb-4">
+          <template #append>
+            <v-icon color="primary">{{ input.icon }}</v-icon>
+          </template>
+        </v-file-input>
       </template>
 
       <template v-else-if="input.type === 'select'">
-        <v-autocomplete :rules="input.rules" v-model="input.value" :title="input.title" class="mb-4"
-          :label="input.label" variant="outlined" :append-icon="input.icon" hide-details="auto" :hint="input.hint"
+        <v-autocomplete base-color="primary" color="primary" item-color="primary"
+          bg-color="rgb(var(--v-theme-box-bg-color))" :rules="input.rules" v-model="input.value" :title="input.title"
+          class="mb-4" :label="input.label" variant="outlined" hide-details="auto" :hint="input.hint"
           :items="input.items" item-value="code" item-title="title">
+          <template #append>
+            <v-icon color="primary">{{ input.icon }}</v-icon>
+          </template>
         </v-autocomplete>
       </template>
     </div>
@@ -147,6 +164,15 @@ const inputs = ref<InputField[]>([
     label: 'Country',
     description: 'Your country of residence',
     icon: 'mdi-earth',
+  },
+  {
+    title: 'Navbar avatar',
+    value: '',
+    rules: [],
+    type: 'input',
+    label: 'Navbar avatar',
+    description: "It's recommended to use avatar in Ghibli's style",
+    icon: 'mdi-image',
   },
 ]);
 

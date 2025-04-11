@@ -7,8 +7,8 @@
       <span v-if="siteSettings && siteSettings.configuration && siteSettings.configuration.adminDashboard">
         <router-link to="/admin-dashboard">Admin Space</router-link> •
       </span>
-      <a v-if="siteSettings && siteSettings.configuration && siteSettings.configuration.multipleThemes" href="#"
-        @click.prevent="toggleTheme">
+      <!-- <a v-if="siteSettings && siteSettings.configuration && siteSettings.configuration.multipleThemes" href="#" -->
+      <a href="#" @click.prevent="toggleTheme">
         {{ isDark ? 'Light Mode' : 'Dark Mode' }}
       </a>
     </small>
@@ -53,12 +53,12 @@ export default {
       theme.global.name.value = isDark.value ? 'dark' : 'light';
 
       // Persist the theme selection in settings store
-      settingsStore.setTheme(isDark.value ? 'dark' : 'light');
+      // settingsStore.setTheme(isDark.value ? 'dark' : 'light');
     }
 
     // Watch for changes in the theme and persist them
     watch(isDark, (newVal) => {
-      settingsStore.setTheme(newVal ? 'dark' : 'light');
+      // settingsStore.setTheme(newVal ? 'dark' : 'light');
       siteSettings.value.theme.defaultTheme = newVal ? 'dark' : 'light';
     });
 
