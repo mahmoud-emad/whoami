@@ -30,6 +30,16 @@ const requiredRule = () => [
   (v: string) => v && v.length > 0 || 'This field is required'
 ];
 
+const validateFileRules = (options: { fieldName: string, fieldSize: number, allowedExtensions: string[] }) => [
+  (v: File[]) => {
+    if (!v || !(v[0] instanceof File)) return `${options.fieldName} is required`;
+    if (!v[0].type) return 'File type is missing';
+    if (v[0].size > options.fieldSize * 1024 * 1024) return `${options.fieldName} size must be less than ${options.fieldSize} MB`;
+    if (!options.allowedExtensions.includes(v[0].type.split('/')[1])) return `${options.fieldName} must be a ${options.allowedExtensions.join(', ')} file`;
+    return true;
+  }
+];
+
 const longTextRules = (options: {
   fieldName: string,
   minLength: number,
@@ -85,11 +95,12 @@ export {
   validateProjectTagsRules,
   validateAdminSignature,
   githubWebsiteRules,
-  nameRules,
+  validateFileRules,
   longTextRules,
-  isValidURL,
   requiredRule,
   antiBotRules,
+  isValidURL,
   formatData,
   emailRules,
+  nameRules,
 }

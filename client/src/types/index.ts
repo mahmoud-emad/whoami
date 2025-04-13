@@ -47,6 +47,7 @@ export type SettingsType = {
     email: string,
     country: string,
     resumeURL?: string,
+    avatarURL?: string,
     social: {
       github: string,
       linkedin: string
