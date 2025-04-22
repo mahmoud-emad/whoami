@@ -10,6 +10,10 @@ export function useTabNavigation(
 	const activeTab = ref('user-settings');
 	const formData = ref<Record<string, any>>({});
 
+	const getFormData = () => {
+		return formData.value;
+	}
+
 	const visibleTabs = computed(() =>
 		setupMode.value ? tabs.filter(tab => tab.setupStep !== null) : tabs
 	);
@@ -66,6 +70,7 @@ export function useTabNavigation(
 	return {
 		activeTab,
 		visibleTabs,
+		getFormData,
 		saveFormData,
 		handleTabCompletion,
 		saveCurrentTabAndGoNext,

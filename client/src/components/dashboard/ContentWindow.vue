@@ -9,11 +9,12 @@
                 </v-alert>
                 <component :is="tab.component" :setup-mode="setupMode" :intro-mode="isIntro"
                     @settings-saved="$emit('settings-saved', tab.value)"
-                    @form-data-changed="$emit('form-data-changed', tab.value, $event)" />
+                    @form-data-changed="$emit('form-data-changed', tab.value, $event)"
+                    @is-valid-form="isValidForm = $event; $emit('is-valid-form', $event)" />
                 <FieldGuides v-if="setupMode && tab.fieldGuides?.length" :guides="tab.fieldGuides" class="mt-4" />
-                <SetupNavigation v-if="setupMode" :current-step="currentStep" :total-steps="totalSteps"
-                    @previous="$emit('previous-step')" @next="$emit('next-step')" @complete="$emit('complete-setup')"
-                    class="mt-4" />
+                <SetupNavigation :is-valid-form="isValidForm" v-if="setupMode" :current-step="currentStep"
+                    :total-steps="totalSteps" @previous="$emit('previous-step')" @next="$emit('next-step')"
+                    @complete="$emit('complete-setup')" class="mt-4" />
             </div>
         </v-tabs-window-item>
     </v-tabs-window>
@@ -24,6 +25,7 @@ import { TabDefinition } from '../../types';
 import SetupWizardHeader from './SetupWizardHeader.vue';
 import FieldGuides from './FieldGuides.vue';
 import SetupNavigation from './SetupNavigation.vue';
+import { ref } from 'vue';
 
 defineProps<{
     tabs: TabDefinition[];
@@ -37,12 +39,14 @@ defineEmits<{
     (e: 'update:modelValue', value: string): void;
     (e: 'settings-saved', tabValue: string): void;
     (e: 'form-data-changed', tabValue: string, data: any): void;
+    (e: 'is-valid-form', isValid: boolean): void;
     (e: 'previous-step'): void;
     (e: 'next-step'): void;
     (e: 'complete-setup'): void;
 }>();
 
 const modelValue = defineModel<string>('modelValue', { required: true });
+const isValidForm = ref(false);
 </script>
 
 <style scoped>

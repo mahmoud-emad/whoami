@@ -47,6 +47,64 @@ class SettingsAPI {
             return null
         }
     }
+
+    /**
+     * Upload resume
+     * @param {File} file
+     * @returns {Promise<string | null>}
+     * @static
+     */
+    static async uploadResume(file: File): Promise<string | null> {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await axios.post('/api/dashboard/upload-resume/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            const res = response.data as CustomResponse<{ url: string }>;
+            return res.results['url'];
+        } catch (error: any) {
+            ServerErrorNotification.show({
+                title: 'Error',
+                message: error.response?.data?.message || error.message,
+                type: 'error'
+            });
+            return null;
+        }
+    }
+
+    /**
+     * Upload avatar
+     * @param {File} file
+     * @returns {Promise<string | null>}
+     * @static
+     */
+    static async uploadAvatar(file: File): Promise<string | null> {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await axios.post('/api/dashboard/upload-avatar/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            const res = response.data as CustomResponse<{ url: string }>;
+            return res.results['url'];
+        } catch (error: any) {
+            ServerErrorNotification.show({
+                title: 'Error',
+                message: error.response?.data?.message || error.message,
+                type: 'error'
+            });
+            return null;
+        }
+    }
 }
 
 export default SettingsAPI;

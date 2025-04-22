@@ -31,7 +31,8 @@
           <ContentWindow :tabs="tabs" v-model="activeTab" :setup-mode="setupMode" :is-intro="isIntro"
             :current-step="currentStep" :total-steps="totalSteps" @settings-saved="handleTabCompletion"
             @form-data-changed="saveFormData" @next-step="saveCurrentTabAndGoNext" @previous-step="goToPreviousStep"
-            @complete-setup="saveCurrentTabAndComplete" />
+            @complete-setup="saveCurrentTabAndComplete" :form-data="formData"
+            @is-valid-form="isFormDataValid = $event" />
         </template>
       </DashboardLayout>
 
@@ -47,7 +48,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAPILoading, useSiteSettingsStore } from '../store';
 import { dashboardTabs } from '../components/dashboard/tabDefinitions';
-import { SettingsType, TabDefinition } from '../types';
+import { SettingsType } from '../types';
 import { useDynamicComponents } from '../components/dashboard/useDynamicComponents';
 import { useSetupWizard } from '../components/dashboard/useSetupWizard';
 import { useTabNavigation } from '../components/dashboard/useTabNavigation';
@@ -72,6 +73,7 @@ const apiLoading = useAPILoading();
 // State
 const siteSettings = ref<SettingsType>({} as SettingsType);
 const isIntro = ref(!!router.currentRoute.value.query['intro']);
+const isFormDataValid = ref(false);
 
 // Dynamic Components
 const { tabs } = useDynamicComponents(dashboardTabs);
@@ -94,11 +96,18 @@ const {
   activeTab,
   visibleTabs,
   saveFormData,
+  getFormData,
   handleTabCompletion,
   saveCurrentTabAndGoNext,
   goToPreviousStep
 } = useTabNavigation(tabs, setupMode, currentStep, completedTabs);
 
+const settingsFormData = ref(getFormData());
+const formData = ref<Record<string, any>>({});
+watch(settingsFormData, () => {
+  console.log('isFormDataValid', isFormDataValid.value);
+  formData.value = settingsFormData.value[activeTab.value];
+}, { deep: true });
 // Computed Properties
 const isAdminDashboardDisabled = computed(() =>
   siteSettings.value?.configuration && !siteSettings.value.configuration.adminDashboard

@@ -5,11 +5,12 @@ from components import BASE_DIR, config
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("DJANGO_SECRET_KEY")
-DEBUG = config("DJANGO_DEBUG") == "True"
+DEBUG = config("DJANGO_DEBUG") == "False"
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "0.0.0.0",
+    "localhost",
     config("SERVER_URL"),
     config("CLIENT_URL"),
 ]

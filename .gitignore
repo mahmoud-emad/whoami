@@ -148,3 +148,4 @@ terraform/.terraform.tfstate.lock.info
 terraform/.terraform.script
 node_modules
 staticfiles
+mediafiles

@@ -101,3 +101,15 @@ export interface TabDefinition {
   introMessage?: string;
   fieldGuides?: FieldGuide[];
 }
+
+export interface InputField {
+  title: string;
+  value: any;
+  rules: ((value: any) => true | string)[];
+  type: string;
+  label: string;
+  description?: string;
+  icon?: string;
+  hint?: string;
+  items?: { title: string; code: string }[];
+}
