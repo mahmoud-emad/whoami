@@ -106,12 +106,30 @@ a:hover {
   color: rgb(var(--v-theme-gray-color));
 }
 
-/* Layout */
+/* Layout.
+   A column at least as tall as the viewport, with the main region allowed to grow. That is what
+   keeps the footer on the bottom edge of a short page — Contact and the 404 are barely half a
+   screen, and the footer used to float in the middle of the window with blank space under it.
+   `position: fixed` would do it too, but it would also sit on top of the last line of every long
+   page, which is worse. */
 .c-container {
   width: 100%;
   max-width: 52rem !important;
   padding: 1rem 2.5rem;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  /* Mobile browsers shrink the viewport as their chrome slides away; dvh follows that, vh does
+     not, and the difference is a footer pushed just below the fold. */
+  min-height: 100dvh;
+}
+
+.c-main {
+  flex: 1 0 auto;
+  /* Without this a flex child refuses to shrink below its content width, which is the usual cause
+     of a wide table or code block pushing the whole page sideways. */
+  min-width: 0;
 }
 
 /* Media never gets to be wider than the column that holds it — the single most common cause of a

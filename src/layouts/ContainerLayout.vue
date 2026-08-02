@@ -21,7 +21,12 @@ const isAllowedPath = computed(() => {
     <template v-if="isAllowedPath">
         <v-container class="c-container">
             <CNavbar></CNavbar>
-            <slot name="layout-child"></slot>
+            <!-- The page is wrapped so it can be the growing part of the column, which is what
+                 holds the footer on the bottom edge of a short page. <main> rather than a div
+                 because that is what this region is. -->
+            <main class="c-main">
+                <slot name="layout-child"></slot>
+            </main>
             <CFooter></CFooter>
         </v-container>
     </template>

@@ -31,7 +31,16 @@ export interface SiteConfig {
   theme: Record<string, unknown>;
   meta: Record<string, string>;
   indieweb: Record<string, unknown>;
-  security: { debug: boolean; adminSignature: SignatureRecord };
+  security: {
+    debug: boolean;
+    adminSignature: SignatureRecord;
+    /**
+     * Salt for the anonymous vote hash. Generated on the first vote rather than shipped as a
+     * default: it has to differ per install, or the same IP would hash identically everywhere.
+     * Deliberately separate from `adminSignature.salt`, which protects a password.
+     */
+    voteSalt?: string;
+  };
   profile: Record<string, unknown>;
   [key: string]: unknown;
 }

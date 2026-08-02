@@ -23,6 +23,10 @@ rebuild, no code changes, no name of anyone else's left in the source.
 - **Real document head.** Title, description, Open Graph and Twitter tags, and the favicon come from
   config, and the server injects them into the HTML so crawlers and link previews see them.
 - **Content built in.** Projects, articles, a blog, work history, a guestbook, and a "more" page.
+- **Real markdown posts.** Tables, syntax-highlighted code, Mermaid diagrams and KaTeX maths, in a
+  Write/Preview editor with GitHub-style image drop and paste. Heavy libraries load only when a post
+  actually uses them.
+- **Post reactions.** Up and down votes anyone can cast, no account and no replies.
 - **Search.** Across whichever collections you choose to include.
 - **Guestbook anti-bot.** A question you write. The answer stays on the server.
 - **Uploads.** Images and PDFs, with a file manager in the dashboard.
@@ -109,6 +113,7 @@ Everything is namespaced under `/api`. 🔒 marks endpoints that require
 | `PUT`/`DELETE /api/guestbooks/:id` 🔒 | Edit or remove an entry |
 | `GET /api/projects` · `/api/articles` · `/api/posts` | Public content listings |
 | `POST`/`PUT`/`DELETE` on those 🔒 | Content management |
+| `GET`/`POST /api/posts/:id/reactions` | Read or cast an anonymous up/down vote |
 | `POST /api/upload` 🔒 | Upload a file (JPEG, PNG, GIF or PDF, up to 5 MB) |
 | `GET /api/uploads` 🔒 · `DELETE /api/uploads/:filename` 🔒 | Manage uploaded files |
 

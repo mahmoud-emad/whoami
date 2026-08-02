@@ -142,7 +142,8 @@ button, and the owner controls appear on the pages themselves:
 - **Home**: the intro copy, the problem solving blurb, the experience entries, and the project and
   article lists — each with add, edit, reorder, hide and delete where it makes sense.
 - **Projects**: a "New project" button above the list, and edit and delete icons on each card.
-- **Blog and articles**: edit and delete on each entry, and a create button on the listing.
+- **Blog and articles**: edit and delete on each entry, and a create button on the listing. Posts
+  are written in the markdown editor described below.
 - **Guestbook**: delete on each entry.
 - **Contact**: add, edit, reorder and delete contact channels, plus the page heading and intro.
 - **More**: add, edit and delete the cards and the small link list, plus the page copy.
@@ -173,6 +174,42 @@ dropdown.
 | Uploads | Every uploaded file, with copy URL and delete |
 | Configure Search engine | Whether search is on, and which collections it looks at |
 | Site Settings | GitHub link, the dark/light toggle switch, whether the dashboard is reachable, and changing your signature |
+
+### Writing a post
+
+Posts are markdown. The editor has a Write/Preview pair, and the preview is the exact renderer the
+published page uses, so what you see is what a reader gets.
+
+What the renderer supports beyond plain markdown:
+
+| Feature | How |
+| --- | --- |
+| Tables, footnotes, task lists | Standard markdown |
+| Syntax-highlighted code | ` ```ts ` and friends |
+| Diagrams | ` ```mermaid ` — flowcharts, sequence, class, and the rest |
+| Maths | `$inline$` and `$$display$$`, rendered with KaTeX |
+| Images | Drag one in, paste from the clipboard, or use the image button |
+
+Mermaid, KaTeX and the syntax highlighter are each about half a megabyte, so none of them is in the
+main bundle: a post downloads only what it actually uses, and a post with no diagrams and no maths
+downloads neither. Diagrams follow the site's palette and are redrawn when the theme changes.
+
+Images work the way they do on GitHub. Drop a file on the editor, paste a screenshot, or press the
+image button; an `![Uploading …]()` placeholder appears at the cursor and is replaced with the real
+`/uploads/...` URL when the upload finishes. They are uploaded, not inlined — the old editor turned
+every screenshot into a base64 blob inside the post body, which every reader then downloaded.
+
+### Reactions
+
+Every post carries an up and a down vote, open to anyone. There are no accounts and no replies.
+
+A voter is identified by a salted hash of their IP address and the post id, so one reader gets one
+vote per post and can change it or take it back by clicking the same arrow again. The salt is
+generated per install on the first vote and kept in `security.voteSalt`; the hash cannot be reversed
+to an address, and cannot be correlated across posts. This is a courtesy limit rather than a
+guarantee — someone determined to vote twice can change address — which is the right trade against
+making a reader sign up to say they liked something. Writes are throttled to 20 per minute per
+address.
 
 ### Uploads
 

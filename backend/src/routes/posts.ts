@@ -2,6 +2,7 @@ import express from 'express';
 import type { Request, Response, Router } from 'express';
 import { readDatabase, writeDatabase, nextId, updateById } from '../db';
 import { requireAuth } from '../auth/middleware';
+import { tallyAll } from './reactions';
 import { log } from '../lib/logger';
 import type { DbRecord } from '../types';
 
@@ -11,10 +12,17 @@ const errorMessage = (error: unknown): string => (error instanceof Error ? error
 export const postsRouter: Router = express.Router();
 
 // Posts CRUD
-postsRouter.get('/posts', async (_req: Request, res: Response): Promise<void> => {
+postsRouter.get('/posts', async (req: Request, res: Response): Promise<void> => {
   try {
     const dbData = await readDatabase();
-    res.json({ data: dbData.posts, total: dbData.posts.length });
+    // Vote counts travel with the listing. Fetching them per post would be one request per card,
+    // and the blog page would flash a column of zeroes while they arrived.
+    const tallies = await tallyAll(req, dbData);
+    const data = dbData.posts.map((post) => ({
+      ...post,
+      reactions: typeof post.id === 'number' ? tallies[post.id] : { up: 0, down: 0, mine: null },
+    }));
+    res.json({ data, total: data.length });
   } catch (error) {
     log(`Failed to read posts: ${errorMessage(error)}`, 'error');
     res.status(500).json({ error: errorMessage(error) });

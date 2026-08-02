@@ -36,18 +36,26 @@
           <p class="article-link">{{ post.title }}</p>
           <small class="published-date">Published on: {{ formatPostDate(post.createdAt || '') }}</small>
         </v-card-title>
-        <v-btn @click="toggleContent(post.id || 0)" title="Read Blog Post" class="mb-4 ml-3" color="primary"
-          variant="tonal">
-          {{ expandedPosts[post.id || 0] ? 'Read Less' : 'Read More' }}
-        </v-btn>
-        <v-card-text class="mt-4" v-if="expandedPosts[post.id || 0]">
-          <div class="markdown-content">
-            <VMarkdownView :content="post.content" mode="transparent" />
+        <!--
+          The post renders straight away. It used to be hidden entirely behind "Read More", so the
+          listing was a column of titles with no way to tell what any of them were about. A long
+          one is clipped with a fade instead, which keeps the page scannable without hiding the
+          opening paragraph.
+        -->
+        <v-card-text>
+          <div class="markdown-content post-body"
+            :class="{ 'post-body--clipped': isLong(post) && !expandedPosts[post.id || 0] }">
+            <MarkdownView :content="post.content" />
           </div>
-          <v-btn v-if="post.content.length > 1500" @click="toggleContent(post.id || 0)" title="Read Blog Post"
-            color="primary" class="mt-4" variant="tonal">
-            {{ expandedPosts[post.id || 0] ? 'Read Less' : 'Read More' }}
-          </v-btn>
+          <div class="post-foot">
+            <v-btn v-if="isLong(post)" @click="toggleContent(post.id || 0)"
+              :title="expandedPosts[post.id || 0] ? 'Collapse this post' : 'Read the whole post'" color="primary"
+              variant="tonal">
+              {{ expandedPosts[post.id || 0] ? 'Read less' : 'Read more' }}
+            </v-btn>
+            <!-- Anyone can vote; there is nothing to sign in to. -->
+            <PostVotes v-if="post.id !== undefined" :post-id="post.id" :initial="post.reactions || null" />
+          </div>
         </v-card-text>
       </v-card>
     </div>
@@ -64,9 +72,7 @@
           maxLength: 60,
           minLength: 10
         })" title="Post Title" label="Post Title" variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
-        <div class="md-editor-wrap mb-4">
-          <VMarkdownEditor v-model="draft.content" locale="en" :upload-action="handleUpload" />
-        </div>
+        <MarkdownEditor v-model="draft.content" class="mb-4" />
       </v-form>
 
       <template #actions>
@@ -79,25 +85,28 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
 import { apiFetch, apiJson } from '../utils/api';
 import { useAPILoading, useSettingsStore } from '../store';
 import { PostType } from '../types';
 import LoadingComponent from '../components/LoadingComponent.vue';
 import InlineActions from '../components/admin/InlineActions.vue';
+import PostVotes from '../components/PostVotes.vue';
 import EditorDialog from '../components/admin/EditorDialog.vue';
 import { useAdmin } from '../composables/useAdmin';
 import { useFormFeedback } from '../composables/useFormFeedback';
 import { deepClone, nameRules } from '../utils';
 
-import { VMarkdownView, VMarkdownEditor } from 'vue3-markdown';
-import 'vue3-markdown/dist/style.css';
+// Async so markdown-it, DOMPurify and the editor stay out of the entry bundle: every view is
+// statically routed, so a static import here would put all of it on the home page too.
+const MarkdownView = defineAsyncComponent(() => import('../components/MarkdownView.vue'));
+const MarkdownEditor = defineAsyncComponent(() => import('../components/admin/MarkdownEditor.vue'));
 
 const emptyPost = (): PostType => ({ title: '', content: '' });
 
 export default {
   name: 'Blog',
-  components: { LoadingComponent, VMarkdownView, VMarkdownEditor, InlineActions, EditorDialog },
+  components: { LoadingComponent, MarkdownView, MarkdownEditor, InlineActions, EditorDialog, PostVotes },
   setup() {
     const apiLoading = useAPILoading();
     const settingsStore = useSettingsStore();
@@ -153,6 +162,13 @@ export default {
       expandedPosts.value[postId] = !expandedPosts.value[postId];
     };
 
+    /**
+     * Long enough to be worth clipping. Measured on the raw markdown rather than the rendered
+     * height: the height is not known until after paint, and a threshold that moved as images
+     * loaded would make the button appear and disappear under the reader.
+     */
+    const isLong = (post: PostType): boolean => (post.content || '').length > 1200;
+
     // Format Date Correctly
     const formatPostDate = (date: string) => {
       if (!date) return 'Unknown Date';
@@ -166,22 +182,6 @@ export default {
       });
     };
 
-    /**
-     * Images are inlined as data URIs, the same as the dashboard's post form: the markdown body is
-     * stored as a single JSON string, so an embedded image travels with it rather than depending on
-     * a second upload endpoint staying in sync.
-     */
-    const handleUpload = (file: File) =>
-      new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (typeof reader.result === 'string') resolve(reader.result);
-          else reject(new Error('Failed to read file content.'));
-        };
-        reader.onerror = () => reject(new Error('Error occurred while reading the file.'));
-        reader.readAsDataURL(file);
-      });
-
     const openCreate = () => {
       clear();
       editingId.value = null;
@@ -193,7 +193,11 @@ export default {
       clear();
       editingId.value = post.id ?? null;
       // Clone: the editor must not rewrite the post rendered behind the dialog as you type.
-      draft.value = { ...emptyPost(), ...deepClone(post) };
+      // `reactions` is dropped: it is computed per request from the vote table, and saving it back
+      // would freeze a stale count onto the post record and shadow the real one.
+      const editable = deepClone(post);
+      delete editable.reactions;
+      draft.value = { ...emptyPost(), ...editable };
       editorOpen.value = true;
     };
 
@@ -234,6 +238,7 @@ export default {
     return {
       formatPostDate,
       toggleContent,
+      isLong,
       errorMessage,
       expandedPosts,
       apiLoading,
@@ -249,7 +254,6 @@ export default {
       saving,
       responseType,
       responseMessage,
-      handleUpload,
       openCreate,
       openEdit,
       savePost,
@@ -277,8 +281,41 @@ export default {
 }
 
 /* Ensures Markdown Formatting is Correct */
+/* `white-space: pre-wrap` used to live here, from when the body was printed as plain text. It has
+   to go now that the body is real markup: it turns every newline in the source into a line break,
+   so a wrapped paragraph rendered with ragged breaks in the middle of sentences. */
 .markdown-content {
-  white-space: pre-wrap;
+  min-width: 0;
+}
+
+/* Read-more on the left, votes on the right, wrapping to two rows on a phone. */
+.post-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+/* A long post is clipped rather than hidden, so the opening still reads from the listing. */
+.post-body--clipped {
+  position: relative;
+  max-height: 24rem;
+  overflow: hidden;
+}
+
+/* The fade has to end in the page colour, not the card colour: the card is transparent. */
+.post-body--clipped::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 6rem;
+  background: linear-gradient(to bottom,
+      rgba(var(--v-theme-background), 0),
+      rgb(var(--v-theme-background)));
+  pointer-events: none;
 }
 
 /* ---- owner controls (never rendered signed out) ----------------------- */
@@ -303,11 +340,6 @@ export default {
 
 /* Same sizing the dashboard's post form uses: min-width:0 stops the editor refusing to shrink
    below its intrinsic width, which is what makes a phone scroll sideways. */
-.md-editor-wrap {
-  height: 350px;
-  max-width: 100%;
-  min-width: 0;
-}
 
 @media (max-width: 600px) {
   .post-card--editable :deep(.v-card-title) {
@@ -317,19 +349,6 @@ export default {
   }
 
   /* Editor and live preview sit side by side by default; at 390px that is two ~170px columns. */
-  .md-editor-wrap {
-    height: 60vh;
-    min-height: 360px;
-  }
 
-  .md-editor-wrap :deep(.vmd-body) {
-    flex-direction: column;
-  }
-
-  .md-editor-wrap :deep(.vmd-toolbar-icon) {
-    padding: 8px;
-    margin-left: 2px;
-    margin-right: 2px;
-  }
 }
 </style>

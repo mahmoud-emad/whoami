@@ -18,7 +18,12 @@ mahmoud-emad.dev, www.mahmoud-emad.dev {
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "geolocation=(), microphone=(), camera=()"
 		# Vuetify injects styles at runtime, so style-src needs unsafe-inline.
-		Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		# img-src also allows https: because a post can reference an image hosted elsewhere, and
+		# without it those come out as broken boxes. It is the one relaxation here: scripts,
+		# styles, fonts and connections all stay same-origin, so an external image is an image and
+		# nothing more. Post bodies are owner-authored, and the guestbook is not markdown, so a
+		# visitor cannot get a remote URL onto the page.
+		Content-Security-Policy "default-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 		-Server
 	}
 

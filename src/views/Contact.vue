@@ -40,7 +40,7 @@
 
       <ContactInfo :class="{ 'channel--parked': isAdmin && channel.show === false }" :title="headingOf(channel)"
         :description="channel.description" :link="hrefOf(channel)" :linkText="channel.linkText"
-        :icon="mdiIconOf(channel)" :cols="display.mdAndUp.value" :me="isProfileLink(channel)" />
+        :icon="mdiIconOf(channel)" :cols="display.mdAndUp.value" :me="isProfileLink(channel)" flush />
     </section>
 
     <!-- The local-time note is about the person, not about any one channel, so it stands on its
@@ -69,7 +69,9 @@
             <span class="row-list__title">
               <v-icon v-if="mdiIconOf(channel)" size="18" class="mr-1">{{ mdiIconOf(channel) }}</v-icon>
               <span v-else-if="channel.icon" aria-hidden="true" class="mr-1">{{ channel.icon }}</span>
-              {{ channel.label }}
+              <!-- Same guard as the featured blocks: the address is already the row's right hand
+                   column, so a row labelled with it would print it twice. -->
+              {{ titleOf(channel) }}
             </span>
             <span class="row-list__meta">{{ metaOf(channel) }}</span>
           </a>
@@ -210,6 +212,25 @@ const normalise = (channel?: Partial<ContactChannel> | null): ContactChannel => 
 /** Human-readable form of a URL: no scheme, no trailing slash. Used when nothing better is set. */
 const readable = (url: string): string =>
   url.replace(/^mailto:/, '').replace(/^https?:\/\//, '').replace(/\/+$/, '');
+
+/**
+ * What to call a channel when its own label would say nothing the link does not already say.
+ *
+ * A featured channel prints its label as the heading and the address underneath, so a channel
+ * labelled with its own address renders that address twice. Naming the kind instead keeps both
+ * lines carrying something, which is what the pre-channels version of this page did.
+ */
+const KIND_NAMES: Record<string, string> = {
+  email: 'E-mail',
+  signal: 'Instant Messaging',
+  github: 'GitHub',
+  linkedin: 'LinkedIn',
+  x: 'X',
+  mastodon: 'Mastodon',
+  bluesky: 'Bluesky',
+  website: 'Website',
+  other: 'Elsewhere',
+};
 
 export default defineComponent({
   name: 'Contact',
@@ -563,8 +584,22 @@ export default defineComponent({
     /** Emoji icons belong in the heading; mdi icons are rendered inside the card by ContactInfo. */
     const isMdi = (icon?: string) => Boolean(icon && icon.startsWith('mdi-'));
     const mdiIconOf = (channel: RenderChannel) => (isMdi(channel.icon) ? channel.icon : undefined);
-    const headingOf = (channel: RenderChannel) =>
-      isMdi(channel.icon) || !channel.icon ? channel.label : `${channel.icon} ${channel.label}`;
+
+    /**
+     * The heading of a featured block. Falls back to the kind's name when the label is just the
+     * address again — a channel labelled "me@example.com" pointing at me@example.com printed the
+     * address as the heading and again as the link right below it.
+     */
+    const titleOf = (channel: RenderChannel): string => {
+      const label = (channel.label || '').trim();
+      const same = label.toLowerCase() === readable(channel.url || '').trim().toLowerCase();
+      return same ? (KIND_NAMES[channel.kind] || KIND_NAMES.other) : label;
+    };
+
+    const headingOf = (channel: RenderChannel) => {
+      const title = titleOf(channel);
+      return isMdi(channel.icon) || !channel.icon ? title : `${channel.icon} ${title}`;
+    };
 
     /** Required-field rule. Not websiteRules(): an e-mail channel stores a bare address. */
     const requiredRules = (fieldName: string) => [
@@ -614,6 +649,7 @@ export default defineComponent({
       otherChannels,
       hrefOf,
       headingOf,
+      titleOf,
       mdiIconOf,
       relOf,
       metaOf,
@@ -654,13 +690,16 @@ export default defineComponent({
   margin-bottom: 2.25rem;
 }
 
-/* One gap between sections rather than a mix of .section, mb-2 and mb-4. */
+/* One gap between sections rather than a mix of .section, mb-2 and mb-4.
+   `!important` because the timezone note is a <p>, and the global `p { margin: 0 !important }`
+   reset in style.css otherwise wins — which is exactly what left it sitting on top of the
+   "Elsewhere" heading with no gap at all. */
 .contact__section {
-  margin-bottom: 2.25rem;
+  margin-bottom: 2.25rem !important;
 }
 
 .contact__section:last-child {
-  margin-bottom: 0;
+  margin-bottom: 0 !important;
 }
 
 /* ContactInfo carries its own bottom margin for pages that drop it into a grid (More); here the
@@ -669,8 +708,12 @@ export default defineComponent({
   margin-bottom: 0;
 }
 
+/* A footnote to the channels above rather than a section in its own right, so it sits closer to
+   them than the gap between two real sections. */
 .timezone-note {
+  margin-top: -0.9rem !important;
   line-height: 1.7;
+  font-size: 0.92rem;
   color: rgb(var(--v-theme-gray-color));
 }
 
@@ -773,7 +816,7 @@ export default defineComponent({
 
   .contact__head,
   .contact__section {
-    margin-bottom: 1.75rem;
+    margin-bottom: 1.75rem !important;
   }
 }
 </style>

@@ -7,7 +7,8 @@
 
     <!-- No `color="transparent"`: that prop emits a `!important` background rule that no scoped
          style can override, which is why this card could never take the theme's panel colour. -->
-    <v-card class="contact-info__card" :class="{ 'contact-info__card--wide': cols }" flat>
+    <v-card class="contact-info__card" :class="{ 'contact-info__card--wide': cols, 'contact-info__card--flush': flush }"
+      flat>
       <!--
         rel="me" is what makes these profiles verifiable as the same person: an IndieWeb consumer
         follows the link, finds a rel="me" pointing back at this domain, and treats the identity as
@@ -41,6 +42,13 @@ export default defineComponent({
     icon: String,
     /** Set for links that are genuinely another profile of the site owner. */
     me: { type: Boolean, default: false },
+    /**
+     * Drop the card's border and side padding so the link sits on the page's own left edge.
+     * Contact sets it: a boxed e-mail sitting a dozen pixels right of the "Elsewhere" rows below
+     * it read as two different kinds of thing that had failed to line up. More does not — there
+     * the block really is a card in a grid.
+     */
+    flush: { type: Boolean, default: false },
   },
   setup(props) {
     // noopener on every external link; "me" only where the link really is another profile of the
@@ -68,6 +76,20 @@ export default defineComponent({
   border-radius: 6px;
   background: rgb(var(--v-theme-box-bg-color));
   box-shadow: none;
+}
+
+/* Flush variant: the same hairline row the rest of the page uses, aligned to the column edge. */
+.contact-info__card--flush {
+  border: 0;
+  border-top: 1px solid rgb(var(--v-theme-border-color));
+  border-bottom: 1px solid rgb(var(--v-theme-border-color));
+  border-radius: 0;
+  background: transparent;
+}
+
+.contact-info__card--flush .contact-info__link {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 /* The card is the tap target, so the padding is what gets the row past the ~40px a thumb needs. */

@@ -247,11 +247,20 @@ export type SettingsType = {
   profile: ProfileType,
 }
 
+/** Anonymous up/down votes on a post. `mine` is what the requesting reader has already cast. */
+export type PostReactions = {
+  up: number,
+  down: number,
+  mine: 'up' | 'down' | null,
+}
+
 export type PostType = {
   id?: number,
   title: string,
   content: string,
-  createdAt?: string
+  createdAt?: string,
+  /** Served with the listing so the counts do not need one request per card. Never sent back. */
+  reactions?: PostReactions,
 }
 
 export type NavLink = {
