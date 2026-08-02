@@ -265,6 +265,43 @@ a different ring. Once it is on, the footer shows:
 The links are hidden whenever the ring is off or the base URL is empty, so a half configured ring
 never renders a dead arrow.
 
+### Signing in as your domain
+
+Some sites let you log in with your own domain instead of a username — Web Sign In, usually via
+[IndieLogin.com](https://indielogin.com/). Nothing needs enabling here: the server puts a
+`<link rel="me">` in the head of every page for each contact channel you have configured and not
+hidden.
+
+That it is **server rendered** is the whole point. This is a single page app, and IndieLogin fetches
+your URL with a plain HTTP client — it never runs the JavaScript that would draw the contact links,
+so a `rel="me"` that only exists in a Vue component is invisible to it.
+
+Verification is reciprocal, and the second half is not something this project can do for you:
+
+| Profile | What you have to do |
+| --- | --- |
+| GitHub | Put your site URL in the **Website** field of your GitHub profile |
+| GitLab, Codeberg | The same, in their profile website field |
+| Email | Nothing — the provider mails you a one-time code |
+| Mastodon | Add your site URL as a profile metadata field |
+
+X and LinkedIn strip `rel="me"` from outbound links, so they can never verify. They are still worth
+claiming — the link says the accounts are yours — they just are not sign-in options.
+
+Check both directions against the deployed site:
+
+```bash
+./scripts/check-identity.sh https://your-domain.example
+```
+
+It reads the HTML a plain client sees, lists every `rel="me"` it finds, follows each one, and tells
+you which link back. It exits non-zero when nothing is verified both ways.
+
+If you would rather only allow the stronger providers, add `authn` to the rel list of the ones you
+want (`rel="me authn"`). IndieLogin then ignores every plain `rel="me"` link — so, for example,
+GitHub with two factor authentication becomes the only way in and the email code is no longer
+offered. That is a code change in `backend/src/server/frontend.ts`, not a setting.
+
 ---
 
 ## 7. Deploying

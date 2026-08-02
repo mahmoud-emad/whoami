@@ -26,6 +26,58 @@ const firstTruthy = (...values: unknown[]): string => {
 const asRecord = (value: unknown): Record<string, unknown> =>
   value !== null && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
+const asArray = (value: unknown): unknown[] => (Array.isArray(value) ? value : []);
+
+/**
+ * Normalise one configured channel address into something safe to put in an href.
+ *
+ * Only http, https and mailto survive. Config is owner-editable, and an unchecked value here would
+ * put whatever it contains — `javascript:` included — into a link in the served document.
+ * A bare address with an @ and no scheme is an email, which is how the Contact page stores them.
+ */
+const relMeHref = (raw: unknown): string => {
+  const value = String(raw ?? '').trim();
+  if (!value) return '';
+  if (/^https?:\/\//i.test(value)) return value;
+  if (/^mailto:/i.test(value)) return value;
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return `mailto:${value}`;
+  return '';
+};
+
+/**
+ * The identities this site claims, as rel="me".
+ *
+ * IndieAuth consumers — IndieLogin.com among them — fetch the page with a plain HTTP client and
+ * parse the HTML. They do not run JavaScript, so the rel="me" anchors Vue renders on the Contact
+ * page are invisible to them: the claim has to be in the document the server returns. A <link> in
+ * the head counts exactly as much as an <a> in the body and changes nothing on screen, which keeps
+ * the page's markup the owner's business.
+ *
+ * The list is the one the Contact page renders from — configured channels when there are any, the
+ * pre-channels socials otherwise — so what the site shows and what it claims cannot drift apart.
+ * A channel the owner has hidden is not claimed either; hiding it is a statement about the address,
+ * not about the page it sits on.
+ *
+ * Verification is reciprocal. A link here proves nothing on its own: the profile has to link back
+ * to this domain (GitHub's "website" field, GitLab's and Codeberg's, a Mastodon profile field).
+ */
+const buildRelMeLinks = (configData: SiteConfig | null | undefined): string[] => {
+  const profile = asRecord(configData?.profile);
+  const channels = asArray(profile.channels);
+
+  const configured = channels
+    .map(asRecord)
+    .filter((channel) => channel.show !== false)
+    .map((channel) => relMeHref(channel.url));
+
+  const socials = asRecord(profile.socials);
+  const legacy = [socials.githubUrl, socials.linkedinUrl, socials.xUrl, socials.signalUrl, socials.email]
+    .map(relMeHref);
+
+  const hrefs = configured.some(Boolean) ? configured : legacy;
+  return [...new Set(hrefs.filter(Boolean))];
+};
+
 /**
  * Build the <head> tags for one request. Falls back through meta -> profile so a site that never
  * touched the SEO tab still gets a real title and description instead of an empty tag.
@@ -75,6 +127,9 @@ const buildHeadTags = (configData: SiteConfig | null | undefined, req: Request):
   }
   if (twitterHandle) {
     tags.push(`<meta name="twitter:site" content="${escapeHtml(twitterHandle)}" />`);
+  }
+  for (const href of buildRelMeLinks(configData)) {
+    tags.push(`<link rel="me" href="${escapeHtml(href)}" />`);
   }
   return `\n    ${tags.join('\n    ')}\n  `;
 };

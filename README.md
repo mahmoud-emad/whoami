@@ -27,6 +27,8 @@ rebuild, no code changes, no name of anyone else's left in the source.
 - **Guestbook anti-bot.** A question you write. The answer stays on the server.
 - **Uploads.** Images and PDFs, with a file manager in the dashboard.
 - **IndieWeb webring.** Optional `← IndieWeb Webring →` links in the footer.
+- **Web Sign-In.** Your contact channels are served as `rel="me"` in the HTML itself, so you can log
+  in to other sites as your own domain via IndieLogin.com without running any JavaScript.
 - **Authenticated API.** Every write endpoint is behind a bearer token.
 - **Responsive.** The dashboard is usable from a phone, not just the site.
 
@@ -123,6 +125,7 @@ Uploaded files are served publicly from `/uploads/<filename>`.
 | `yarn typecheck` | `vue-tsc` only |
 | `yarn lint` | ESLint |
 | `yarn preview` | Preview the production bundle with Vite |
+| `./scripts/check-identity.sh <url>` | Check the deployed site works as a Web Sign-In identity |
 
 Equivalent `make` targets exist for each (`make build`, `make start`, `make check`, and so on).
 
