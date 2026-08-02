@@ -124,7 +124,7 @@ const defaultSettings = (): SettingsType => ({
     security: { debug: false },
     server: { host: '', port: 0 },
     theme: {
-        defaultTheme: 'dark',
+        defaultTheme: 'light',
         dark: {} as ThemeColors,
         light: {} as ThemeColors,
     },
@@ -164,7 +164,7 @@ const useSettingsStore = defineStore('settingsStore', {
                 port: 0
             },
             theme: {
-                defaultTheme: 'dark' as 'dark' | 'light',
+                defaultTheme: 'light' as 'dark' | 'light',
                 dark: {} as ThemeColors,
                 light: {} as ThemeColors,
             },

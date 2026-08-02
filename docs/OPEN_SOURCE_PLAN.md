@@ -66,7 +66,8 @@ Also landed, beyond the original list:
 ## Phase 3: make it feel like a template (2 of 3)
 
 10. ✅ **Configurable theme.** Both palettes live in `theme.dark` / `theme.light` and Vuetify is fed
-    from settings. `AppearanceForm` edits all ten slots per palette and shows a live WCAG 2.1
+    from settings. `AppearanceForm` edits all twelve slots per palette — including Vuetify's own
+    `primary` and `info`, which used to be left at the factory blue — and shows a live WCAG 2.1
     contrast readout against a 4.5:1 AA floor. The light theme's 2.68:1 body text is fixed.
 11. ✅ **Document head from config.** `useDocumentHead` owns the meta tags and favicon in the SPA,
     and the production server injects real title, description, Open Graph and Twitter tags into the

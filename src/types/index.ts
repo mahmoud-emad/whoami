@@ -175,6 +175,19 @@ export type ThemeColors = {
   'front-end-bg-color': string,
   'back-end-bg-color': string,
   form: string,
+  /**
+   * Vuetify's own accent, behind every `color="primary"` button, tab and switch — sixty-odd of them.
+   * It used to be left at Vuetify's factory blue, which meant recolouring the site changed the page
+   * but not a single control on it.
+   */
+  primary: string,
+  /**
+   * `type="info"` alerts — the explanatory note at the top of every dashboard form. Also Vuetify's
+   * factory blue until now. Deliberately a different hue from `primary` so a note does not look
+   * like something you can press. `error`, `success` and `warning` keep Vuetify's own colours,
+   * because red, green and orange carry meaning that a palette should not reassign.
+   */
+  info: string,
 }
 
 /**

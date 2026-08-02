@@ -200,13 +200,20 @@ whole point. Leave the answer empty to accept every submission.
 ## 5. Theming
 
 Both palettes live in config, under `theme.dark` and `theme.light`, and the Appearance tab edits
-them. There are ten colour slots per palette: background, text, borders, muted grey text, links,
-link hover, box background, two accent backgrounds, and form fields. Each one has a colour picker
-and a text field, and the text field accepts 6 digit hex or 8 digit hex with an alpha suffix.
+them. There are twelve colour slots per palette: background, text, borders, muted grey text, links,
+link hover, box background, two accent backgrounds, form fields, `primary` and `info`. Each one has
+a colour picker and a text field, and the text field accepts 6 digit hex or 8 digit hex with an
+alpha suffix.
 
-`theme.defaultTheme` decides what a visitor gets before they touch anything. Their own choice is
-remembered in local storage and always wins after that. The dark/light toggle in the footer only
-appears when the two theme switch in Site Settings is on.
+The last two are Vuetify's own. `primary` is behind every button, tab and switch on the site, and
+`info` is the explanatory note at the top of each dashboard form — leave them out of your palette
+and both stay Vuetify's factory blue, which means recolouring the site changes the page but not a
+single control on it. `error`, `success` and `warning` are deliberately not configurable: red,
+green and orange carry meaning a palette should not be able to reassign.
+
+`theme.defaultTheme` decides what a visitor gets before they touch anything, and ships as `light`.
+Their own choice is remembered in local storage and always wins after that. The dark/light toggle
+in the footer only appears when the two theme switch in Site Settings is on.
 
 ### The contrast readout
 

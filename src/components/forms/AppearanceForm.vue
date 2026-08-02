@@ -84,6 +84,8 @@ const COLOR_KEYS: ColorKey[] = [
   'front-end-bg-color',
   'back-end-bg-color',
   'form',
+  'primary',
+  'info',
 ];
 
 /** WCAG 2.1 AA minimum for normal-size body text. */
@@ -96,7 +98,7 @@ const emptyColors = (): ThemeColors =>
   }, {} as ThemeColors);
 
 const emptyTheme = (): ThemeSlice => ({
-  defaultTheme: 'dark',
+  defaultTheme: 'light',
   dark: emptyColors(),
   light: emptyColors(),
 });
@@ -171,7 +173,7 @@ export default {
         if (current) {
           const loaded = deepClone(current) as Partial<ThemeSlice>;
           theme.value = {
-            defaultTheme: loaded.defaultTheme === 'light' ? 'light' : 'dark',
+            defaultTheme: loaded.defaultTheme === 'dark' ? 'dark' : 'light',
             // Per-key merge so a palette missing a colour still gets an editable (empty) field.
             dark: { ...emptyColors(), ...(loaded.dark || {}) },
             light: { ...emptyColors(), ...(loaded.light || {}) },

@@ -474,14 +474,15 @@ export default {
   padding-top: 0.4rem;
 }
 
-/* Light theme: the reference's pale blue-grey paper. */
+/* Light theme: warm paper, matching the light palette's off-white page. It used to be a pale
+   blue-grey, which was the last blue left on the site once the palette went warm. */
 .gb--light .gb-note {
-  background: #f0f3fa;
+  background: #f7f3ec;
   border-color: rgba(0, 0, 0, 0.1);
 }
 
 .gb--light .gb-note:hover {
-  background: #e9eef8;
+  background: #f2ece2;
 }
 
 .gb--light .gb-note::after {
@@ -500,7 +501,7 @@ export default {
 }
 
 .gb--light .gb-form-wrap {
-  background: #fffdf9;
+  background: #fffcf7;
 }
 
 .gb-form__title {

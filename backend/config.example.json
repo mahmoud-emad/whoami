@@ -1,5 +1,5 @@
 {
-  "_comment": "Reference copy of the runtime config, matching the defaultConfig in backend/server.cjs. backend/config.json is gitignored and is created automatically on first boot from these defaults, seeded from the environment (see .env.production.example) and then edited through the admin dashboard — the dashboard is the source of truth from that point on. security.adminSignature holds a scrypt hash and its salt, never a plaintext signature; configuration.antiBot.answer is stored here but is stripped from every public response.",
+  "_comment": "Reference copy of the runtime config, matching the defaultConfig in backend/server.cjs. backend/config.json is gitignored and is created automatically on first boot from these defaults, seeded from the environment (see .env.production.example) and then edited through the admin dashboard \u2014 the dashboard is the source of truth from that point on. security.adminSignature holds a scrypt hash and its salt, never a plaintext signature; configuration.antiBot.answer is stored here but is stripped from every public response.",
   "server": {
     "host": "localhost",
     "port": 3000
@@ -22,30 +22,34 @@
     }
   },
   "theme": {
-    "defaultTheme": "dark",
+    "defaultTheme": "light",
     "dark": {
-      "background": "#01061F",
-      "text-color": "#ffffff",
-      "border-color": "#123869",
-      "gray-color": "#cdd4df",
-      "link-color": "#cdd4df",
-      "box-bg-color": "#120131bb",
-      "link-hover-color": "#82adf3",
-      "front-end-bg-color": "#05143dbb",
-      "back-end-bg-color": "#05283dbb",
-      "form": "#091C21FF"
+      "background": "#14110F",
+      "text-color": "#F2EDE7",
+      "border-color": "#403830",
+      "gray-color": "#A79E95",
+      "link-color": "#E5C9A3",
+      "box-bg-color": "#1C1815",
+      "link-hover-color": "#E0A458",
+      "front-end-bg-color": "#33241A",
+      "back-end-bg-color": "#2A2A1C",
+      "form": "#1A1613",
+      "primary": "#E0A458",
+      "info": "#A8B89A"
     },
     "light": {
-      "background": "#ffffff",
-      "text-color": "#11161f",
-      "border-color": "#e2e6ec",
-      "gray-color": "#5b6473",
-      "link-color": "#2a4d8f",
-      "box-bg-color": "#ffffff",
-      "link-hover-color": "#2f6bd4",
-      "front-end-bg-color": "#cedeff",
-      "back-end-bg-color": "#c4e1ff",
-      "form": "#f4f6fa"
+      "background": "#FDFCFA",
+      "text-color": "#1A1613",
+      "border-color": "#D9D1C5",
+      "gray-color": "#6B6259",
+      "link-color": "#8A4F1B",
+      "box-bg-color": "#FFFFFF",
+      "link-hover-color": "#9A5A1C",
+      "front-end-bg-color": "#F5E6D3",
+      "back-end-bg-color": "#EDE9DA",
+      "form": "#F7F4EF",
+      "primary": "#9A5A1C",
+      "info": "#46603D"
     }
   },
   "indieweb": {
@@ -86,37 +90,37 @@
       "navItems": [
         {
           "link": "/",
-          "name": "❄️ About",
+          "name": "\u2744\ufe0f About",
           "title": "About me",
           "show": true
         },
         {
           "link": "/contact",
-          "name": "📞 Contact",
+          "name": "\ud83d\udcde Contact",
           "title": "Contact me",
           "show": true
         },
         {
           "link": "/projects",
-          "name": "🎨 Projects",
+          "name": "\ud83c\udfa8 Projects",
           "title": "See my projects",
           "show": true
         },
         {
           "link": "/blog",
-          "name": "✍️ Blog",
+          "name": "\u270d\ufe0f Blog",
           "title": "See my blog",
           "show": true
         },
         {
           "link": "/guestbook",
-          "name": "🧁 Guestbook",
+          "name": "\ud83e\uddc1 Guestbook",
           "title": "Write me a guestbook",
           "show": true
         },
         {
           "link": "/more",
-          "name": "🌏 More",
+          "name": "\ud83c\udf0f More",
           "title": "Wanna to see more?",
           "show": true
         }
@@ -163,35 +167,35 @@
       },
       "experience": {
         "title": "Experience",
-        "emoji": "⚙️",
+        "emoji": "\u2699\ufe0f",
         "intro": "",
         "show": true,
         "order": 2
       },
       "projects": {
         "title": "Selected Work",
-        "emoji": "🎨",
+        "emoji": "\ud83c\udfa8",
         "intro": "",
         "show": true,
         "order": 3
       },
       "openSource": {
         "title": "Open Source",
-        "emoji": "🌟",
+        "emoji": "\ud83c\udf1f",
         "intro": "",
         "show": true,
         "order": 4
       },
       "problemSolving": {
         "title": "Problem Solving",
-        "emoji": "🧠",
+        "emoji": "\ud83e\udde0",
         "intro": "",
         "show": true,
         "order": 5
       },
       "articles": {
         "title": "Articles",
-        "emoji": "📝",
+        "emoji": "\ud83d\udcdd",
         "intro": "",
         "show": true,
         "order": 6
