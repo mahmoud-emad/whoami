@@ -107,6 +107,16 @@ import { deepClone, longTextRules, nameRules, sectionHeading, selectRules, tagsR
 
 const PROJECT_TYPES = ['Project', 'Open Source'];
 
+/**
+ * When a project was last touched, as a timestamp for sorting. Falls back through updatedAt ->
+ * createdAt -> 0, so an entry missing both sorts last instead of poisoning the comparison with NaN.
+ */
+const touchedAt = (project: ProjectType): number => {
+  const stamp = project.updatedAt || project.createdAt || '';
+  const ms = Date.parse(stamp);
+  return Number.isNaN(ms) ? 0 : ms;
+};
+
 // How many projects the home page shows. The full list lives on /projects.
 const HOME_PROJECT_LIMIT = 4;
 const HOME_OPEN_SOURCE_LIMIT = 2;
@@ -228,12 +238,19 @@ export default defineComponent({
         apiLoadingStore.setLoading(true);
         const all = await loadAllProjects();
         const wanted = props.section === 'openSource' ? 'open source' : 'project';
-        const matching = all.filter((project) => (project.type || '').toLowerCase() === wanted);
+        const matching = all
+          .filter((project) => (project.type || '').toLowerCase() === wanted)
+          // Hidden projects are filtered out *before* the cap, not after: otherwise one of them
+          // would eat a slot and a visitor would be shown three projects instead of four. The
+          // full list, hidden ones included, is on /projects, which is where they are managed.
+          .filter((project) => project.show !== false);
 
-        // Newest first, capped. The old logic kept the last two *inserted*, which silently
-        // hid the strongest work behind whatever happened to be added most recently.
+        // Most recently touched first. `updatedAt` is set on every edit and `createdAt` only on
+        // creation, so the fallback makes a project that has never been edited sort by when it
+        // was added. Sorting on the dates rather than on array order is the point: the previous
+        // code reversed the array, which is insertion order and says nothing about recency.
         items.value = [...matching]
-          .reverse()
+          .sort((a, b) => touchedAt(b) - touchedAt(a))
           .slice(0, props.section === 'openSource' ? HOME_OPEN_SOURCE_LIMIT : HOME_PROJECT_LIMIT);
       } catch (error) {
         console.error('Error loading projects:', error);

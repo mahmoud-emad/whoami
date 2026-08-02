@@ -49,7 +49,7 @@
         <li v-for="item in visibleNavItems" :key="item.link" class="nav-list__item">
           <router-link :to="item.link" class="nav-link-item" :class="{ active: isActive(item.link) }"
             :title="item.title" :aria-current="isActive(item.link) ? 'page' : undefined" @click="closeNavbar">
-            {{ item.name }}
+            {{ item.name }}<span v-if="countFor(item.link)" class="nav-count">{{ countFor(item.link) }}</span>
           </router-link>
         </li>
       </ul>
@@ -67,12 +67,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from "vue";
+import { defineComponent, ref, computed, onMounted } from "vue";
 import { useDisplay } from "vuetify";
 import { useRoute, useRouter } from "vue-router";
 import { useAPILoading, useSettingsStore } from "../store";
 import { useAdmin } from "../composables/useAdmin";
-import { logout } from "../utils/api";
+import { apiFetch, logout } from "../utils/api";
 // Imported rather than referenced by path so Vite bundles and fingerprints them. A literal
 // "/src/assets/..." src only resolves under the dev server and 404s in a production build.
 import searchIcon from "../assets/icons/search.svg";
@@ -124,6 +124,31 @@ export default defineComponent({
       { name: "🧁 Guestbook", link: "/guestbook", title: "Write me a guestbook" },
       { name: "🌏 More", link: "/more", title: "Wanna to see more?" },
     ];
+
+    /**
+     * How many people have signed the guestbook, shown beside that nav entry.
+     *
+     * Fetched once when the bar mounts. The bar lives in the layout, so it survives client-side
+     * navigation and this is one request per page load, not one per route change. A failure leaves
+     * it at null and the number simply does not render — a nav item is not worth an error state.
+     */
+    const guestbookCount = ref<number | null>(null);
+
+    onMounted(async () => {
+      try {
+        const res = await apiFetch('/guestbooks');
+        if (!res.ok) return;
+        const json = await res.json();
+        const total = typeof json.total === 'number' ? json.total : (json.data || []).length;
+        if (total > 0) guestbookCount.value = total;
+      } catch {
+        // Offline, or the guestbook is unreachable. The link still works without a number on it.
+      }
+    });
+
+    /** Only the guestbook carries a count today; matched on the route so a renamed label is fine. */
+    const countFor = (link: string): number | null =>
+      link === '/guestbook' ? guestbookCount.value : null;
 
     const brand = computed(() => (settingsStore.isSettingsLoaded() ? settingsStore.profile?.brand : undefined));
 
@@ -192,6 +217,7 @@ export default defineComponent({
     return {
       navbarClicked,
       navBarLinks,
+      countFor,
       visibleNavItems,
       isActive,
       isAdmin,
@@ -215,6 +241,21 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* A plain number beside the label, not a badge: it is a count, not a notification, and nothing
+   about it needs attention. Mono and muted so it reads as metadata next to the link text. */
+.nav-count {
+  margin-left: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+  color: rgb(var(--v-theme-gray-color));
+  font-variant-numeric: tabular-nums;
+}
+
+.nav-link-item.active .nav-count {
+  color: inherit;
+  opacity: 0.75;
+}
+
 /* One horizontal rhythm for the whole header. The brand row and the nav strip share this padding,
    which is what makes their left and right edges line up. */
 .c-header {

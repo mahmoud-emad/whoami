@@ -1,6 +1,8 @@
 export type ProjectType = {
   id?: number,
   createdAt?: string,
+  /** Set by the server on every write. Drives "last updated" ordering on the home page. */
+  updatedAt?: string,
   status?: string,
   title: string,
   link: string,
