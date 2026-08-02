@@ -3,6 +3,13 @@
     class="head-card pa-4 mb-4" :style="{ background: 'transparent !important', borderColor: '#772020 !important' }">
     ❌ You cannot access this page; the admin has decided to close the admin dashboard service.
   </v-card>
+  <!--
+    A fresh install goes through the wizard instead of the tab rail. It is keyed on the owner's
+    name being empty, so it disappears as soon as the first step is saved and is never seen on a
+    configured site.
+  -->
+  <SetupWizard v-else-if="needsSetup" @done="needsSetup = false" />
+
   <div v-else class="admin-dashboard">
     <div class="head-card pa-4 d-flex align-center ga-3 flex-wrap">
       <v-alert color="primary" class="flex-grow-1 dashboard-title" title="📊 Admin Dashboard" variant="tonal" />
@@ -55,12 +62,13 @@
 </template>
 
 <script lang="ts">
-import { ref, computed, defineAsyncComponent, onMounted } from 'vue';
+import { ref, computed, defineAsyncComponent, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import { useAPILoading, useSettingsStore } from '../store';
 import { SettingsType } from '../types';
 import { logout } from '../utils/api';
+import SetupWizard, { SETUP_DISMISSED_KEY } from '../components/admin/SetupWizard.vue';
 
 // Lazy-loaded form components
 const BrandForm = defineAsyncComponent(() => import('../components/forms/BrandForm.vue'));
@@ -148,6 +156,7 @@ const tabs = [
 ];
 
 export default {
+  components: { SetupWizard },
   setup() {
     const activeTab = ref(tabs[0].value);
     const settingsStore = useSettingsStore();
@@ -158,6 +167,62 @@ export default {
     const display = useDisplay();
     // Phones and small tablets get the stacked layout with a section dropdown.
     const isMobile = computed(() => display.smAndDown.value);
+
+    // Local fallback, only for the case where the flag could not be written (server unreachable
+    // at the moment the wizard was dismissed). The server flag is what normally decides.
+    const dismissedLocally = (() => {
+      try {
+        return localStorage.getItem(SETUP_DISMISSED_KEY) === '1';
+      } catch {
+        return false;
+      }
+    })();
+
+    /**
+     * Does this install still need setting up?
+     *
+     * Not keyed on the owner's name: production refuses to boot without `SITE_OWNER`, which seeds
+     * exactly that field, so a name check would mean the wizard could only ever appear in
+     * development — and a fresh production deploy lands on nine tabs with no guidance, which is
+     * the whole problem.
+     *
+     * So the persisted `setupCompleted` flag decides, and the emptiness check is only there for
+     * installs that predate the flag. A site with a bio, a social link, a job or a contact channel
+     * is one somebody has already configured, and must never be interrupted by a setup screen.
+     */
+    const looksUnconfigured = (): boolean => {
+      if (settingsStore.setupCompleted) return false;
+      const profile = settingsStore.profile;
+      const socials = profile?.socials;
+      return !(
+        (profile?.bio || '').trim()
+        || (socials?.email || '').trim()
+        || (socials?.githubUrl || '').trim()
+        || (socials?.linkedinUrl || '').trim()
+        || (profile?.experience || []).length
+        || (profile?.channels || []).length
+      );
+    };
+
+    /**
+     * Decided once, the first time settings arrive — deliberately not a live computed.
+     *
+     * Step one of the wizard writes the bio, which flips `looksUnconfigured` to false. As a
+     * computed this unmounted the wizard the moment step one saved and dropped the owner into the
+     * dashboard half way through the flow. Latching it means the wizard runs to its own end and
+     * closes only when it says so.
+     */
+    const needsSetup = ref(false);
+    let decided = false;
+    watch(
+      () => settingsStore.isSettingsLoaded(),
+      (loaded) => {
+        if (!loaded || decided) return;
+        decided = true;
+        needsSetup.value = !dismissedLocally && looksUnconfigured();
+      },
+      { immediate: true }
+    );
 
     const signOut = async () => {
       signingOut.value = true;
@@ -178,7 +243,7 @@ export default {
       apiLoadingStore.setLoading(false)
     })
 
-    return { activeTab, tabs, siteSettings, signOut, signingOut, isMobile };
+    return { activeTab, tabs, siteSettings, signOut, signingOut, isMobile, needsSetup };
   }
 };
 </script>

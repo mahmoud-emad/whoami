@@ -232,6 +232,8 @@ export type SettingsType = {
       answer: string,
     },
   },
+  /** True once the first-run wizard has been completed or skipped. See the backend type. */
+  setupCompleted?: boolean,
   theme: {
     defaultTheme: 'dark' | 'light',
     dark: ThemeColors,

@@ -31,6 +31,12 @@ export interface SiteConfig {
   theme: Record<string, unknown>;
   meta: Record<string, string>;
   indieweb: Record<string, unknown>;
+  /**
+   * Set once the owner has been through (or skipped) the first-run wizard. Persisted rather than
+   * kept in the browser so it survives a different machine, and so a restored blank config puts
+   * the wizard back — that install really is unconfigured again.
+   */
+  setupCompleted?: boolean;
   security: {
     debug: boolean;
     adminSignature: SignatureRecord;

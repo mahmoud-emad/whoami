@@ -25,6 +25,11 @@ export const defaultConfig: SiteConfig = {
       answer: '',
     },
   },
+  // Set by the first-run wizard when it is completed or skipped. Present in the defaults so it is
+  // a real config key: POST /settings only accepts keys that already exist, and `deepBackfill`
+  // adds it to installs that predate it (as `false`, which is correct — they were configured by
+  // hand, and the emptiness check in the dashboard keeps the wizard away from them).
+  setupCompleted: false,
   theme: {
     defaultTheme: 'light',
     // Palettes were 23 hex literals inside plugins/vuetify.ts. They live here so an owner can
