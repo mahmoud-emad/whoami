@@ -48,7 +48,7 @@
       display.mdAndUp.value ? 'normal-navbar' : 'responsive-navbar',
     ]" :style="navbarStyles">
       <v-row>
-        <v-col v-for="route in navBarLinks" :key="route.link" xxl="2" xl="2" lg="2" md="2" cols="12" :class="[
+        <v-col v-for="item in visibleNavItems" :key="item.link" xxl="2" xl="2" lg="2" md="2" cols="12" :class="[
           'pa-0',
           'ma-0',
           !display.mdAndUp.value && navbarClicked ? 'responsove-link-hover' : '',
@@ -58,9 +58,9 @@
           { 'pt-1 pb-1': navbarClicked },
         ]">
 
-          <router-link @click="setActiveLink(route.link)" :to="selectedLink(route).link"
-            :class="`nav-link-item pa-0 ma-0`" :title="route.title">
-            {{ selectedLink(route).name }}
+          <router-link :to="item.link" :class="['nav-link-item', 'pa-0', 'ma-0', { active: isActive(item.link) }]"
+            :title="item.title" :aria-current="isActive(item.link) ? 'page' : undefined">
+            {{ item.name }}
           </router-link>
         </v-col>
       </v-row>
@@ -82,9 +82,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, computed, watch } from "vue";
+import { defineComponent, ref, computed, watch } from "vue";
 import { useDisplay } from "vuetify";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useAPILoading, useSettingsStore } from "../store";
 // Imported rather than referenced by path so Vite bundles and fingerprints them. A literal
 // "/src/assets/..." src only resolves under the dev server and 404s in a production build.
@@ -103,11 +103,11 @@ export default defineComponent({
     // Vuetify display utility
     const display = useDisplay();
     const router = useRouter();
+    const route = useRoute();
 
     // State
     const navbarClicked = ref(false);
     const apiLoadingStore = useAPILoading()
-    const activeLink = ref("/");
     const navbarHeight = ref(40);
 
     // Store
@@ -140,32 +140,35 @@ export default defineComponent({
       return items.filter((i) => i.show).map((i) => ({ name: i.name, link: i.link, title: i.title }));
     });
 
+    /**
+     * Collapsed on a phone the bar shows only where you are, so it renders that single entry
+     * rather than six copies of it. Expanded, or on desktop, it shows the whole list.
+     */
+    const visibleNavItems = computed<NavLink[]>(() => {
+      if (display.mdAndUp.value || navbarClicked.value) return navBarLinks.value;
+      const current = navBarLinks.value.find((item) => isActive(item.link));
+      return current ? [current] : navBarLinks.value.slice(0, 1);
+    });
+
     // Computed Properties
     const navbarStyles = computed(() => ({
       height: `${navbarHeight.value}px !important`,
       cursor: display.mdAndUp.value ? "auto" : "pointer",
     }));
 
-    // Methods
-    const selectedLink = (route: NavLink): NavLink => {
-      if (navbarClicked.value || display.mdAndUp.value) return route;
-
-      if (activeLink.value === "/") return route;
-
-      const pathSegments = activeLink.value.split("/").filter(Boolean);
-      if (pathSegments.length > 0) {
-        const routerName = pathSegments[0].toLowerCase();
-        const foundLink = navBarLinks.value.find((link) =>
-          link.name.toLowerCase().includes(routerName)
-        );
-        return foundLink ? foundLink : route;
-      }
-      return route;
+    /**
+     * Which nav entry matches the page being viewed.
+     *
+     * This used to be tracked in a ref that only changed when a nav link was clicked, and applied
+     * by toggling a class on the DOM by hand inside a setTimeout. Any other way of moving between
+     * pages (a link in the body, the back button, a redirect) left the highlight on the previous
+     * page. Deriving it from the router means it is always right.
+     */
+    const isActive = (link: string): boolean => {
+      if (link === '/') return route.path === '/';
+      return route.path === link || route.path.startsWith(`${link}/`);
     };
 
-    const setActiveLink = (link: string) => {
-      activeLink.value = link;
-    };
 
     const openNavbar = () => {
       navbarClicked.value = !navbarClicked.value;
@@ -181,10 +184,6 @@ export default defineComponent({
       searchQuery.value = "";
     };
 
-    onMounted(() => {
-      activeLink.value = window.location.pathname.length > 0 ? window.location.pathname : "/";
-    });
-
     const searchEnabled = computed(() => settingsStore.configuration.enableSearch);
 
     // Watchers
@@ -194,20 +193,6 @@ export default defineComponent({
       // entries once the nav had six items.
       navbarHeight.value = navbarClicked.value ? navBarLinks.value.length * 46 + 12 : 40;
     });
-
-    watch(
-      activeLink,
-      () => {
-        setTimeout(() => {
-          const navLinks = document.querySelectorAll(".nav-link-item");
-          navLinks.forEach((link) => {
-            const linkTo = link.getAttribute("href");
-            link.classList.toggle("active", linkTo === activeLink.value);
-          });
-        }, 50);
-      },
-      { deep: true }
-    );
 
     watch(display.mdAndUp, () => {
       if (display.mdAndUp.value) {
@@ -220,11 +205,11 @@ export default defineComponent({
     return {
       navbarClicked,
       navBarLinks,
+      visibleNavItems,
+      isActive,
       navbarHeight,
       display,
       openNavbar,
-      selectedLink,
-      setActiveLink,
       navbarStyles,
       apiLoadingStore,
       searchEnabled,
@@ -241,6 +226,23 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* Vuetify's v-row carries a -12px bottom margin (it pairs with the padding on v-col). That pulled
+   the nav strip up into the header, so on a phone its top border cut across the bottom of the
+   avatar. Neutralising the negative margin here lets the two sit apart instead of overlapping. */
+.c-header :deep(.v-row) {
+  margin-bottom: 0;
+}
+
+.div-navbar {
+  margin-top: 4px;
+}
+
+/* The avatar's own bottom margin was doing the same job badly: it pushed the name block up while
+   the image kept its box, which is what left the gap looking uneven. */
+.c-header :deep(.image .v-img) {
+  margin-bottom: 0 !important;
+}
+
 /* Menu affordance for the collapsed mobile nav. Positioned against the bar, which is itself the
    click target, so tapping either the icon or the strip opens it. */
 .navbar-toggle {
