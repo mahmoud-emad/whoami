@@ -68,8 +68,10 @@ searchRouter.get('/search', async (req: Request, res: Response): Promise<void> =
       const collection = dbData[model];
       if (!fields || !Array.isArray(collection)) continue;
 
+      // `show === false` means the owner took it off the site. Search is public, so honouring the
+      // flag here is what stops a hidden entry coming straight back through the search box.
       const hits = collection
-        .filter((entry) => entry && entryMatches(entry, fields, needle))
+        .filter((entry) => entry && entry.show !== false && entryMatches(entry, fields, needle))
         .slice(0, SEARCH_MAX_PER_MODEL);
 
       if (hits.length) {

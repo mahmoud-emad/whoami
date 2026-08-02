@@ -111,7 +111,7 @@ describe('small formats', () => {
 
   it('validates IANA timezones through Intl', () => {
     accepts(timezoneRules(), 'Europe/Berlin');
-    accepts(timezoneRules(), 'Africa/Cairo');
+    accepts(timezoneRules(), 'America/Sao_Paulo');
     rejects(timezoneRules(), 'Mars/Olympus');
   });
 

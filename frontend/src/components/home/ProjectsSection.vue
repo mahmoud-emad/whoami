@@ -22,11 +22,12 @@
     <div class="projects pa-2">
       <LoadingComponent :type="'card'" :content-length="2" :content-name="sectionTitle || 'Projects'"
         v-if="apiLoadingStore.isLoading()" />
-      <div v-else-if="items.length">
+      <div v-else-if="visibleItems.length">
         <v-row>
-          <v-col xl='6' cols="12" md="6" sm="6" xs="12" v-for="(project, index) in items" :key="index"
+          <v-col xl='6' cols="12" md="6" sm="6" xs="12" v-for="(project, index) in visibleItems" :key="index"
             class="d-flex justify-start align-stretch">
-            <ProjectCard :project="project" :editable="isAdmin" @edit="openEdit" @remove="removeProject" />
+            <ProjectCard :project="project" :editable="isAdmin" @edit="openEdit" @remove="removeProject"
+              @toggle-hidden="toggleProjectHidden" />
           </v-col>
         </v-row>
         <!-- Only offered when a GitHub profile is actually configured. -->
@@ -161,6 +162,11 @@ export default defineComponent({
     const apiLoadingStore = useAPILoading();
     const settingsStore = useSettingsStore();
     const items: Ref<ProjectType[]> = ref([]);
+
+    /** Same rule as the Projects page: dimmed for the owner, absent for everyone else. */
+    const visibleItems = computed(() =>
+      items.value.filter((project) => isAdmin.value || project.show !== false)
+    );
     const { isAdmin } = useAdmin();
     const { responseType, responseMessage, success, error, clear } = useFormFeedback();
 
@@ -208,7 +214,9 @@ export default defineComponent({
     // add the first project. A section switched off in settings stays off for everyone.
     const visible = computed(() =>
       config.value?.show !== false &&
-      (isAdmin.value || apiLoadingStore.isLoading() || items.value.length > 0)
+      // Counts what actually renders: a section whose every project is hidden must not leave an
+      // empty block behind for a visitor.
+      (isAdmin.value || apiLoadingStore.isLoading() || visibleItems.value.length > 0)
     );
 
     const createLabel = computed(() => (props.section === 'openSource' ? 'New open source' : 'New project'));
@@ -268,6 +276,31 @@ export default defineComponent({
       }
     };
 
+
+    /**
+     * Hide or show a project. Reversible, so unlike delete it fires on the first click.
+     *
+     * Optimistic, with the previous list kept so a failed write puts the card back the way the
+     * owner left it rather than silently disagreeing with the server.
+     */
+    const toggleProjectHidden = async (project: ProjectType) => {
+      if (project.id === undefined) return;
+      const nextShown = project.show === false;
+      const snapshot = items.value.map((item) => ({ ...item }));
+      items.value = items.value.map((item) =>
+        item.id === project.id ? { ...item, show: nextShown } : item
+      );
+      try {
+        await apiJson(`/projects/${project.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ ...project, show: nextShown }),
+        });
+      } catch (e: any) {
+        items.value = snapshot;
+        error(e?.message || 'Failed to change that.');
+      }
+    };
+
     const removeProject = async (project: ProjectType) => {
       if (project.id === undefined) return;
       // Optimistic removal, restored from the snapshot if the server refuses.
@@ -314,6 +347,8 @@ export default defineComponent({
       openEdit,
       saveProject,
       removeProject,
+      visibleItems,
+      toggleProjectHidden,
       nameRules,
       websiteRules,
       longTextRules,

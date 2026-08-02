@@ -8,6 +8,11 @@ export type ProjectType = {
   description: string,
   background: string,
   type: 'project' | 'Open Source',
+  /**
+   * Off takes the project off the public page and out of search, without deleting it. Absent means
+   * visible, so every project written before this existed stays where it was.
+   */
+  show?: boolean,
 }
 
 export type ArticleType = {

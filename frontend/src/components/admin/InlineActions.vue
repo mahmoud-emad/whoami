@@ -10,6 +10,11 @@
     <v-btn v-if="edit && !confirming" class="inline-actions__btn" variant="text" density="comfortable"
       icon="mdi-pencil-outline" :title="editTitle" :aria-label="editTitle" @click.stop="$emit('edit')"></v-btn>
 
+    <!-- Hiding is reversible, so unlike delete it fires on the first click. -->
+    <v-btn v-if="hideable && !confirming" class="inline-actions__btn" variant="text" density="comfortable"
+      :icon="hidden ? 'mdi-eye-outline' : 'mdi-eye-off-outline'" :title="hideTitle" :aria-label="hideTitle"
+      @click.stop="$emit('toggle-hidden')"></v-btn>
+
     <template v-if="remove">
       <v-btn v-if="!confirming" class="inline-actions__btn" variant="text" density="comfortable"
         icon="mdi-delete-outline" :title="removeTitle" :aria-label="removeTitle"
@@ -47,10 +52,14 @@ export default defineComponent({
     add: { type: Boolean, default: false },
     edit: { type: Boolean, default: true },
     remove: { type: Boolean, default: true },
+    /** Show the hide/unhide toggle. Off by default; only collections with a `show` field use it. */
+    hideable: { type: Boolean, default: false },
+    /** Current state, so the button can offer the opposite action. */
+    hidden: { type: Boolean, default: false },
     /** Noun used in the tooltips, e.g. 'project' -> "Edit project". */
     label: { type: String, default: '' },
   },
-  emits: ['edit', 'remove', 'add'],
+  emits: ['edit', 'remove', 'add', 'toggle-hidden'],
   setup(props, { emit }) {
     const { isAdmin } = useAdmin();
     const confirming = ref(false);
@@ -60,6 +69,9 @@ export default defineComponent({
     const addTitle = computed(() => `New${noun.value || ' item'}`);
     const editTitle = computed(() => `Edit${noun.value}`);
     const removeTitle = computed(() => `Delete${noun.value}`);
+    // Says what the click will do, not what the current state is.
+    const hideTitle = computed(() =>
+      props.hidden ? `Show${noun.value} on the site` : `Hide${noun.value} from the site`);
     const confirmTitle = computed(() => `Yes, delete${noun.value}`);
 
     const stopTimer = () => {
@@ -93,6 +105,7 @@ export default defineComponent({
       addTitle,
       editTitle,
       removeTitle,
+      hideTitle,
       confirmTitle,
       requestRemove,
       confirmRemove,

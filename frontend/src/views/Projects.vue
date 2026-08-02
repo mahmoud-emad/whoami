@@ -18,9 +18,10 @@
     <LoadingComponent type="card" :content-length="4" :content-name="'Projects'" v-if="apiLoadingStore.isLoading()" />
     <div class="projects pa-2 mb-4" v-else>
       <v-row>
-        <v-col cols="12" xl='6' md="6" sm="6" xs="12" v-for="(project, index) in projects" :key="index"
+        <v-col cols="12" xl='6' md="6" sm="6" xs="12" v-for="(project, index) in visibleProjects" :key="index"
           class="d-flex justify-start align-stretch">
-          <ProjectCard :project="project" :editable="isAdmin" @edit="openEdit" @remove="removeProject" />
+          <ProjectCard :project="project" :editable="isAdmin" @edit="openEdit" @remove="removeProject"
+            @toggle-hidden="toggleProjectHidden" />
         </v-col>
       </v-row>
       <!-- Only shown when a GitHub profile is configured; there is no default account to link to. -->
@@ -108,6 +109,14 @@ export default {
   components: { ProjectCard, LoadingComponent, EditorDialog },
   setup() {
     const projects: Ref<ProjectType[]> = ref([]);
+
+    /**
+     * Hidden projects stay on the page for the owner, dimmed, so one can be brought back from the
+     * same place it was hidden. A visitor never sees them at all.
+     */
+    const visibleProjects = computed(() =>
+      projects.value.filter((project) => isAdmin.value || project.show !== false)
+    );
     const pageNumber = ref(1)
     const pageSize = ref(0)
     const apiLoadingStore = useAPILoading()
@@ -204,6 +213,31 @@ export default {
       }
     }
 
+
+    /**
+     * Hide or show a project. Reversible, so unlike delete it fires on the first click.
+     *
+     * Optimistic, with the previous list kept so a failed write puts the card back the way the
+     * owner left it rather than silently disagreeing with the server.
+     */
+    const toggleProjectHidden = async (project: ProjectType) => {
+      if (project.id === undefined) return;
+      const nextShown = project.show === false;
+      const snapshot = projects.value.map((item) => ({ ...item }));
+      projects.value = projects.value.map((item) =>
+        item.id === project.id ? { ...item, show: nextShown } : item
+      );
+      try {
+        await apiJson(`/projects/${project.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ ...project, show: nextShown }),
+        });
+      } catch (e: any) {
+        projects.value = snapshot;
+        error(e?.message || 'Failed to change that.');
+      }
+    };
+
     const removeProject = async (project: ProjectType) => {
       if (project.id === undefined) return
       // Optimistic: the card goes immediately, and comes back if the server refuses.
@@ -256,6 +290,8 @@ export default {
       responseType,
       responseMessage,
       openCreate,
+      visibleProjects,
+      toggleProjectHidden,
       openEdit,
       saveProject,
       removeProject,

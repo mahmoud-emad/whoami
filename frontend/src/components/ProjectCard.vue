@@ -1,6 +1,8 @@
 <template>
   <v-card @mouseleave="resetCardBackground(project)" @mousemove="(e) => changeCardBackground(e, project)"
-    class="mx-auto project-card d-flex flex-column" :style="{ background: project.background + '!important' }" rel="noopener">
+    class="mx-auto project-card d-flex flex-column"
+    :class="{ 'project-card--hidden': editable && project.show === false }"
+    :style="{ background: project.background + '!important' }" rel="noopener">
     <div class="project-logo">{{ project.title.toLocaleUpperCase() }}</div>
     <h2 style="cursor: pointer; color: var(--v-theme-text-color);" @click="openLink(project)">{{ project.title }}</h2>
     <v-card-text class="ma-0 pa-0 mt-4 mb-4" style="min-height: 90px;">
@@ -21,7 +23,11 @@
       390px. The card never fetches anything itself — it just reports which project was acted on.
     -->
     <div v-if="editable" class="project-card__actions">
-      <InlineActions label="project" @edit="$emit('edit', project)" @remove="$emit('remove', project)" />
+      <!-- The owner is looking at a card nobody else can see; say so rather than let the dimming
+           read as a rendering fault. -->
+      <span v-if="project.show === false" class="project-card__flag">HIDDEN</span>
+      <InlineActions label="project" hideable :hidden="project.show === false" @edit="$emit('edit', project)"
+        @remove="$emit('remove', project)" @toggle-hidden="$emit('toggle-hidden', project)" />
     </div>
   </v-card>
 </template>
@@ -46,7 +52,7 @@ export default {
       default: false
     }
   },
-  emits: ['edit', 'remove'],
+  emits: ['edit', 'remove', 'toggle-hidden'],
   setup() {
     // Handle Card Background Change
     const handleCardBackgroundChange = (e: any, project: ProjectType) => {
@@ -131,8 +137,27 @@ export default {
 </script>
 
 <style scoped>
+/* A hidden project stays on the page for the owner, dimmed, so it can be brought back from the
+   same place it was hidden. Visitors never render it at all. */
+.project-card--hidden {
+  opacity: 0.55;
+}
+
+.project-card__flag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  padding: 2px 6px;
+  border: 1px dashed rgb(var(--v-theme-border-color));
+  border-radius: 4px;
+  color: rgb(var(--v-theme-gray-color));
+  align-self: center;
+}
+
 .project-card__actions {
   display: flex;
+  align-items: center;
+  gap: 8px;
   justify-content: flex-end;
   margin-top: 4px;
   border-top: 1px solid rgba(var(--v-theme-border-color), 0.6);
