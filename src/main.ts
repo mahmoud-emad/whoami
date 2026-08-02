@@ -24,6 +24,17 @@ import App from './App.vue'
 import router from './router'
 
 
+/**
+ * A deploy replaces the hashed asset filenames, so a tab that was open across one can ask for a
+ * chunk that no longer exists and fail with "Unable to preload CSS for ...". Reloading once picks
+ * up the new index.html. The flag stops a genuinely broken build from looping.
+ */
+window.addEventListener('vite:preloadError', () => {
+  if (sessionStorage.getItem('whoami.reloadedForStaleChunk')) return
+  sessionStorage.setItem('whoami.reloadedForStaleChunk', '1')
+  window.location.reload()
+})
+
 const app = createApp(App)
 
 app.use(createPinia())

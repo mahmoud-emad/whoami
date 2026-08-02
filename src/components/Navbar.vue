@@ -1,88 +1,62 @@
 <template>
-  <div class="c-header">
-    <v-row class="d-flex justify-space-between align-center ml-1 mr-1">
-      <!-- Logo and Username Section -->
-      <v-col md="6" cols="10" class="image pb-0">
-        <div class="d-flex align-center">
-          <!-- No logo is configured on a fresh install, and there is no sensible stand-in for one:
-               a placeholder avatar would put someone else's face on the site. So it is simply
-               absent until brand.logoUrl is set. -->
-          <router-link v-if="logoSrc" to="/" class="d-flex justify-start align-center">
-            <v-img :width="display.mdAndDown.value ? 65 : 80" :height="display.mdAndDown.value ? 65 : 80"
-              :src="logoSrc" class="mb-3" :alt="brandDisplayName || 'Logo'" :title="brandDisplayName || 'Home'" />
-          </router-link>
-          <strong class="username">
-            <h3 v-if="brandDisplayName" :title="brandHandle" :class="{ 'username-title': display.mdAndUp.value }">
-              {{ brandDisplayName }}
-            </h3>
-            <small v-if="brandHandle" class="username-description">
-              known as
-              <a v-if="brandHandleUrl" :href="brandHandleUrl" target="_blank" :title="brandDisplayName">{{ brandHandle
-                }}</a>
-              <span v-else>{{ brandHandle }}</span>
-            </small>
-          </strong>
-        </div>
-      </v-col>
+  <header class="c-header">
+    <!--
+      Plain flexbox rather than v-row / v-col. Vuetify's grid carries negative margins that the
+      nav strip below does not, so the brand block and the nav could never share a left edge no
+      matter what padding was applied. One layout system, one set of edges.
+    -->
+    <div class="nav-top">
+      <router-link v-if="logoSrc" to="/" class="nav-brand__logo">
+        <v-img :src="logoSrc" :alt="brandDisplayName || 'Logo'" :title="brandDisplayName || 'Home'" cover />
+      </router-link>
 
-      <!-- Search Section -->
-      <v-col v-if="searchEnabled" xxl="4" xl="4" lg="4" md="4" cols="2" class="search d-flex justify-end">
-        <!--
-          This box had no v-model and no handler, so typing in it did nothing. Enter or the
-          button now goes to /search, which queries the collections picked in the dashboard.
-        -->
-        <div class="search-container d-flex align-center">
-          <input v-if="display.mdAndUp.value" v-model="searchQuery" type="text" placeholder="Search..." class="c-search"
-            title="Search this site" aria-label="Search this site" @keyup.enter="submitSearch" />
-          <button class="c-nav-search-btn" type="button" title="Search" aria-label="Search" @click="submitSearch">
-            <v-img :src="searchIcon" width="15" height="15" alt="" />
-          </button>
-        </div>
-      </v-col>
-    </v-row>
+      <div class="nav-brand__text">
+        <h3 v-if="brandDisplayName" class="nav-brand__name" :title="brandHandle">{{ brandDisplayName }}</h3>
+        <small v-if="brandHandle" class="nav-brand__handle">
+          known as
+          <a v-if="brandHandleUrl" :href="brandHandleUrl" target="_blank" rel="me noopener"
+            :title="brandDisplayName">{{ brandHandle }}</a>
+          <span v-else>{{ brandHandle }}</span>
+        </small>
+      </div>
 
-    <!-- Navigation Links Section -->
-    <div @click="openNavbar" :class="[
-      'div-navbar',
-      'navbar',
-      display.mdAndUp.value ? 'normal-navbar' : 'responsive-navbar',
-    ]" :style="navbarStyles">
-      <v-row>
-        <v-col v-for="item in visibleNavItems" :key="item.link" xxl="2" xl="2" lg="2" md="2" cols="12" :class="[
-          'pa-0',
-          'ma-0',
-          !display.mdAndUp.value && navbarClicked ? 'responsove-link-hover' : '',
-          display.mdAndUp.value
-            ? 'text-center'
-            : 'd-flex justify-start pa-3',
-          { 'pt-1 pb-1': navbarClicked },
-        ]">
+      <div v-if="searchEnabled" class="nav-search">
+        <input v-if="display.mdAndUp.value" v-model="searchQuery" type="text" placeholder="Search..." class="c-search"
+          title="Search this site" aria-label="Search this site" @keyup.enter="submitSearch" />
+        <button class="c-nav-search-btn" type="button" title="Search" aria-label="Search" @click="submitSearch">
+          <v-img :src="searchIcon" width="15" height="15" alt="" />
+        </button>
+      </div>
+    </div>
 
-          <router-link :to="item.link" :class="['nav-link-item', 'pa-0', 'ma-0', { active: isActive(item.link) }]"
-            :title="item.title" :aria-current="isActive(item.link) ? 'page' : undefined">
+    <!--
+      The open height used to be computed in JavaScript and written as an inline style, which is
+      what left the dead space above and below the links when expanded. CSS sizes it now.
+    -->
+    <nav class="nav-bar" :class="{ 'nav-bar--open': navbarClicked }" aria-label="Site">
+      <ul class="nav-list">
+        <li v-for="item in visibleNavItems" :key="item.link" class="nav-list__item">
+          <router-link :to="item.link" class="nav-link-item" :class="{ active: isActive(item.link) }"
+            :title="item.title" :aria-current="isActive(item.link) ? 'page' : undefined" @click="closeNavbar">
             {{ item.name }}
           </router-link>
-        </v-col>
-      </v-row>
+        </li>
+      </ul>
 
-      <!--
-        On phones the bar collapses to the current page and the whole strip is the toggle, but
-        nothing said so — a visitor could not tell there were other pages behind it. This is the
-        affordance.
-      -->
-      <button v-if="!display.mdAndUp.value" class="navbar-toggle" type="button"
-        :aria-expanded="navbarClicked ? 'true' : 'false'" aria-label="Toggle navigation" @click.stop="openNavbar">
+      <!-- Collapsed, the bar shows only the current page, so this says there is more behind it. -->
+      <button v-if="!display.mdAndUp.value" class="nav-toggle" type="button"
+        :aria-expanded="navbarClicked ? 'true' : 'false'" aria-label="Toggle navigation" @click="openNavbar">
         <v-icon size="20">{{ navbarClicked ? 'mdi-chevron-up' : 'mdi-menu' }}</v-icon>
       </button>
-    </div>
-    <v-progress-linear v-if="apiLoadingStore.isLoading()"
-      style="width: 99% !important; border-radius: 3px !important; margin:  0 auto; height: 2px;" color="primary"
+    </nav>
+
+    <v-progress-linear v-if="apiLoadingStore.isLoading()" class="nav-progress" color="primary" height="2"
       indeterminate></v-progress-linear>
-  </div>
+  </header>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, watch } from "vue";
+import { defineComponent, ref, computed } from "vue";
 import { useDisplay } from "vuetify";
 import { useRoute, useRouter } from "vue-router";
 import { useAPILoading, useSettingsStore } from "../store";
@@ -108,7 +82,6 @@ export default defineComponent({
     // State
     const navbarClicked = ref(false);
     const apiLoadingStore = useAPILoading()
-    const navbarHeight = ref(40);
 
     // Store
     const settingsStore = useSettingsStore();
@@ -150,11 +123,6 @@ export default defineComponent({
       return current ? [current] : navBarLinks.value.slice(0, 1);
     });
 
-    // Computed Properties
-    const navbarStyles = computed(() => ({
-      height: `${navbarHeight.value}px !important`,
-      cursor: display.mdAndUp.value ? "auto" : "pointer",
-    }));
 
     /**
      * Which nav entry matches the page being viewed.
@@ -169,6 +137,10 @@ export default defineComponent({
       return route.path === link || route.path.startsWith(`${link}/`);
     };
 
+
+    const closeNavbar = () => {
+      navbarClicked.value = false;
+    };
 
     const openNavbar = () => {
       navbarClicked.value = !navbarClicked.value;
@@ -186,20 +158,7 @@ export default defineComponent({
 
     const searchEnabled = computed(() => settingsStore.configuration.enableSearch);
 
-    // Watchers
-    watch(navbarClicked, () => {
-      if (display.mdAndUp.value) return;
-      // Derived from the number of links rather than a fixed 220px, which clipped the last
-      // entries once the nav had six items.
-      navbarHeight.value = navbarClicked.value ? navBarLinks.value.length * 46 + 12 : 40;
-    });
 
-    watch(display.mdAndUp, () => {
-      if (display.mdAndUp.value) {
-        navbarClicked.value = false;
-        navbarHeight.value = 40;
-      }
-    }, { deep: true });
 
     // Return reactive properties and methods
     return {
@@ -207,10 +166,9 @@ export default defineComponent({
       navBarLinks,
       visibleNavItems,
       isActive,
-      navbarHeight,
       display,
       openNavbar,
-      navbarStyles,
+      closeNavbar,
       apiLoadingStore,
       searchEnabled,
       searchQuery,
@@ -226,96 +184,199 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Vuetify's v-row carries a -12px bottom margin (it pairs with the padding on v-col). That pulled
-   the nav strip up into the header, so on a phone its top border cut across the bottom of the
-   avatar. Neutralising the negative margin here lets the two sit apart instead of overlapping. */
-.c-header :deep(.v-row) {
-  margin-bottom: 0;
+/* One horizontal rhythm for the whole header. The brand row and the nav strip share this padding,
+   which is what makes their left and right edges line up. */
+.c-header {
+  --nav-inset: 0px;
+  background-color: transparent !important;
+  color: rgb(var(--v-theme-text-color)) !important;
 }
 
-.div-navbar {
-  margin-top: 4px;
+/* ---- brand row ---- */
+.nav-top {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.5rem var(--nav-inset) 0.75rem;
 }
 
-/* The avatar's own bottom margin was doing the same job badly: it pushed the name block up while
-   the image kept its box, which is what left the gap looking uneven. */
-.c-header :deep(.image .v-img) {
-  margin-bottom: 0 !important;
+.nav-brand__logo {
+  flex: 0 0 auto;
+  display: block;
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-/* Menu affordance for the collapsed mobile nav. Positioned against the bar, which is itself the
-   click target, so tapping either the icon or the strip opens it. */
-.navbar-toggle {
-  position: absolute;
-  top: 6px;
-  right: 10px;
+.nav-brand__logo :deep(.v-img) {
+  width: 100%;
+  height: 100%;
+}
+
+.nav-brand__text {
+  /* Lets a long name wrap instead of pushing the search button off the row. */
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.nav-brand__name {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: rgb(var(--v-theme-text-color)) !important;
+  overflow-wrap: anywhere;
+}
+
+.nav-brand__handle {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.85rem;
+  color: rgb(var(--v-theme-gray-color));
+}
+
+.nav-brand__handle a {
+  color: rgb(var(--v-theme-link-hover-color)) !important;
+}
+
+.nav-search {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+/* ---- nav strip ---- */
+.nav-bar {
+  border: 1px solid rgb(var(--v-theme-border-color));
+  border-radius: 8px;
+  margin: 0 var(--nav-inset);
+  /* Collapsed on mobile the links and the toggle share one row; expanded, the list takes over. */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0 !important;
+}
+
+.nav-list__item {
+  display: flex;
+}
+
+.nav-link-item {
+  display: flex;
+  align-items: center;
+  /* 40px keeps every entry a comfortable tap target without a separate mobile rule. */
+  min-height: 40px;
+  padding: 0 0.6rem;
+  font-family: var(--font-mono) !important;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: rgb(var(--v-theme-gray-color)) !important;
+  border-radius: 4px;
+}
+
+.nav-link-item:hover {
+  color: rgb(var(--v-theme-link-hover-color)) !important;
+  background: rgba(var(--v-theme-link-hover-color), 0.08);
+}
+
+.nav-link-item.active {
+  color: rgb(var(--v-theme-link-hover-color)) !important;
+}
+
+.nav-link-item:focus-visible {
+  outline: 2px solid rgb(var(--v-theme-link-hover-color));
+  outline-offset: -2px;
+}
+
+.nav-toggle {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
+  width: 40px;
+  height: 40px;
   background: transparent !important;
   color: rgb(var(--v-theme-gray-color)) !important;
   border-radius: 4px;
 }
 
-.navbar-toggle:focus-visible {
+.nav-toggle:focus-visible {
   outline: 2px solid rgb(var(--v-theme-link-hover-color));
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
-.responsive-navbar {
-  position: relative;
+.nav-progress {
+  margin-top: 0.35rem;
+  border-radius: 3px;
 }
 
-/* Active link styling */
-.active {
-  color: rgb(var(--v-theme-link-hover-color)) !important;
-}
+/* ---- mobile ---- */
+@media (max-width: 959px) {
+  .nav-brand__logo {
+    width: 56px;
+    height: 56px;
+  }
 
-/* Responsive navbar styling */
-.responsive-navbar {
-  flex-wrap: wrap;
-  padding: 7px !important;
-  display: flex !important;
-  padding-left: 25px !important;
-  padding-right: 25px !important;
-}
+  .nav-brand__name {
+    font-size: 1.1rem;
+  }
 
-/* General navbar styling */
-.navbar {
-  background: transparent !important;
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  background: var(--v-theme-box-bg-color) !important;
-  border: 1px solid rgb(var(--v-theme-border-color)) !important;
-  border-radius: 6px !important;
-  transition: 0.2s;
-}
+  /* Expanded, the strip becomes a column. Height comes from the content, so there is no dead
+     space above or below the links the way there was with a JavaScript-set height. */
+  .nav-bar--open {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0.4rem 0.5rem 0.6rem;
+  }
 
-/* Username section styling */
-.username {
-  line-height: 20px;
-}
+  .nav-bar--open .nav-list {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    order: 2;
+  }
 
-.username small {
-  color: var(--v-theme-gray-color) !important;
-}
+  .nav-bar--open .nav-list__item {
+    width: 100%;
+  }
 
-/* Navbar container */
-.div-navbar {
-  overflow: hidden;
-}
+  .nav-bar--open .nav-link-item {
+    width: 100%;
+    min-height: 44px;
+  }
 
-.responsove-link-hover:hover {
-  background: rgb(var(--v-theme-border-color)) !important;
-  transition: 0.5s;
-}
+  /* The toggle floats into the corner rather than taking a row of its own, which is what left a
+     band of empty space between it and the first link. The links are left aligned text, so the
+     only one that could run under it gets clearance. */
+  .nav-bar--open {
+    position: relative;
+  }
 
-.nav-link-item-bg-hover:hover {
-  background: rgb(var(--v-theme-border-color)) !important;
-  transition: 0.5s;
+  .nav-bar--open .nav-toggle {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.5rem;
+  }
+
+  .nav-bar--open .nav-list__item:first-child .nav-link-item {
+    padding-right: 3rem;
+  }
 }
 </style>
