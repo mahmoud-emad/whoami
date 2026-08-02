@@ -135,9 +135,6 @@ required once those fields are filled.
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — repository layout, how to add a config key, and the one
   rule: no personal data in the source tree.
 
-The manual is written for [hero_doc_generator](https://forge.ourworld.tf/lhumina_code/hero_skills):
-`hero_doc_generator build docs` turns `docs/content/` into HTML, an ebook, a PDF and a DOCX. The
-Markdown reads fine on its own, so the tool is optional.
 
 ## License
 

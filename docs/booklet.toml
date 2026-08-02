@@ -1,9 +1,7 @@
-# Build manifest for hero_doc_generator.
+# Build manifest for the manual: title, chapter order, and how headings, images and page breaks
+# are handled when `content/` is rendered to HTML, PDF, DOCX or an ebook.
 #
-#   hero_doc_generator build docs
-#
-# Output lands in ~/Downloads/whoami-manual/ as whoami-manual.{html,docx,pdf,ebook}.
-# Command-line flags override anything set here.
+# The chapters are plain Markdown and read fine without any of this.
 
 title    = "whoami Manual"
 subtitle = "Running and configuring a self-hosted personal site"

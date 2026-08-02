@@ -31,7 +31,7 @@ export const BOOT_DARK_COLORS: ThemeColors = {
     "gray-color": "#A79E95",       //  7.13:1
     "link-color": "#E5C9A3",       // 11.83:1
     "box-bg-color": "#1C1815",
-    "link-hover-color": "#E0A458", //  8.61:1 — the accent, also the hero CTAs and the RUNNING state
+    "link-hover-color": "#E0A458", //  8.61:1 — the accent, also the intro CTAs and the RUNNING state
     "front-end-bg-color": "#33241A",
     "back-end-bg-color": "#2A2A1C",
     "form": "#1A1613",
@@ -50,7 +50,7 @@ export const BOOT_LIGHT_COLORS: ThemeColors = {
     "gray-color": "#6B6259",
     "link-color": "#8A4F1B",       //  6.37:1
     "box-bg-color": "#FFFFFF",
-    // Accent used for the RUNNING state and the hero CTAs; the amber that works on
+    // Accent used for the RUNNING state and the intro CTAs; the amber that works on
     // charcoal is far too light on white, so light gets the burnt end of the same hue.
     "link-hover-color": "#9A5A1C", //  5.32:1
     "front-end-bg-color": "#F5E6D3",

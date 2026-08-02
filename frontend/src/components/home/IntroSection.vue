@@ -1,12 +1,12 @@
 <template>
   <!--
-    The hero states a claim instead of performing a greeting. Every line of it comes from settings;
-    an unconfigured install renders an empty hero rather than someone else's introduction.
+    The intro states a claim instead of performing a greeting. Every line of it comes from settings;
+    an unconfigured install renders an empty intro rather than someone else's introduction.
   -->
   <!-- No `pa-2`: Vuetify's spacing utilities are !important, so that class was silently overriding
-       the block's own padding and collapsing the hero's breathing room to 8px. -->
+       the block's own padding and collapsing the intro's breathing room to 8px. -->
   <!-- `|| isAdmin` keeps the block mounted for the owner when the section is switched off or still
-       empty — otherwise a fresh install offers nowhere to fill the hero in from. For a visitor the
+       empty — otherwise a fresh install offers nowhere to fill the intro in from. For a visitor the
        condition is exactly the `show` it always was. -->
   <div v-if="show || isAdmin" class="intro">
     <p v-if="role" class="intro__eyebrow">{{ role }}</p>
@@ -23,7 +23,7 @@
 
     <!-- Owner-only strip, below the calls to action so the visitor layout above it is untouched. -->
     <div v-if="isAdmin" class="owner-bar">
-      <InlineActions label="hero" :remove="false" @edit="openEditor" />
+      <InlineActions label="intro" :remove="false" @edit="openEditor" />
       <!-- The owner is looking at a block nobody else can see; say so rather than let it read as a
            rendering bug. -->
       <span v-if="!show" class="owner-bar__note">Hidden from visitors</span>
@@ -32,22 +32,22 @@
     </div>
 
     <!-- Mounted only for the owner, so a visitor never loads the form at all. -->
-    <EditorDialog v-if="isAdmin" v-model="editorOpen" title="Edit hero">
+    <EditorDialog v-if="isAdmin" v-model="editorOpen" title="Edit intro">
       <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
         {{ responseMessage }}
       </v-alert>
       <v-form v-model="validForm" :disabled="saving">
         <!-- The section entry (profile.sections.intro) is edited here as well as in the dashboard,
-             so the hero can be retitled or hidden from the page it actually belongs to. -->
+             so the intro can be retitled or hidden from the page it actually belongs to. -->
         <div class="d-flex align-center justify-space-between flex-wrap ga-2 mb-2">
           <span class="editor-group">Section</span>
           <v-switch v-model="draft.section.show" color="primary" inset hide-details density="compact"
             :label="draft.section.show ? 'Visible' : 'Hidden'"></v-switch>
         </div>
         <!-- Home.vue drops a hidden section from the page entirely, this editor included, so hiding
-             the hero is not undoable from here. Say so before it is switched off, not after. -->
+             the intro is not undoable from here. Say so before it is switched off, not after. -->
         <p v-if="!draft.section.show" class="editor-warning mb-2">
-          Hidden removes the whole hero from the page — including this editor. Bring it back from
+          Hidden removes the whole intro from the page — including this editor. Bring it back from
           Sections in the dashboard.
         </p>
         <v-row class="ma-0">
@@ -56,14 +56,14 @@
               variant="outlined" hide-details="auto" density="comfortable"></v-text-field>
           </v-col>
           <v-col cols="12" sm="9" class="pa-1">
-            <!-- The hero has no <h2> of its own: emoji + heading stand in as the headline whenever
+            <!-- The intro has no <h2> of its own: emoji + heading stand in as the headline whenever
                  no claim line is set, which is why this is worth filling in. -->
             <v-text-field v-model="draft.section.title" title="Section Heading" label="Heading" variant="outlined"
               hide-details="auto" density="comfortable"
               hint="Used as the headline when no claim line is set." persistent-hint></v-text-field>
           </v-col>
           <v-col cols="12" class="pa-1">
-            <!-- The hero has no separate intro paragraph either: the bio fills that slot, and this
+            <!-- There is no separate intro paragraph either: the bio fills that slot, and this
                  is what shows when the bio is empty. -->
             <v-textarea v-model="draft.section.intro" title="Section Intro" label="Intro paragraph" variant="outlined"
               hide-details="auto" density="comfortable" rows="2" auto-grow
@@ -83,7 +83,7 @@
           hide-details="auto" multiple chips closable-chips
           hint="The headline. Type a line and press enter; more than one rotates every 3 seconds."
           persistent-hint class="mb-4 welcome-combobox"></v-combobox>
-        <!-- Rules only bite once something has been typed, so an empty hero is still savable. -->
+        <!-- Rules only bite once something has been typed, so an empty intro is still savable. -->
         <v-textarea v-model="draft.bio" :rules="draft.bio?.length ? longTextRules({
           fieldName: 'Bio',
           maxLength: 600,
@@ -117,7 +117,7 @@ import { deepClone, longTextRules, sectionHeading, websiteRules } from '../../ut
 
 const ROTATE_MS = 3000;
 
-/** The hero's own slice of the profile — exactly the keys `save` writes back, and no others. */
+/** The intro's own slice of the profile — exactly the keys `save` writes back, and no others. */
 type IntroDraft = {
   role: string;
   bio: string;
@@ -132,7 +132,7 @@ const emptyDraft = (): IntroDraft => ({
   welcomeMessages: [],
   resumeUrl: '',
   // `order` drives Home.vue's section sequence; the stored value replaces this default on open, so
-  // editing the hero never reshuffles the page.
+  // editing the intro never reshuffles the page.
   section: { title: '', emoji: '', intro: '', show: true, order: 1 },
 });
 
@@ -151,7 +151,7 @@ export default defineComponent({
       (settingsStore.profile?.welcomeMessages || []).filter((m) => m && m.trim().length > 0)
     );
 
-    // The hero has no separate <h2>: its headline *is* the section heading. So when no welcome
+    // The intro has no separate <h2>: its headline *is* the section heading. So when no welcome
     // message is configured, the section's own emoji + title stand in — still config, never a name.
     const configuredHeading = computed<string>(() => sectionHeading(section.value));
 
@@ -215,7 +215,7 @@ export default defineComponent({
     const openEditor = () => {
       clear();
       const profile = settingsStore.profile;
-      // Cloned, so typing in the dialog does not rewrite the hero behind it before anything is
+      // Cloned, so typing in the dialog does not rewrite the intro behind it before anything is
       // saved — and so Cancel really cancels.
       draft.value = {
         ...emptyDraft(),
@@ -237,7 +237,7 @@ export default defineComponent({
         const full = settingsStore.getSettings();
         // Only the keys this dialog owns are written back. brand/socials/contact/more/experience and
         // every other `sections` entry are carried through from current store state, so saving the
-        // hero can never clobber another form's or another section's data.
+        // intro can never clobber another form's or another section's data.
         full.profile = {
           ...full.profile,
           role: draft.value.role,
@@ -254,9 +254,9 @@ export default defineComponent({
         };
         await settingsStore.saveSettings(full);
         editorOpen.value = false;
-        success('Hero saved.');
+        success('Intro saved.');
       } catch (e: any) {
-        error(e?.message || 'Failed to save the hero.');
+        error(e?.message || 'Failed to save the intro.');
       } finally {
         saving.value = false;
       }
@@ -285,7 +285,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Vertical padding only. The hero starts on the same left edge as every section below it — it used
+/* Vertical padding only. The intro starts on the same left edge as every section below it — it used
    to be indented by half a rem, which is exactly enough to look like a mistake. The max-width it
    also set was a second measure inside .c-container's. */
 .intro {

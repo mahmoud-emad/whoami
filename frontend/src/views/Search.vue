@@ -215,7 +215,7 @@ export default defineComponent({
   margin-bottom: 0;
 }
 
-/* Mono, uppercase, accent — the same label device the hero's eyebrow and the experience states
+/* Mono, uppercase, accent — the same label device the intro's eyebrow and the experience states
    use. It marks a group of data rather than being a heading in its own right, which is why it is
    smaller than .section-heading instead of a second size in the heading scale. */
 .search__group-title {

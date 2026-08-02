@@ -18,34 +18,12 @@ what the numeric prefixes are for.
 [OPEN_SOURCE_PLAN.md](OPEN_SOURCE_PLAN.md) sits outside `content/` on purpose — it is a record of
 how this repository was made publishable, not part of the manual.
 
-## Building it
-
-`booklet.toml` is the manifest. With
-[hero_doc_generator](https://forge.ourworld.tf/lhumina_code/hero_skills) installed:
-
-```bash
-hero_doc_generator check docs     # print the chapter order without building
-hero_doc_generator build docs     # HTML, ebook, PDF and DOCX
-```
-
-Output lands in `~/Downloads/whoami-manual/`. Useful flags:
-
-| Flag | Effect |
-| --- | --- |
-| `--format html` | One format only — build HTML first to check diagrams render |
-| `--watch --open` | Rebuild on save and open the result |
-| `--strict` | Fail on broken local links or missing images. Use this in CI. |
-| `--out <DIR>` | Write somewhere other than `~/Downloads` |
-
-The `ebook` format turns the `content/` subdirectories into a collapsible sidebar treeview, so the
-folder names double as navigation labels.
-
 ## Writing conventions
 
 - One `# H1` per file — it becomes the chapter title in every output format.
 - Never skip a heading level. `#` then `##` then `###`. Check with `grep -n "^#" <file>`.
 - A one- or two-sentence lead paragraph under the H1, before the first `##`.
-- Numeric prefixes (`01_`, `02_`) set the order. Verify with `hero_doc_generator check docs`.
+- Numeric prefixes (`01_`, `02_`) set the order.
 - Relative links between chapters, so they work both on the forge and in the built output.
 - Mermaid for flows and sequences. Unsupported diagram types render as plain code blocks rather
   than failing the build, so check the HTML output.

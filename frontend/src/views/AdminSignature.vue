@@ -157,7 +157,7 @@ export default {
   max-width: 25rem;
 }
 
-/* Mono eyebrow above a display heading: the same pairing the home page hero uses, so this screen
+/* Mono eyebrow above a display heading: the same pairing the home page intro uses, so this screen
    reads as part of the site rather than a stray admin tool. */
 .signin__eyebrow {
   font-family: var(--font-mono);
