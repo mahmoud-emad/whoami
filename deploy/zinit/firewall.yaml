@@ -1,0 +1,5 @@
+# ufw ships a systemd unit for boot persistence, but this machine runs zinit as PID 1.
+# Re-apply the saved ruleset at boot so 3000/2019 stay closed and only 22/80/443 are open.
+exec: /usr/sbin/ufw --force enable
+oneshot: true
+log: ring

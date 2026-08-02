@@ -1,0 +1,6 @@
+# Caddy reverse proxy — the only publicly reachable service. Terminates TLS for
+# mahmoud-emad.dev and forwards to the backend on 127.0.0.1:3000. Runs unprivileged.
+exec: /opt/whoami/deploy/bin/start-caddy.sh
+after:
+  - whoami
+log: ring

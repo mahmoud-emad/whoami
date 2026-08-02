@@ -1,0 +1,5 @@
+# Whoami portfolio — Express API + built frontend, listening on 127.0.0.1:3000.
+exec: /opt/whoami/deploy/bin/start.sh
+after:
+  - sshd
+log: ring
