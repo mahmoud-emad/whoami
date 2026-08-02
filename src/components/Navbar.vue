@@ -4,30 +4,39 @@
       <!-- Logo and Username Section -->
       <v-col md="6" cols="10" class="image pb-0">
         <div class="d-flex align-center">
-          <router-link to="/" class="d-flex justify-start align-center">
+          <!-- No logo is configured on a fresh install, and there is no sensible stand-in for one:
+               a placeholder avatar would put someone else's face on the site. So it is simply
+               absent until brand.logoUrl is set. -->
+          <router-link v-if="logoSrc" to="/" class="d-flex justify-start align-center">
             <v-img :width="display.mdAndDown.value ? 65 : 80" :height="display.mdAndDown.value ? 65 : 80"
-              src="/src/assets/navbar/logo.png" class="mb-3" alt="Logo" title="Want to see my photo? zoom in :P 👀" />
+              :src="logoSrc" class="mb-3" :alt="brandDisplayName || 'Logo'" :title="brandDisplayName || 'Home'" />
           </router-link>
           <strong class="username">
-            <h3 title="Omdanii" :class="{ 'username-title': display.mdAndUp.value }">
-              Mahmoud Emad 🎄
+            <h3 v-if="brandDisplayName" :title="brandHandle" :class="{ 'username-title': display.mdAndUp.value }">
+              {{ brandDisplayName }}
             </h3>
-            <small class="username-description">
+            <small v-if="brandHandle" class="username-description">
               known as
-              <a href="https://github.com/Mahmoud-Emad" target="_blank" title="Mahmoud Emad">@Omdanii</a>
+              <a v-if="brandHandleUrl" :href="brandHandleUrl" target="_blank" :title="brandDisplayName">{{ brandHandle
+                }}</a>
+              <span v-else>{{ brandHandle }}</span>
             </small>
           </strong>
         </div>
       </v-col>
 
       <!-- Search Section -->
-      <v-col xxl="4" xl="4" lg="4" md="4" cols="2" class="search d-flex justify-end">
+      <v-col v-if="searchEnabled" xxl="4" xl="4" lg="4" md="4" cols="2" class="search d-flex justify-end">
+        <!--
+          This box had no v-model and no handler, so typing in it did nothing. Enter or the
+          button now goes to /search, which queries the collections picked in the dashboard.
+        -->
         <div class="search-container d-flex align-center">
-          <input v-if="display.mdAndUp.value" type="text" placeholder="Search..." class="c-search"
-            title="What goes around comes around 🧞‍♀️" />
-          <div class="c-nav-search-btn" :style="{ padding: display.mdAndUp.value ? '10px' : '10px' }">
-            <v-img src="/src/assets/icons/search.svg" width="15" height="15" title="Think and dig 🎲" />
-          </div>
+          <input v-if="display.mdAndUp.value" v-model="searchQuery" type="text" placeholder="Search..." class="c-search"
+            title="Search this site" aria-label="Search this site" @keyup.enter="submitSearch" />
+          <button class="c-nav-search-btn" type="button" title="Search" aria-label="Search" @click="submitSearch">
+            <v-img :src="searchIcon" width="15" height="15" alt="" />
+          </button>
         </div>
       </v-col>
     </v-row>
@@ -55,6 +64,16 @@
           </router-link>
         </v-col>
       </v-row>
+
+      <!--
+        On phones the bar collapses to the current page and the whole strip is the toggle, but
+        nothing said so — a visitor could not tell there were other pages behind it. This is the
+        affordance.
+      -->
+      <button v-if="!display.mdAndUp.value" class="navbar-toggle" type="button"
+        :aria-expanded="navbarClicked ? 'true' : 'false'" aria-label="Toggle navigation" @click.stop="openNavbar">
+        <v-icon size="20">{{ navbarClicked ? 'mdi-chevron-up' : 'mdi-menu' }}</v-icon>
+      </button>
     </div>
     <v-progress-linear v-if="apiLoadingStore.isLoading()"
       style="width: 99% !important; border-radius: 3px !important; margin:  0 auto; height: 2px;" color="primary"
@@ -65,7 +84,11 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref, computed, watch } from "vue";
 import { useDisplay } from "vuetify";
+import { useRouter } from "vue-router";
 import { useAPILoading, useSettingsStore } from "../store";
+// Imported rather than referenced by path so Vite bundles and fingerprints them. A literal
+// "/src/assets/..." src only resolves under the dev server and 404s in a production build.
+import searchIcon from "../assets/icons/search.svg";
 
 // Define interfaces for type safety
 interface NavLink {
@@ -79,26 +102,43 @@ export default defineComponent({
   setup() {
     // Vuetify display utility
     const display = useDisplay();
+    const router = useRouter();
 
     // State
     const navbarClicked = ref(false);
     const apiLoadingStore = useAPILoading()
     const activeLink = ref("/");
     const navbarHeight = ref(40);
-    const adminDashboard = ref(false);
 
     // Store
     const settingsStore = useSettingsStore();
 
-    // Navigation Links Configuration
-    const navBarLinks = ref<NavLink[]>([
+    // Generic page chrome, not identity: used before settings load and when an owner has not
+    // customised the nav. A portfolio with no navigation is broken, so this default stays.
+    const DEFAULT_NAV_ITEMS: NavLink[] = [
       { name: "❄️ About", link: "/", title: "About me" },
       { name: "📞 Contact", link: "/contact", title: "Contact me" },
       { name: "🎨 Projects", link: "/projects", title: "See my projects" },
       { name: "✍️ Blog", link: "/blog", title: "See my blog" },
       { name: "🧁 Guestbook", link: "/guestbook", title: "Write me a guestbook" },
       { name: "🌏 More", link: "/more", title: "Wanna to see more?" },
-    ]);
+    ];
+
+    const brand = computed(() => (settingsStore.isSettingsLoaded() ? settingsStore.profile?.brand : undefined));
+
+    // Everything about the brand comes from settings. Nothing falls back to a person's name, handle
+    // or profile URL: an unconfigured clone must not advertise whoever set the template up first.
+    // Empty values are rendered as nothing at all (see the v-ifs in the template).
+    const brandDisplayName = computed(() => brand.value?.displayName?.trim() || '');
+    const brandHandle = computed(() => brand.value?.handle?.trim() || '');
+    const brandHandleUrl = computed(() => brand.value?.handleUrl?.trim() || '');
+    const logoSrc = computed(() => brand.value?.logoUrl?.trim() || '');
+
+    const navBarLinks = computed<NavLink[]>(() => {
+      const items = brand.value?.navItems;
+      if (!items || items.length === 0) return DEFAULT_NAV_ITEMS;
+      return items.filter((i) => i.show).map((i) => ({ name: i.name, link: i.link, title: i.title }));
+    });
 
     // Computed Properties
     const navbarStyles = computed(() => ({
@@ -131,34 +171,28 @@ export default defineComponent({
       navbarClicked.value = !navbarClicked.value;
     };
 
-    // Lifecycle Hooks
-    onMounted(async () => {
-      activeLink.value =
-        window.location.pathname.length > 0 ? window.location.pathname : "/";
+    const searchQuery = ref("");
 
-      const serverUrl = import.meta.env.VITE_SERVER_URL;
-      if (!serverUrl) {
-        throw new Error("VITE_SERVER_URL is not defined");
-      }
+    // On phones the input is hidden, so the button alone opens the search page and the visitor
+    // types there instead.
+    const submitSearch = () => {
+      const term = searchQuery.value.trim();
+      router.push(term ? { path: "/search", query: { q: term } } : { path: "/search" });
+      searchQuery.value = "";
+    };
 
-      try {
-        const url = new URL(serverUrl);
-        settingsStore.server.host = url.hostname;
-        settingsStore.server.port =
-          Number(url.port) || (url.protocol === "https:" ? 443 : 80);
-
-        await settingsStore.loadSettings();
-        adminDashboard.value =
-          settingsStore.getSettings().configuration.adminDashboard;
-      } catch (error) {
-        console.error("Failed to initialize settings:", error);
-      }
+    onMounted(() => {
+      activeLink.value = window.location.pathname.length > 0 ? window.location.pathname : "/";
     });
+
+    const searchEnabled = computed(() => settingsStore.configuration.enableSearch);
 
     // Watchers
     watch(navbarClicked, () => {
       if (display.mdAndUp.value) return;
-      navbarHeight.value = navbarClicked.value ? 220 : 40;
+      // Derived from the number of links rather than a fixed 220px, which clipped the last
+      // entries once the nav had six items.
+      navbarHeight.value = navbarClicked.value ? navBarLinks.value.length * 46 + 12 : 40;
     });
 
     watch(
@@ -193,12 +227,46 @@ export default defineComponent({
       setActiveLink,
       navbarStyles,
       apiLoadingStore,
+      searchEnabled,
+      searchQuery,
+      submitSearch,
+      brandDisplayName,
+      brandHandle,
+      brandHandleUrl,
+      logoSrc,
+      searchIcon,
     };
   },
 });
 </script>
 
 <style scoped>
+/* Menu affordance for the collapsed mobile nav. Positioned against the bar, which is itself the
+   click target, so tapping either the icon or the strip opens it. */
+.navbar-toggle {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent !important;
+  color: rgb(var(--v-theme-gray-color)) !important;
+  border-radius: 4px;
+}
+
+.navbar-toggle:focus-visible {
+  outline: 2px solid rgb(var(--v-theme-link-hover-color));
+  outline-offset: 2px;
+}
+
+.responsive-navbar {
+  position: relative;
+}
+
 /* Active link styling */
 .active {
   color: rgb(var(--v-theme-link-hover-color)) !important;

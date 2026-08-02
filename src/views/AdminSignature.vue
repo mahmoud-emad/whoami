@@ -1,53 +1,55 @@
 <template>
-  <div class="main-scope pa-3 bg-image">
-    <div class="d-flex justify-center align-center">
-      <v-alert class="d-flex justify-center align-center" variant="outlined" type="warning">
-        Please be aware that this area is restricted to admins only. If you are here by mistake or wish to
-        return to
-        the site, please click `<router-link to="/">Return me</router-link>`.
-      </v-alert>
-    </div>
-    <div class="admin-form d-flex justify-center align-center" style="height: 750px;">
-      <v-card width="500" class="pa-4 login-card head-card" :style="{ background: 'transparent !important' }">
-        <p class="mb-4">
-          <strong>Admin Login Signature</strong>
-          <small> 🔑 </small>
-        </p>
-        <small class="mb-4">
-          Please enter your email and password to access the admin panel.
-        </small>
-        <v-form v-model="validForm" @submit.prevent="login">
-          <v-text-field :rules="signatureRules()" v-model="signature" append-icon="mdi-fingerprint" class="mb-4"
-            type="password" label="Signature" hide-details="auto" variant="outlined"></v-text-field>
-          <v-alert v-if="showInvalidAlert" class="mt-4 mb-4" type="error" variant="tonal">
-            The signature you entered is invalid
-          </v-alert>
-          <v-alert v-if="siteSettings && siteSettings.configuration && !siteSettings.configuration.adminDashboard"
-            class="mt-4 mb-4" type="warning" variant="tonal">
-            The admin-dashboard service is disabled, would you like to enable it?
-          </v-alert>
-          <v-switch class="mb-3"
-            v-if="siteSettings && siteSettings.configuration && !siteSettings.configuration.adminDashboard"
-            :loading="apiLoadingStore.isLoading()" v-model="enableAdminDashboard" title="Enable admin-dashboard service"
-            color="primary" hide-details inset>
+  <!--
+    Deliberately plain. This page is reached by typing the URL, never by following a link, so it
+    does not need to sell anything or explain where the visitor is — it needs one input and a way
+    back out. No branding, no owner name, no hint about the credential.
+  -->
+  <div class="signin">
+    <section class="signin__panel">
+      <p class="signin__eyebrow">Restricted</p>
+      <h1 class="signin__title">Sign in</h1>
+      <p class="signin__lede">
+        This page is for the site owner. If you landed here by accident,
+        <router-link to="/" class="signin__back">return to the site</router-link>.
+      </p>
+
+      <v-form v-model="validForm" class="signin__form" @submit.prevent="login">
+        <label class="signin__label" for="signature">Signature</label>
+        <v-text-field id="signature" v-model="signature" :rules="signatureRules()"
+          :type="showPassword ? 'text' : 'password'"
+          :append-inner-icon="showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+          autocomplete="current-password" density="comfortable" variant="outlined" hide-details="auto"
+          @click:append-inner="showPassword = !showPassword"></v-text-field>
+
+        <v-alert v-if="showInvalidAlert" class="mt-4" type="error" variant="tonal" density="compact">
+          {{ errorMessage || 'That signature was not accepted' }}
+        </v-alert>
+
+        <!-- Only offered while the dashboard is off: with it already on, the switch would be a
+             control that changes nothing. -->
+        <template v-if="dashboardDisabled">
+          <p class="signin__note">The dashboard is currently switched off.</p>
+          <v-switch v-model="enableAdminDashboard" :loading="apiLoadingStore.isLoading()" class="signin__switch"
+            color="primary" density="compact" hide-details inset>
             <template #label>
-              Enable <strong class="ml-1 mr-1" style="font-size: 16px;">admin-dashboard</strong> service
+              <span class="signin__switch-label">Switch it back on when I sign in</span>
             </template>
           </v-switch>
-          <v-btn :loading="apiLoadingStore.isLoading()" :disabled="!validForm" @click="login" variant="tonal"
-            color="primary" class="mb-2 mt-2">
-            Validate
-          </v-btn>
-        </v-form>
-      </v-card>
-    </div>
+        </template>
+
+        <v-btn :loading="apiLoadingStore.isLoading()" :disabled="!validForm" type="submit" variant="flat"
+          color="primary" class="signin__submit" block>
+          Continue
+        </v-btn>
+      </v-form>
+    </section>
   </div>
 </template>
 
 <script lang="ts">
-import { onMounted, ref } from 'vue';
-import md5 from 'md5';
-import { validateAdminSignature } from '../utils';
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { login as apiLogin } from '../utils/api';
 import { useAPILoading, useSettingsStore } from "../store/index";
 import { SettingsType } from '../types';
 
@@ -57,29 +59,32 @@ export default {
     const showPassword = ref(false)
     const apiLoadingStore = useAPILoading();
     const settingsStore = useSettingsStore();
+    const router = useRouter();
     const siteSettings = ref<SettingsType>({} as SettingsType);
     const signature = ref('');
     const showInvalidAlert = ref(false)
+    const errorMessage = ref('')
     const validForm = ref(false);
-    const serverUrl = import.meta.env.VITE_SERVER_URL;
     const enableAdminDashboard = ref(false);
 
+    // Settings arrive asynchronously, so this is false until they land — which is the right
+    // default: the extra switch stays hidden rather than flashing in and out.
+    const dashboardDisabled = computed(
+      () => Boolean(siteSettings.value?.configuration) && !siteSettings.value.configuration.adminDashboard
+    );
 
     onMounted(async () => {
       await loadSettings();
     })
 
-    // Load settings from backend
+    // Read the public settings so the form knows whether the dashboard is currently enabled.
     const loadSettings = async () => {
       try {
         apiLoadingStore.setLoading(true);
-        const res = await fetch(`${serverUrl}/settings`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        const result = await res.json();
-        siteSettings.value = result.data;
-        settingsStore.saveSettings(result.data);
+        await settingsStore.loadSettings();
+        if (settingsStore.isSettingsLoaded()) {
+          siteSettings.value = settingsStore.getSettings();
+        }
       } catch (error) {
         console.error("Failed to load settings:", error);
       } finally {
@@ -87,32 +92,33 @@ export default {
       }
     };
 
-    const login = () => {
+    // The signature is verified on the server, which returns a short-lived bearer token. Nothing
+    // about the credential is checked or stored in the browser.
+    const login = async () => {
       apiLoadingStore.setLoading(true);
+      showInvalidAlert.value = false;
+      errorMessage.value = '';
       try {
-        const hashedUserInputSignature = md5(signature.value)
-        const savedSignature = siteSettings.value.security.adminFingerprintSignature
-        if (!validateAdminSignature(savedSignature, hashedUserInputSignature)) {
-          showInvalidAlert.value = true
-          return
+        await apiLogin(signature.value);
+
+        // Turning the dashboard back on requires the token we just obtained.
+        if (enableAdminDashboard.value) {
+          const current = settingsStore.getSettings();
+          current.configuration.adminDashboard = true;
+          await settingsStore.saveSettings(current);
         }
 
-        if (enableAdminDashboard.value) {
-          siteSettings.value.configuration.adminDashboard = true
-          settingsStore.saveSettings(siteSettings.value)
-        }
-        showInvalidAlert.value = false
-        window.location.href = '/admin-dashboard'
-      } catch (error) {
-        console.error("Failed to validate signature:", error);
+        router.push('/admin-dashboard');
+      } catch (error: any) {
+        showInvalidAlert.value = true;
+        errorMessage.value = error?.message || 'That signature was not accepted';
       } finally {
         apiLoadingStore.setLoading(false);
       }
-
     }
 
     const signatureRules = () => [
-      (v: string) => v && v.length > 0 || 'Admin signature is required',
+      (v: string) => v && v.length > 0 || 'A signature is required',
     ];
 
     return {
@@ -120,7 +126,9 @@ export default {
       showPassword,
       signature,
       showInvalidAlert,
+      errorMessage,
       siteSettings,
+      dashboardDisabled,
       apiLoadingStore,
       enableAdminDashboard,
       signatureRules,
@@ -131,10 +139,121 @@ export default {
 </script>
 
 <style scoped>
-.login-card {
-  border: 1px solid #494949 !important;
+/* The page renders without the site's navbar and footer, so it owns the whole viewport and centres
+   its one panel in it. */
+.signin {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
   align-items: center;
-  margin: 0 auto;
-  display: grid;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+  background: rgb(var(--v-theme-background));
+  color: rgb(var(--v-theme-text-color));
+}
+
+.signin__panel {
+  width: 100%;
+  max-width: 25rem;
+}
+
+/* Mono eyebrow above a display heading: the same pairing the home page hero uses, so this screen
+   reads as part of the site rather than a stray admin tool. */
+.signin__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(var(--v-theme-gray-color));
+  margin-bottom: 0.75rem;
+}
+
+.signin__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 6vw, 2.2rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: rgb(var(--v-theme-text-color));
+}
+
+.signin__lede {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: rgb(var(--v-theme-gray-color));
+  margin-top: 0.9rem;
+}
+
+.signin__back {
+  color: rgb(var(--v-theme-link-hover-color)) !important;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.signin__form {
+  margin-top: 2.25rem;
+}
+
+.signin__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(var(--v-theme-gray-color));
+  margin-bottom: 0.5rem;
+}
+
+.signin__note {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: rgb(var(--v-theme-gray-color));
+  margin-top: 1.5rem;
+}
+
+.signin__switch {
+  margin-top: 0.25rem;
+}
+
+.signin__switch-label {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: rgb(var(--v-theme-gray-color));
+}
+
+.signin__submit {
+  margin-top: 1.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+/* Vuetify paints the field from its own palette, which is not the one the rest of the site uses;
+   these pull it back onto the theme tokens so it holds up in both light and dark. */
+.signin__form :deep(.v-field) {
+  background: rgb(var(--v-theme-box-bg-color));
+  color: rgb(var(--v-theme-text-color));
+  border-radius: 4px;
+}
+
+.signin__form :deep(.v-field__outline) {
+  --v-field-border-opacity: 1;
+  color: rgb(var(--v-theme-border-color));
+}
+
+.signin__form :deep(.v-field--focused .v-field__outline) {
+  color: rgb(var(--v-theme-link-hover-color));
+}
+
+.signin__form :deep(.v-field__input),
+.signin__form :deep(input) {
+  font-family: var(--font-mono);
+  color: rgb(var(--v-theme-text-color));
+}
+
+.signin__form :deep(.v-field__append-inner .v-icon) {
+  color: rgb(var(--v-theme-gray-color));
 }
 </style>

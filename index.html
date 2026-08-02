@@ -3,8 +3,32 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image" href="/image.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!--
+    Static head defaults.
+
+    Two audiences read these: crawlers and link unfurlers that never run our JS, and anyone who has
+    just cloned the template and not filled in config yet. So they stay deliberately generic — no
+    personal data belongs in this file. At runtime src/composables/useDocumentHead.ts overwrites
+    every tag below from the `meta` block of the site config, and creates the ones that are absent
+    (og:url, twitter:site, …) once their values are actually known.
+  -->
+  <title>Portfolio</title>
+  <meta name="description" content="A personal portfolio and blog." />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Portfolio" />
+  <meta property="og:description" content="A personal portfolio and blog." />
+  <meta property="og:image" content="/image.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Portfolio" />
+  <meta name="twitter:description" content="A personal portfolio and blog." />
+  <meta name="twitter:image" content="/image.png" />
+
+  <!-- Replaced at runtime by meta.faviconUrl when one is configured. -->
+  <link rel="icon" type="image/png" href="/image.png" />
 </head>
 
 <body>

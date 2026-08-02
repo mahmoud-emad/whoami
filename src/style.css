@@ -1,4 +1,33 @@
+/* Type system
+   --font-display : IBM Plex Sans  — headings and the name
+   --font-body    : Inter          — reading text
+   --font-mono    : IBM Plex Mono  — labels, status, metadata
+   Mono is used structurally (it marks data and state), never decoratively. */
+:root {
+  --font-display: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
 /* Global Styles */
+body {
+  font-family: var(--font-body);
+  font-feature-settings: 'cv05' 1, 'ss01' 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
 body {
   background-color: rgb(var(--v-theme-background)) !important;
   color: rgb(var(--v-theme-text-color)) !important;
@@ -33,6 +62,11 @@ pre {
   padding: 16px !important;
   border-radius: 6px !important;
   border-left: 5px solid rgb(var(--v-theme-text-color)) !important;
+  /* `pre` does not wrap, so a single long code line used to widen the whole document and make
+     the page scroll sideways on a phone. The block scrolls inside itself instead. */
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 code {
@@ -42,10 +76,14 @@ code {
   color: rgb(var(--v-theme-text-color)) !important;
 }
 
+/* Links read in the body face. Mono is reserved for things that are genuinely data or state —
+   the nav, the status strip, metadata — so it keeps meaning instead of becoming texture.
+   (Several components used to override this with inline `font-family: system-ui !important`
+   precisely because a blanket monospace on every link was wrong.) */
 a {
   text-decoration: none;
-  color: var(--v-theme-link-color);
-  font-family: monospace;
+  color: rgb(var(--v-theme-link-color));
+  font-family: inherit;
 }
 
 button {
@@ -60,8 +98,12 @@ a:hover {
   transition: all .3s ease-in-out;
 }
 
+/* `--gray-color` is not a variable that exists — Vuetify publishes the palette as
+   `--v-theme-gray-color`. The declaration was therefore invalid and dropped, so every
+   .text-light-gray paragraph on the site has silently been rendering in the full-strength text
+   colour instead of the muted one, in both themes. */
 .text-light-gray {
-  color: rgb(var(--gray-color));
+  color: rgb(var(--v-theme-gray-color));
 }
 
 /* Layout */
@@ -70,6 +112,87 @@ a:hover {
   max-width: 52rem !important;
   padding: 1rem 2.5rem;
   margin: 0 auto;
+}
+
+/* Media never gets to be wider than the column that holds it — the single most common cause of a
+   page that scrolls sideways on a phone. Deliberately not applied to `svg`: icon sets size their
+   own glyphs and a blanket max-width can collapse them inside flex containers. */
+img,
+video {
+  max-width: 100%;
+}
+
+/* Admin form action rows.
+   Buttons used to sit side by side with no wrapping rule, so a Save/Delete/Refresh row ran off
+   the edge of a 390px screen. They wrap here, and every action clears the ~40px minimum that is
+   comfortable to hit with a thumb (Vuetify's default button is 36px tall). */
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.form-actions .v-btn {
+  min-height: 40px;
+}
+
+/* Vuetify renders size="small" icon buttons at 28px square. The inline remove/copy buttons in the
+   admin forms are the hardest things on the dashboard to hit on a phone, so they opt in to a
+   40px target without changing the icon or the button's look. */
+.tap-target.v-btn--icon {
+  width: 40px;
+  height: 40px;
+}
+
+/* v-select menus are teleported to the overlay container at the end of <body>, so a component's
+   scoped style can never reach them. Option titles default to nowrap + ellipsis, which turned
+   long article/post titles into indistinguishable stubs on a phone; let them wrap instead. */
+.select-menu-wrap .v-list-item-title {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.35;
+}
+
+.select-menu-wrap .v-list-item {
+  min-height: 44px;
+}
+
+/* Switch and checkbox labels inherit .v-label's nowrap + ellipsis, so a label such as
+   "Enable admin dashboard service" was clipped mid-word once the toggle had taken its ~52px out
+   of a 390px row. Selection controls only appear in the admin forms, so wrapping them here
+   cannot affect the public site. */
+.v-selection-control .v-label {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.35;
+}
+
+/* Phones: 2.5rem of side padding eats a fifth of a 375px screen. */
+@media (max-width: 600px) {
+  .c-container {
+    padding: 0.75rem 1rem;
+  }
+
+  /* On a phone each button owns a full row rather than being squeezed next to its neighbour. */
+  .form-actions>.v-btn {
+    flex: 1 1 auto;
+  }
+
+  /* 25px of side padding on a 390px screen leaves the card text in a very narrow column.
+     Purely a spacing adjustment — the card keeps its border, radius and background. */
+  .project-card,
+  .package-card {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .c-nav-card-items-small {
+    padding-right: 12px !important;
+  }
 }
 
 /* Navbar */
@@ -89,7 +212,7 @@ a:hover {
   justify-content: space-between !important;
   align-items: center !important;
   flex-wrap: wrap;
-  background: var(--v-theme-box-bg-color) !important;
+  background: rgb(var(--v-theme-box-bg-color)) !important;
   border: 1px solid rgb(var(--v-theme-border-color)) !important;
   padding: 7px !important;
   /* margin-bottom: 15px !important; */
@@ -133,10 +256,19 @@ a:hover {
   color: rgb(var(--v-theme-text-color)) !important;
 }
 
+/* The nav is a control surface, so it keeps the mono face on purpose. */
 .nav-link-item {
-  font-size: 15px !important;
-  font-weight: 800 !important;
-  color: var(--v-theme-link-color) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em;
+  color: rgb(var(--v-theme-link-color)) !important;
+}
+
+/* Underlined links inside body copy. */
+.body-link {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .username-title {
@@ -146,7 +278,7 @@ a:hover {
 }
 
 .username-description {
-  color: rgb(var(--gray-color));
+  color: rgb(var(--v-theme-gray-color));
   font-size: 14px !important;
 }
 
@@ -177,11 +309,11 @@ a:hover {
   border-top: 1px solid rgb(var(--v-theme-border-color)) !important;
   border-bottom: 1px solid rgb(var(--v-theme-border-color)) !important;
   border-radius: 18px !important;
-  padding: 7px !important;
-  /* margin-bottom: 15px !important; */
-  padding-left: 25px !important;
-  padding-right: 25px !important;
-  height: 225px !important;
+  padding: 16px 25px !important;
+  /* Was a hard 225px, which clipped longer descriptions so the text ran underneath the tag row.
+     A minimum keeps the grid tidy while letting a card grow; the columns stretch to match. */
+  min-height: 225px !important;
+  width: 100%;
 }
 
 .package-card {
@@ -223,25 +355,162 @@ a:hover {
   border: 1px solid rgb(var(--v-theme-border-color)) !important;
 }
 
+/* The old treatment printed the project title again at 30px inside a 550px rosybrown circle at
+   0.2 opacity. On a card it rendered as a pink blob with the title overflowing the edge, which
+   read as a rendering bug rather than a design. The card already states its title, so this is
+   now a quiet corner mark instead of a second, broken headline. */
 .project-logo {
-  object-fit: cover !important;
-  border-radius: 6px !important;
-  color: rgb(17, 80, 69);
-  font-size: 30px !important;
-  font-weight: 800 !important;
-  background-color: rosybrown;
-  width: 550px;
-  height: 550px;
-  padding-right: 50px;
-  border-radius: 50% !important;
-  display: flex;
-  justify-content: center;
-  z-index: 0;
-  opacity: 0.2;
   position: absolute;
+  top: 0;
+  right: 0;
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  font-size: 0 !important;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(120px 120px at 100% 0%,
+      rgba(var(--v-theme-link-hover-color), 0.16),
+      transparent 70%);
 }
 
 .page-body {
   padding: 15px;
   padding-bottom: 0px !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Shared page furniture.
+   Three small groups that make separate components read as one document: one
+   heading scale, one treatment for a list of links, one focus ring. Everything
+   here is opt-in (a class) except the focus ring and `h2.title`, both of which
+   fix something that is simply missing today.
+   --------------------------------------------------------------------------- */
+
+/* Page heading and standfirst. Deliberately classes rather than a bare `h1`
+   rule: pages that have not been converted keep exactly the look they have. */
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: rgb(var(--v-theme-text-color));
+}
+
+.page-intro {
+  margin-top: 0.6rem !important;
+  line-height: 1.7;
+  color: rgb(var(--v-theme-gray-color));
+}
+
+/* Section headings.
+   Every home section renders `<h2 class="title">`. `.title` was a Vuetify 2
+   typography class and does not exist in Vuetify 3, so those headings have been
+   falling back to the browser's default h2 while other components invented their
+   own size — which is why the page reads as five components. One scale here puts
+   all of them on the same footing, and `.section-heading` is the same scale for
+   markup that is not an h2.title. */
+h2.title,
+.section-heading {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: rgb(var(--v-theme-text-color));
+  /* Beats the blanket `h1..h6 { margin: 0 !important }` above. */
+  margin-bottom: 0.85rem !important;
+}
+
+.section-intro {
+  line-height: 1.7;
+  color: rgb(var(--v-theme-gray-color));
+  margin-bottom: 1.1rem !important;
+}
+
+/* Row list — one list of links, one look.
+   Bold title on the left, muted mono metadata on the right, hairline rule
+   between rows, tight vertical rhythm. Global rather than per-page so the search
+   results and the contact channels are visibly the same object. */
+.row-list {
+  list-style: none;
+  margin: 0;
+  padding-left: 0 !important;
+}
+
+.row-list__item {
+  border-top: 1px solid rgb(var(--v-theme-border-color));
+}
+
+.row-list__item:last-child {
+  border-bottom: 1px solid rgb(var(--v-theme-border-color));
+}
+
+/* The whole row is the target, which is also what gets it past the ~40px a thumb
+   needs. `align-items: baseline` lines the mono metadata up with the title. */
+.row-list__link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1.25rem;
+  min-height: 40px;
+  padding: 0.65rem 0;
+  color: rgb(var(--v-theme-text-color)) !important;
+}
+
+.row-list__title {
+  font-weight: 600;
+  line-height: 1.45;
+  /* Without min-width:0 a flex child refuses to shrink below its content width,
+     which is how a long URL or title pushes the page sideways on a phone. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.row-list__meta {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  color: rgb(var(--v-theme-gray-color));
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.row-list__snippet {
+  margin-top: 0.2rem !important;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgb(var(--v-theme-gray-color));
+}
+
+/* Anchor only: a search result with nothing to link to still renders as a row, and a hover colour
+   on something that cannot be clicked is a lie. */
+a.row-list__link:hover .row-list__title {
+  color: rgb(var(--v-theme-link-hover-color));
+}
+
+@media (max-width: 600px) {
+
+  /* The metadata drops under the title instead of squeezing it to a stub. */
+  .row-list__link {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+    padding: 0.7rem 0;
+  }
+
+  .row-list__meta {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Visible keyboard focus, everywhere.
+   Vuetify's own components ship a focus treatment, but plain <a>, <button> and
+   the row lists above had none at all, so a keyboard user had no idea where they
+   were. `:focus-visible` means pointer users never see it. The outline follows
+   the element's own border-radius. */
+:where(a, button, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid rgb(var(--v-theme-link-hover-color));
+  outline-offset: 2px;
 }

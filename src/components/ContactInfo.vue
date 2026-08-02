@@ -1,30 +1,34 @@
 <template>
-  <div class="section mb-4">
-    <h2 v-if="title">
-      <span v-html="title">
-      </span>
+  <div class="contact-info">
+    <h2 v-if="title" class="section-heading">
+      <span v-html="title"></span>
     </h2>
-    <p v-if="description" class="mb-2 mt-3" v-html="description + (additionalText || '')"></p>
-    <v-card :class="`pa-2 ${!display.mdAndUp.value ? 'responsive-info-card justify-start' : 'info-card'}`" outlined
-      color="transparent"
-      :style="{ border: '1px solid rgb(var(--v-theme-border-color))', borderRadius: '6px', fontSize: '12px' }">
-      <a class="card-link-text" v-if="icon" :href="link" target="_blank">
-        <v-icon v-if="icon.startsWith('mdi-')">{{ icon }}</v-icon>
-        <span v-else>{{ icon }}</span>
-        {{ linkText }}
-      </a>
-      <a class="card-link-text" v-else :href="link" target="_blank">
-        {{ linkText }}
+    <p v-if="description" class="section-intro" v-html="description + (additionalText || '')"></p>
+
+    <!-- No `color="transparent"`: that prop emits a `!important` background rule that no scoped
+         style can override, which is why this card could never take the theme's panel colour. -->
+    <v-card class="contact-info__card" :class="{ 'contact-info__card--wide': cols }" flat>
+      <!--
+        rel="me" is what makes these profiles verifiable as the same person: an IndieWeb consumer
+        follows the link, finds a rel="me" pointing back at this domain, and treats the identity as
+        confirmed. It is also what IndieAuth uses to let the owner sign in with their own domain.
+        Only real profile links get it, which is why it is a prop rather than always-on.
+      -->
+      <a class="contact-info__link" :href="link" target="_blank" :rel="linkRel">
+        <template v-if="icon">
+          <v-icon v-if="icon.startsWith('mdi-')" size="18">{{ icon }}</v-icon>
+          <span v-else aria-hidden="true">{{ icon }}</span>
+        </template>
+        <span class="contact-info__text">{{ linkText }}</span>
       </a>
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
-import { useDisplay } from 'vuetify';
+import { computed, defineComponent } from 'vue';
 
-
-export default {
+export default defineComponent({
   name: 'ContactInfo',
   props: {
     title: String,
@@ -32,49 +36,66 @@ export default {
     additionalText: String,
     link: String,
     linkText: String,
+    /** True on md-and-up. Only affects the type size, never the alignment. */
     cols: Boolean,
     icon: String,
+    /** Set for links that are genuinely another profile of the site owner. */
+    me: { type: Boolean, default: false },
   },
-  setup() {
-    const display = useDisplay();
+  setup(props) {
+    // noopener on every external link; "me" only where the link really is another profile of the
+    // owner, since claiming identity on an arbitrary URL would be wrong.
+    const linkRel = computed(() => (props.me ? 'me noopener' : 'noopener'));
 
-    return {
-      display
-    };
+    return { linkRel };
   },
-}
+});
 </script>
 
 <style scoped>
-.text-info {
-  font-weight: bold;
-  color: #00c0ef;
+/* The block owns its own rhythm rather than inheriting a `.section` rule from whichever page
+   happens to mount it (Contact and More styled that class differently). */
+.contact-info {
+  margin-bottom: 1.25rem;
+  /* The heading, the description and the card all start on the same left edge as the rest of the
+     page. The card used to centre its own contents on narrow screens, which put this block half a
+     column out of step with everything above it. */
+  min-width: 0;
 }
 
-.info-card {
-  font-size: 15px !important;
-  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif !important;
-}
-
-.responsive-info-card {
+.contact-info__card {
   border: 1px solid rgb(var(--v-theme-border-color));
   border-radius: 6px;
-  font-size: 12px;
-  width: 100% !important;
-  font-size: 14px !important;
-  display: flex;
-  justify-content: center;
-  background: var(--v-theme-box-bg-color) !important;
-  border: 1px solid #16171a7a;
-  border-radius: 4px;
+  background: rgb(var(--v-theme-box-bg-color));
   box-shadow: none;
-  outline: none;
-  font-family: serif !important;
-  text-align: start !important;
 }
 
-.card-link-text {
-  font-family: system-ui;
-  font-size: 14px;
+/* The card is the tap target, so the padding is what gets the row past the ~40px a thumb needs. */
+.contact-info__link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 40px;
+  padding: 0.55rem 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: rgb(var(--v-theme-text-color)) !important;
+}
+
+.contact-info__card--wide .contact-info__link {
+  font-size: 0.9375rem;
+}
+
+.contact-info__link:hover {
+  color: rgb(var(--v-theme-link-hover-color)) !important;
+}
+
+.contact-info__text {
+  /* Channel links are configuration now, so they can be long unbroken strings (a Signal invite, a
+     long e-mail address). Without min-width:0 plus a break rule they push the page sideways on a
+     390px screen. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 </style>
