@@ -38,3 +38,6 @@ backend/config.json
 # Visitor- and admin-uploaded files
 backend/uploads/*
 !backend/uploads/.gitkeep
+
+# Compiled backend
+backend/dist

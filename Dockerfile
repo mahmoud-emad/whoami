@@ -28,4 +28,4 @@ COPY backend ./backend
 VOLUME ["/app/backend/uploads"]
 
 EXPOSE 3000
-CMD ["node", "backend/server.cjs"]
+CMD ["node", "backend/dist/index.js"]

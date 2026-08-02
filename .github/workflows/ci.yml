@@ -31,8 +31,8 @@ jobs:
           # uses relative URLs and works under any domain without a rebuild.
           VITE_SERVER_URL: ''
 
-      - name: Backend syntax
-        run: node --check backend/server.cjs
+      - name: Backend build
+        run: yarn build:server
 
   no-personal-data:
     # This project is a template. A name or handle hardcoded in the source means a fresh clone

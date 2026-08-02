@@ -7,4 +7,4 @@ set -a
 . /etc/whoami/env
 set +a
 exec /usr/bin/setpriv --reuid=whoami --regid=whoami --init-groups \
-	/usr/bin/node /opt/whoami/backend/server.cjs
+	/usr/bin/node /opt/whoami/backend/dist/index.js

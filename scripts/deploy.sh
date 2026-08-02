@@ -31,6 +31,7 @@ rsync -az --delete \
 	--exclude 'backend/config.json' \
 	--exclude 'backend/db.json' \
 	--exclude 'backend/uploads' \
+	--exclude 'backend/dist' \
 	--exclude '.DS_Store' \
 	--exclude '*.log' \
 	-e "ssh -o BatchMode=yes" \
@@ -49,6 +50,7 @@ ln -sfn /var/lib/whoami/db.json     /opt/whoami/backend/db.json
 # devDependencies are needed for the build, then pruned again.
 yarn install --frozen-lockfile
 VITE_SERVER_URL="" yarn build
+# `yarn build` compiles the backend too, so backend/dist exists before the service restarts.
 yarn install --production --frozen-lockfile
 
 chown -R root:root /opt/whoami
