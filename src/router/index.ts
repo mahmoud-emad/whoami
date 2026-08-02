@@ -10,6 +10,8 @@ import AdminSignatureView from '../views/AdminSignature.vue';
 import AdminDashboardView from '../views/AdminDashboard.vue';
 import NotFoundView from '../views/NotFound.vue';
 import SearchView from '../views/Search.vue';
+import ListsView from '../views/Lists.vue';
+import ListDetailView from '../views/ListDetail.vue';
 import { verifySession } from '../utils/api';
 
 const router = createRouter({
@@ -50,6 +52,19 @@ const router = createRouter({
             name: 'more',
             component: MoreView,
             meta: { title: 'More' },
+        },
+        {
+            path: '/lists',
+            name: 'Lists',
+            component: ListsView,
+            meta: { title: 'Lists' },
+        },
+        {
+            // Addressed by slug rather than id, so a bookmarked plan keeps a readable URL.
+            path: '/lists/:slug',
+            name: 'List',
+            component: ListDetailView,
+            meta: { title: 'List' },
         },
         {
             path: '/search',

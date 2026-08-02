@@ -199,6 +199,28 @@ image button; an `![Uploading …]()` placeholder appears at the cursor and is r
 `/uploads/...` URL when the upload finishes. They are uploaded, not inlined — the old editor turned
 every screenshot into a base64 blob inside the post body, which every reader then downloaded.
 
+### Lists
+
+`/lists` holds public checklists — a plan, a reading list, anything with boxes to tick. A card per
+list leads with how much of it is done, which is the reason to keep one in public at all. Following
+a card opens the list itself at `/lists/<slug>`.
+
+A list has three levels: **missions** (what is being worked towards), **groups** inside them (a
+phase or a category), and **items** (one checkable step). Two levels would force phases to become
+either separate missions or a flat wall of items; four would be a folder tree.
+
+Everything is edited in place while signed in — add and reorder missions, add groups, add and edit
+items, and tick boxes straight on the page. When adding a group you can paste a whole checklist into
+the items box, one per line; leading bullets and `[ ]` / `[x]` markers are stripped, and a ticked
+marker carries through, so a list can come straight out of a notes app or a markdown file.
+
+Ticking a box is a write and sits behind the same auth as everything else. Visitors see the state as
+plain markers, not controls: the boxes record what you have actually done, so a visitor being able
+to tick one would make the page a fiction.
+
+Link a list from the More page by adding a card whose link is `/lists` — an internal path renders as
+an in-app link rather than opening a new tab.
+
 ### Reactions
 
 Every post carries an up and a down vote, open to anyone. There are no accounts and no replies.

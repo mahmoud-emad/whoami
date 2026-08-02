@@ -1,21 +1,22 @@
 <template>
-  <div class="votes">
-    <button type="button" class="votes__btn" :class="{ 'votes__btn--on': tally.mine === 'up' }" :disabled="busy"
-      :aria-pressed="tally.mine === 'up'" :title="tally.mine === 'up' ? 'Take back your upvote' : 'Upvote this post'"
-      @click="cast('up')">
-      <v-icon size="18">mdi-arrow-up-bold-outline</v-icon>
-      <span class="votes__count">{{ tally.up }}</span>
-      <span class="votes__label">Helpful</span>
-    </button>
+  <div class="votes-wrap">
+    <div class="votes">
+      <button type="button" class="votes__btn" :class="{ 'votes__btn--on': tally.mine === 'up' }" :disabled="busy"
+        :aria-pressed="tally.mine === 'up'" :title="tally.mine === 'up' ? 'Take back your upvote' : 'Upvote this post'"
+        @click="cast('up')">
+        <v-icon size="14">mdi-arrow-up-bold-outline</v-icon>
+        <span class="votes__count">{{ tally.up }}</span>
+      </button>
 
-    <button type="button" class="votes__btn" :class="{ 'votes__btn--on': tally.mine === 'down' }" :disabled="busy"
-      :aria-pressed="tally.mine === 'down'"
-      :title="tally.mine === 'down' ? 'Take back your downvote' : 'Downvote this post'" @click="cast('down')">
-      <v-icon size="18">mdi-arrow-down-bold-outline</v-icon>
-      <span class="votes__count">{{ tally.down }}</span>
-      <span class="votes__label">Not for me</span>
-    </button>
+      <button type="button" class="votes__btn" :class="{ 'votes__btn--on': tally.mine === 'down' }" :disabled="busy"
+        :aria-pressed="tally.mine === 'down'"
+        :title="tally.mine === 'down' ? 'Take back your downvote' : 'Downvote this post'" @click="cast('down')">
+        <v-icon size="14">mdi-arrow-down-bold-outline</v-icon>
+        <span class="votes__count">{{ tally.down }}</span>
+      </button>
 
+    </div>
+    <!-- Outside the pill: an error is about the attempt, not about either arrow. -->
     <span v-if="failed" class="votes__error">{{ failed }}</span>
   </div>
 </template>
@@ -100,33 +101,53 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.votes {
-  display: flex;
-  flex-wrap: wrap;
+.votes-wrap {
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Reddit-sized: the pair is a small control beside the post, not a call to action. The two
+   buttons share one pill so they read as one thing with two directions. */
+.votes {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid rgb(var(--v-theme-border-color));
+  border-radius: 999px;
 }
 
 .votes__btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  /* 40px is the smallest a thumb reliably hits. */
-  min-height: 40px;
-  padding: 0.3rem 0.75rem;
-  border: 1px solid rgb(var(--v-theme-border-color));
+  gap: 0.3rem;
+  /* Smaller than the 40px touch target the rest of the site uses, which is the point — but the
+     hit area is padded out below so a thumb still lands on it. */
+  height: 26px;
+  padding: 0 0.5rem;
+  border: 0;
   border-radius: 999px;
   background: transparent;
   color: rgb(var(--v-theme-gray-color));
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   line-height: 1;
-  transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+  transition: color .15s ease, background-color .15s ease;
+}
+
+/* The visible pill stays small; the tappable area does not, so a thumb still lands on it. */
+.votes__btn::after {
+  content: '';
+  position: absolute;
+  inset: -7px -2px;
 }
 
 .votes__btn:hover:not(:disabled) {
   color: rgb(var(--v-theme-text-color));
-  border-color: rgb(var(--v-theme-link-hover-color));
+  background: rgba(var(--v-theme-text-color), 0.07);
 }
 
 .votes__btn:disabled {
@@ -136,8 +157,7 @@ export default defineComponent({
 /* The chosen one is filled, so "what did I press" survives a page reload. */
 .votes__btn--on {
   color: rgb(var(--v-theme-link-hover-color));
-  border-color: rgb(var(--v-theme-link-hover-color));
-  background: rgba(var(--v-theme-link-hover-color), 0.12);
+  background: rgba(var(--v-theme-link-hover-color), 0.16);
 }
 
 .votes__count {
@@ -150,10 +170,8 @@ export default defineComponent({
   font-size: 0.78rem;
 }
 
-/* The words are for pointing devices; on a phone the arrow and the number say it. */
-@media (max-width: 600px) {
-  .votes__label {
-    display: none;
-  }
+/* A hairline between the two halves, so the pill reads as up | down. */
+.votes__btn + .votes__btn {
+  box-shadow: -1px 0 0 rgb(var(--v-theme-border-color));
 }
 </style>

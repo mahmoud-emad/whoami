@@ -263,6 +263,59 @@ export type PostType = {
   reactions?: PostReactions,
 }
 
+/**
+ * A checklist the owner keeps in public — a plan, a reading list, anything with boxes to tick.
+ *
+ * Three levels on purpose: a mission is the thing being worked towards, a group is a phase or a
+ * category inside it, and an item is one checkable step. Two levels would force phases to become
+ * either separate missions or flat items; four would be a folder tree.
+ */
+export type ListItem = {
+  text: string,
+  done: boolean,
+}
+
+export type ListGroup = {
+  title: string,
+  items: ListItem[],
+}
+
+/** Where a mission stands. Drives the badge and the progress bar. */
+export type MissionStatus = 'not-started' | 'in-progress' | 'active' | 'done'
+
+export type ListMission = {
+  title: string,
+  emoji: string,
+  status: MissionStatus,
+  groups: ListGroup[],
+}
+
+export type ListDoc = {
+  id?: number,
+  slug?: string,
+  title: string,
+  emoji: string,
+  intro: string,
+  /** The one paragraph the whole list is in service of. Rendered as a quote at the top. */
+  northStar: string,
+  missions: ListMission[],
+  show?: boolean,
+  createdAt?: string,
+}
+
+/** What `GET /lists` returns: the cover of each list, without its items. */
+export type ListSummary = {
+  id: number,
+  slug: string,
+  title: string,
+  emoji: string,
+  intro: string,
+  show?: boolean,
+  missionCount: number,
+  total: number,
+  done: number,
+}
+
 export type NavLink = {
   path: string,
   text: string,

@@ -15,7 +15,20 @@
         confirmed. It is also what IndieAuth uses to let the owner sign in with their own domain.
         Only real profile links get it, which is why it is a prop rather than always-on.
       -->
-      <a class="contact-info__link" :href="link" target="_blank" :rel="linkRel">
+      <!--
+        A link to another page of this site is a RouterLink, not an anchor with target="_blank".
+        Every card used to open in a new tab, which is right for somebody else's site and wrong for
+        our own: it dropped a second copy of the app on the reader for a page they were already in.
+      -->
+      <RouterLink v-if="isInternal" class="contact-info__link" :to="link || '/'">
+        <template v-if="icon">
+          <v-icon v-if="icon.startsWith('mdi-')" size="18">{{ icon }}</v-icon>
+          <span v-else aria-hidden="true">{{ icon }}</span>
+        </template>
+        <span class="contact-info__text">{{ linkText }}</span>
+      </RouterLink>
+
+      <a v-else class="contact-info__link" :href="link" target="_blank" :rel="linkRel">
         <template v-if="icon">
           <v-icon v-if="icon.startsWith('mdi-')" size="18">{{ icon }}</v-icon>
           <span v-else aria-hidden="true">{{ icon }}</span>
@@ -28,9 +41,11 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
+import { RouterLink } from 'vue-router';
 
 export default defineComponent({
   name: 'ContactInfo',
+  components: { RouterLink },
   props: {
     title: String,
     description: String,
@@ -55,7 +70,16 @@ export default defineComponent({
     // owner, since claiming identity on an arbitrary URL would be wrong.
     const linkRel = computed(() => (props.me ? 'me noopener' : 'noopener'));
 
-    return { linkRel };
+    /**
+     * A bare path is a page of this site. Anything with a scheme (https:, mailto:, signal:) and a
+     * protocol-relative `//host` are somebody else's, and only those open in a new tab.
+     */
+    const isInternal = computed(() => {
+      const value = (props.link || '').trim();
+      return value.startsWith('/') && !value.startsWith('//');
+    });
+
+    return { linkRel, isInternal };
   },
 });
 </script>

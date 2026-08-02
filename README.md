@@ -27,6 +27,8 @@ rebuild, no code changes, no name of anyone else's left in the source.
   Write/Preview editor with GitHub-style image drop and paste. Heavy libraries load only when a post
   actually uses them.
 - **Post reactions.** Up and down votes anyone can cast, no account and no replies.
+- **Public checklists.** `/lists` keeps plans in the open — missions, groups and tickable items,
+  all edited in place, with progress on every level.
 - **Search.** Across whichever collections you choose to include.
 - **Guestbook anti-bot.** A question you write. The answer stays on the server.
 - **Uploads.** Images and PDFs, with a file manager in the dashboard.
@@ -114,6 +116,8 @@ Everything is namespaced under `/api`. 🔒 marks endpoints that require
 | `GET /api/projects` · `/api/articles` · `/api/posts` | Public content listings |
 | `POST`/`PUT`/`DELETE` on those 🔒 | Content management |
 | `GET`/`POST /api/posts/:id/reactions` | Read or cast an anonymous up/down vote |
+| `GET /api/lists` · `GET /api/lists/:slug` | Public checklists |
+| `POST`/`PUT`/`DELETE /api/lists` 🔒 | Manage checklists, ticking a box included |
 | `POST /api/upload` 🔒 | Upload a file (JPEG, PNG, GIF or PDF, up to 5 MB) |
 | `GET /api/uploads` 🔒 · `DELETE /api/uploads/:filename` 🔒 | Manage uploaded files |
 
