@@ -12,6 +12,7 @@ import NotFoundView from '../views/NotFound.vue';
 import SearchView from '../views/Search.vue';
 import ListsView from '../views/Lists.vue';
 import ListDetailView from '../views/ListDetail.vue';
+import BooksView from '../views/Books.vue';
 import { verifySession } from '../utils/api';
 
 const router = createRouter({
@@ -65,6 +66,12 @@ const router = createRouter({
             name: 'List',
             component: ListDetailView,
             meta: { title: 'List' },
+        },
+        {
+            path: '/books',
+            name: 'books',
+            component: BooksView,
+            meta: { title: 'Books' },
         },
         {
             path: '/search',

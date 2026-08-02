@@ -221,6 +221,23 @@ to tick one would make the page a fiction.
 Link a list from the More page by adding a card whose link is `/lists` — an internal path renders as
 an in-app link rather than opening a new tab.
 
+### Books
+
+`/books` is a shelf: what you are reading, what you have read, and what is queued up. Grouped by
+where a book stands rather than listed flat, because what is open right now is the part a visitor is
+likely to care about.
+
+A book is a title, an author and a **link to the book itself** — the publisher's page or the
+author's own. Not a file. There is no upload here and nothing hosts a copy of anything.
+
+Add and edit books in place while signed in. The progress field ("page 39", "half way") only shows
+while the status is Reading now, so a finished book does not carry a stale page number.
+
+No covers, on purpose: a shelf where half the books have a picture and half do not looks broken, and
+the link is the useful part.
+
+Link it from the More page with a card pointing at `/books`.
+
 ### Reactions
 
 Every post carries an up and a down vote, open to anyone. There are no accounts and no replies.

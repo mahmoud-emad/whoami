@@ -303,6 +303,28 @@ export type ListDoc = {
   createdAt?: string,
 }
 
+/** Where a book stands on the shelf. */
+export type BookStatus = 'reading' | 'read' | 'want'
+
+/**
+ * One book. `url` points at the book itself — the publisher's page or the author's own — never at
+ * a file, which is the whole difference between a shelf and a pile of PDFs.
+ */
+export type BookType = {
+  id?: number,
+  title: string,
+  author: string,
+  url: string,
+  status: BookStatus,
+  /** Free text: "page 39", "half way", "chapter 4". Only meaningful while reading. */
+  progress: string,
+  /** A line about why it is here, or what it was good for. */
+  note: string,
+  /** Year the edition was published, as text so "2019" and "2nd ed. 2019" both work. */
+  year: string,
+  createdAt?: string,
+}
+
 /** What `GET /lists` returns: the cover of each list, without its items. */
 export type ListSummary = {
   id: number,

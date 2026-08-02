@@ -15,6 +15,7 @@ import { articlesRouter } from '../routes/articles';
 import { postsRouter } from '../routes/posts';
 import { reactionsRouter } from '../routes/reactions';
 import { listsRouter } from '../routes/lists';
+import { booksRouter } from '../routes/books';
 import { uploadsRouter } from '../routes/uploads';
 import { mountFrontend } from './frontend';
 
@@ -55,6 +56,7 @@ export const createApp = (): Express => {
   api.use(postsRouter);
   api.use(reactionsRouter);
   api.use(listsRouter);
+  api.use(booksRouter);
   api.use(uploadsRouter);
 
   // /api is canonical and is what the frontend calls. When this process is not also serving the

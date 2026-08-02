@@ -492,7 +492,10 @@ h2.title,
   font-weight: 600;
   line-height: 1.45;
   /* Without min-width:0 a flex child refuses to shrink below its content width,
-     which is how a long URL or title pushes the page sideways on a phone. */
+     which is how a long URL or title pushes the page sideways on a phone.
+     `flex: 1 1 auto` is what keeps it from being squeezed the other way, by the
+     metadata beside it. */
+  flex: 1 1 auto;
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -503,7 +506,14 @@ h2.title,
   letter-spacing: 0.02em;
   color: rgb(var(--v-theme-gray-color));
   white-space: nowrap;
-  flex: 0 0 auto;
+  /* Shrinkable and truncated rather than fixed. It used to be `flex: 0 0 auto`, so a
+     90-character Signal invite link took the entire row and left the title one character
+     wide, printing it down the page a letter at a time. */
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .row-list__snippet {
