@@ -115,7 +115,8 @@ required once those fields are filled.
 - The admin signature is never stored or transmitted in plaintext. `config.json` holds a salted
   scrypt hash and its salt, and `GET /api/settings` never includes them.
 - Logging in exchanges the signature for a bearer token, held in memory server side and in
-  `sessionStorage` client side. Tokens last 12 hours and are dropped on restart.
+  `sessionStorage` client side. Tokens last 24 hours, and are dropped when the tab closes or the
+  server restarts.
 - Failed logins are rate limited per IP: 5 attempts, then a 15 minute lockout. Set `TRUST_PROXY=1`
   behind a proxy so this counts real client IPs — and only there, since it means trusting a header
   the client sends.

@@ -1,7 +1,15 @@
 import crypto from 'node:crypto';
 import type { ApiRequest } from '../types';
 
-export const TOKEN_TTL_MS = 12 * 60 * 60 * 1000;
+/**
+ * How long a signed-in session lasts. A day, so a normal stretch of editing never asks for the
+ * signature twice.
+ *
+ * Two things end a session sooner regardless of this number, and both are deliberate: the map
+ * below is in memory, so a restart or a deploy drops every session, and the browser keeps the
+ * token in sessionStorage, so closing the tab forgets it.
+ */
+export const TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 
 /** token -> expiry timestamp. Module-private: nothing outside may hold a reference to the map. */
 const sessions = new Map<string, number>();

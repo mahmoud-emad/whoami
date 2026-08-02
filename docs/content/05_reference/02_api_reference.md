@@ -16,7 +16,7 @@ TOKEN=$(curl -s -X POST https://example.com/api/auth/login \
 curl -s https://example.com/api/uploads -H "Authorization: Bearer $TOKEN"
 ```
 
-Tokens are held in memory server side, last 12 hours, and are dropped on restart. Changing the
+Tokens are held in memory server side, last 24 hours, and are dropped on restart. Changing the
 signature invalidates every existing token.
 
 ## Endpoints
