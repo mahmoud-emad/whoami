@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - run: yarn install --frozen-lockfile
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Build
+        run: yarn build
+        env:
+          # Empty on purpose: production serves the API from the same origin, so the bundle
+          # uses relative URLs and works under any domain without a rebuild.
+          VITE_SERVER_URL: ''
+
+      - name: Backend syntax
+        run: node --check backend/server.cjs
+
+  no-personal-data:
+    # This project is a template. A name or handle hardcoded in the source means a fresh clone
+    # renders somebody else's identity, so the build fails on it.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail on hardcoded identity in src/
+        run: |
+          if grep -rniE 'mahmoud|omdanii|hassanein' src/ index.html; then
+            echo "::error::Hardcoded personal data found in the source tree. Move it into config."
+            exit 1
+          fi
+          echo "Source tree is free of hardcoded identity."
