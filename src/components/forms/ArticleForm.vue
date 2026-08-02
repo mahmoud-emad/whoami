@@ -16,20 +16,21 @@
             maxLength: 400,
             minLength: 20
         }) : []" :counter="400" v-model="article.description" title="Article Description" class="mb-4"
-            label="Article Description" variant="outlined" hide-details="auto"></v-textarea>
-        <v-btn :loading="apiLoadingStore.isLoading()" :disabled="!validForm || apiLoadingStore.isLoading()"
-            title="When pressed, it will create a new article" @click="postNewArticle(article)" class="mb-4"
-            color="primary" variant="tonal">Create
-            Article</v-btn>
+            label="Article Description" variant="outlined" hide-details="auto" rows="3" auto-grow></v-textarea>
+        <div class="form-actions mb-4">
+            <v-btn :loading="apiLoadingStore.isLoading()" :disabled="!validForm || apiLoadingStore.isLoading()"
+                title="When pressed, it will create a new article" @click="postNewArticle(article)" color="primary"
+                variant="tonal">Create Article</v-btn>
+        </div>
     </v-form>
 </template>
 
 <script lang="ts">
 import { ref } from 'vue';
+import { apiFetch } from '../../utils/api';
 import { ArticleType } from '../../types';
 import { nameRules, websiteRules, longTextRules } from '../../utils';
 import { useAPILoading } from '../../store';
-
 
 export default {
     setup() {
@@ -46,7 +47,7 @@ export default {
         const postNewArticle = async (article_: ArticleType) => {
             try {
                 apiLoadingStore.setLoading(true);
-                const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/articles`, {
+                const res = await apiFetch(`/articles`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(article_),

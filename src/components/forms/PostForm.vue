@@ -11,17 +11,51 @@
       }
     )" v-model="post.title" title="Post Title" class="mb-4" label="Post Title" variant="outlined"
       hide-details="auto"></v-text-field>
-    <div class="mb-4">
-      <VMarkdownEditor style="height: 350px;" v-model="content" locale="en" :upload-action="handleUpload" />
+    <!-- The height lives in CSS rather than an inline style so the mobile media query can win. -->
+    <div class="md-editor-wrap mb-4">
+      <VMarkdownEditor v-model="content" locale="en" :upload-action="handleUpload" />
     </div>
-    <v-btn :disabled="apiLoading.isLoading() || !validForm" :loading="apiLoading.isLoading()" title="Create Post"
-      class="mb-4" color="primary" variant="tonal" @click="savePost">Create Post</v-btn>
+    <div class="form-actions mb-4">
+      <v-btn :disabled="apiLoading.isLoading() || !validForm" :loading="apiLoading.isLoading()" title="Create Post"
+        color="primary" variant="tonal" @click="savePost">Create Post</v-btn>
+    </div>
   </v-form>
 </template>
+
+<style scoped>
+/* min-width:0 stops the editor refusing to shrink below its intrinsic content width, which is
+   what made the whole dashboard scroll sideways on a phone. */
+.md-editor-wrap {
+  height: 350px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  /* The editor and its live preview sit side by side by default. At 390px that is two ~170px
+     columns, which is unusable, so they stack and the block gets the height back. */
+  .md-editor-wrap {
+    height: 70vh;
+    min-height: 420px;
+  }
+
+  .md-editor-wrap :deep(.vmd-body) {
+    flex-direction: column;
+  }
+
+  /* The toolbar icons are ~16px; padding brings them up to a thumb-sized target. */
+  .md-editor-wrap :deep(.vmd-toolbar-icon) {
+    padding: 8px;
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+}
+</style>
 
 <script lang="ts">
 
 import { ref } from 'vue';
+import { apiFetch } from '../../utils/api';
 import { VMarkdownEditor } from 'vue3-markdown';
 import 'vue3-markdown/dist/style.css';
 import { useAPILoading } from '../../store';
@@ -65,9 +99,8 @@ export default {
     const savePost = async () => {
       try {
         apiLoading.setLoading(true);
-        const serverUrl = import.meta.env.VITE_SERVER_URL;
         post.value.content = content.value;
-        const res = await fetch(`${serverUrl}/posts`, {
+        const res = await apiFetch(`/posts`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(post.value),

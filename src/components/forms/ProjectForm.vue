@@ -28,15 +28,17 @@
       maxLength: 400,
       minLength: 60
     })" :counter="400" v-model="project.description" title="Project Description" class="mb-4"
-      label="Project Description" variant="outlined" hide-details="auto"></v-textarea>
-    <v-btn :disabled="!validForm" @click="createNewProject(project)" title="Create Project" class="mb-4" color="primary"
-      variant="tonal">Create
-      Project</v-btn>
+      label="Project Description" variant="outlined" hide-details="auto" rows="3" auto-grow></v-textarea>
+    <div class="form-actions mb-4">
+      <v-btn :disabled="!validForm" @click="createNewProject(project)" title="Create Project" color="primary"
+        variant="tonal">Create Project</v-btn>
+    </div>
   </v-form>
 </template>
 
 <script lang="ts">
 import { ref } from 'vue';
+import { apiFetch } from '../../utils/api';
 import { ProjectType } from '../../types';
 import { nameRules, websiteRules, longTextRules, validateProjectTagsRules } from '../../utils';
 import { useAPILoading } from '../../store';
@@ -74,8 +76,7 @@ export default {
     const createNewProject = async (project: ProjectType) => {
       try {
         apiLoading.setLoading(true)
-        const serverUrl = import.meta.env.VITE_SERVER_URL;
-        const res = await fetch(`${serverUrl}/projects`, {
+        const res = await apiFetch(`/projects`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(project),

@@ -2,16 +2,21 @@
     <v-alert v-if="hintMessage" :type="hintType" variant="tonal" class="mb-4">
         {{ hintMessage }}
     </v-alert>
+    <!-- Deleting is irreversible, so the option has to stay legible on a phone: select-menu-wrap
+         lets long project titles wrap rather than be clipped to an ellipsis. -->
     <v-select :loading="apiLoadingStore.isLoading()" :disabled="projects.length === 0" item-title="title"
         item-value="id" class="mb-4" label="Select project" variant="outlined" hide-details="auto" :items="projects"
-        v-model="selectedProjectID">
+        :menu-props="{ contentClass: 'select-menu-wrap' }" v-model="selectedProjectID">
     </v-select>
-    <v-btn @click="deleteSelectedProject" :disabled="projects.length === 0 || selectedProjectID === null"
-        title="When you press, the project will be deleted" class="mb-4" color="error" variant="tonal">Delete</v-btn>
+    <div class="form-actions mb-4">
+        <v-btn @click="deleteSelectedProject" :disabled="projects.length === 0 || selectedProjectID === null"
+            title="When you press, the project will be deleted" color="error" variant="tonal">Delete</v-btn>
+    </div>
 </template>
 
 <script lang="ts">
 import { ref, onMounted } from 'vue';
+import { apiFetch } from '../../utils/api';
 import { useAPILoading } from '../../store';
 import { type ProjectType } from '../../types';
 
@@ -20,14 +25,13 @@ export default {
         const projects = ref([]);
         const selectedProjectID = ref(null);
         const apiLoadingStore = useAPILoading()
-        const serverUrl = import.meta.env.VITE_SERVER_URL;
         const hintMessage = ref('');
         const hintType = ref<'error' | 'info' | 'success' | 'warning'>('info');
 
         onMounted(async () => {
             try {
                 apiLoadingStore.setLoading(true)
-                const res = await fetch(`${serverUrl}/projects`, {
+                const res = await apiFetch(`/projects`, {
                     method: "GET",
                     headers: { "Content-Type": "application/json" },
                 });
@@ -47,7 +51,7 @@ export default {
         const deleteSelectedProject = async () => {
             try {
                 apiLoadingStore.setLoading(true)
-                await fetch(`${serverUrl}/projects/${selectedProjectID.value}`, {
+                await apiFetch(`/projects/${selectedProjectID.value}`, {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" },
                 });

@@ -2,8 +2,8 @@
   <v-alert v-if="apiLoadingStore.isLoading()" type="info" class="mb-4" variant="tonal">
     <p>Loading settings from the server</p>
   </v-alert>
-  <v-alert v-if="!siteSettings.configuration.enableSearch" variant="tonal" type="info">Enable search engine to use the
-    search feature</v-alert>
+  <v-alert v-if="!siteSettings.configuration.enableSearch" class="mb-4" variant="tonal" type="info">Enable search engine
+    to use the search feature</v-alert>
   <v-alert v-if="responseMessage" :type="responseType == 'success' ? 'success' : 'error'" class="mb-4"
     variant="tonal">{{ responseMessage }}</v-alert>
 
@@ -22,15 +22,17 @@
     <v-switch :loading="apiLoadingStore.isLoading()" :disabled="!siteSettings.configuration.enableSearch"
       v-model="searchPosts" title="Search all blog posts" color="primary" inset label="Search all blog posts"
       hide-details />
-    <v-btn @click="saveSettings" :loading="apiLoadingStore.isLoading()" :disabled="apiLoadingStore.isLoading()"
-      title="Save Settings" class="mb-4" color="primary" variant="tonal">Save</v-btn>
+    <div class="form-actions mt-4 mb-4">
+      <v-btn @click="saveSettings" :loading="apiLoadingStore.isLoading()" :disabled="apiLoadingStore.isLoading()"
+        title="Save Settings" color="primary" variant="tonal">Save</v-btn>
+    </div>
   </v-form>
 </template>
 
 <script lang="ts">
 import { onMounted, ref } from 'vue';
 import { SettingsType } from '../../types';
-import { useAPILoading, useSettingsStore } from '../../store';
+import { useAPILoading, useSettingsStore, defaultSettings } from '../../store';
 
 
 export default {
@@ -44,31 +46,7 @@ export default {
     const responseType = ref('success');
     const responseMessage = ref();
     const settingsStore = useSettingsStore();
-    const siteSettings = ref<SettingsType>({
-      configuration: {
-        adminDashboard: false,
-        enableSearch: false,
-        githubURL: '',
-        multipleThemes: false,
-        searchModels: [
-          'guestbooks',
-          'projects',
-          'articles',
-          'posts'
-        ]
-      },
-      security: {
-        adminFingerprintSignature: '',
-        debug: false,
-      },
-      server: {
-        host: '',
-        port: 0,
-      },
-      theme: {
-        defaultTheme: 'light'
-      }
-    });
+    const siteSettings = ref<SettingsType>(defaultSettings());
 
     onMounted(() => {
       apiLoadingStore.setLoading(true);

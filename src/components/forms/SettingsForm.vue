@@ -6,29 +6,10 @@
   <v-alert v-if="responseMessage" :type="responseType == 'success' ? 'success' : 'error'" class="mb-4"
     variant="tonal">{{ responseMessage }}</v-alert>
 
-  <v-alert type="warning" class="mb-4" variant="tonal">
-    <strong>Be careful when modifying these settings, especially the admin fingerprint signature.</strong>
-    <p>
-      Changing the fingerprint signature will disable the admin dashboard. Set it to a secret word you’ll remember,
-      like a password.
-    </p>
-    <p>
-      The fingerprint is stored as a hash on the server. When logging in or updating it, you'll need to enter the
-      actual value, not the hash.
-    </p>
-  </v-alert>
   <v-form v-model="validForm" :disabled="apiLoadingStore.isLoading()">
     <v-text-field :loading="apiLoadingStore.isLoading()" v-model="siteSettings.configuration.githubURL"
       title="Your GitHub Link" class="mb-4" label="Your GitHub Link" type="url" variant="outlined" hide-details="auto"
       :rules="[...websiteRules(), ...githubWebsiteRules()]"></v-text-field>
-    <v-text-field :loading="apiLoadingStore.isLoading()" type="password" :rules="longTextRules({
-      fieldName: 'Admin Fingerprint Signature',
-      maxLength: 400,
-      minLength: 6
-    })" v-model="siteSettings.security.adminFingerprintSignature" title="Change admin fingerprint signature"
-      class="mb-4" label="Change admin fingerprint signature" variant="outlined" hide-details="auto"
-      hint="It's recommended to change the signature to avoid being detected as a bot.">
-    </v-text-field>
 
     <v-switch :loading="apiLoadingStore.isLoading()" v-model="support2Themes" title="Support 2 themes Dark/Light"
       color="primary" inset label="Support 2 themes Dark/Light" hide-details />
@@ -37,16 +18,47 @@
       title="Enabling this will display the admin dashboard and its fingerprint" color="primary" inset
       label="Enable admin dashboard service" hide-details />
 
-    <v-btn @click="saveSettings" :loading="apiLoadingStore.isLoading()" :disabled="apiLoadingStore.isLoading()"
-      title="Save Settings" class="mb-4" color="primary" variant="tonal">Save</v-btn>
+    <div class="form-actions mb-4">
+      <v-btn @click="saveSettings" :loading="apiLoadingStore.isLoading()" :disabled="apiLoadingStore.isLoading()"
+        title="Save Settings" color="primary" variant="tonal">Save</v-btn>
+    </div>
+  </v-form>
+
+  <v-divider class="my-6" />
+
+  <!-- Credential changes go through their own endpoint, never the settings payload: the signature
+       is stored as a hash the browser never sees, so it cannot be edited as an ordinary field. -->
+  <h3 class="section-title">🔑 Admin signature</h3>
+  <v-alert type="info" class="mb-4" variant="tonal">
+    Your signature is stored on the server as a salted hash and is never sent to the browser.
+    Changing it signs out every active session, including this one.
+  </v-alert>
+
+  <v-alert v-if="signatureMessage" :type="signatureType" class="mb-4" variant="tonal">{{ signatureMessage }}</v-alert>
+
+  <v-form v-model="validSignatureForm" :disabled="changingSignature">
+    <v-text-field v-model="currentSignature" type="password" title="Current signature" class="mb-4"
+      label="Current signature" variant="outlined" hide-details="auto"
+      :rules="[(v: string) => !!v || 'Current signature is required']"></v-text-field>
+    <v-text-field v-model="newSignature" type="password" title="New signature" class="mb-4" label="New signature"
+      variant="outlined" hide-details="auto" :rules="[
+        (v: string) => !!v || 'New signature is required',
+        (v: string) => (v || '').length >= 8 || 'Use at least 8 characters',
+      ]"></v-text-field>
+    <div class="form-actions mb-4">
+      <v-btn @click="changeSignature" :loading="changingSignature" :disabled="!validSignatureForm || changingSignature"
+        title="Change signature" color="warning" variant="tonal">Change signature</v-btn>
+    </div>
   </v-form>
 </template>
 
 <script lang="ts">
 import { onMounted, ref } from 'vue';
-import { useAPILoading, useSettingsStore } from '../../store';
+import { useRouter } from 'vue-router';
+import { useAPILoading, useSettingsStore, defaultSettings } from '../../store';
 import { SettingsType } from '../../types';
-import { longTextRules, websiteRules, githubWebsiteRules } from '../../utils';
+import { websiteRules, githubWebsiteRules } from '../../utils';
+import { apiJson, clearToken } from '../../utils/api';
 
 
 export default {
@@ -56,34 +68,18 @@ export default {
     const settingsStore = useSettingsStore();
     const adminDashboard = ref(false)
     const support2Themes = ref(false)
-    const siteSettings = ref<SettingsType>({
-      configuration: {
-        adminDashboard: false,
-        enableSearch: false,
-        githubURL: '',
-        multipleThemes: false,
-        searchModels: [
-          'guestbooks',
-          'projects',
-          'articles',
-          'posts'
-        ]
-      },
-      security: {
-        adminFingerprintSignature: '',
-        debug: false,
-      },
-      server: {
-        host: '',
-        port: 0,
-      },
-      theme: {
-        defaultTheme: 'light'
-      }
-    });
+    const siteSettings = ref<SettingsType>(defaultSettings());
     const validForm = ref(false);
     const responseType = ref('success');
     const responseMessage = ref();
+    const router = useRouter();
+
+    const currentSignature = ref('');
+    const newSignature = ref('');
+    const changingSignature = ref(false);
+    const validSignatureForm = ref(false);
+    const signatureMessage = ref('');
+    const signatureType = ref<'success' | 'error'>('success');
 
     onMounted(() => {
       apiLoadingStore.setLoading(true);
@@ -116,6 +112,33 @@ export default {
       }
     }
 
+    // Changing the signature invalidates every token server-side, so the admin is signed out and
+    // sent back to the login screen to prove they know the new value.
+    const changeSignature = async () => {
+      changingSignature.value = true;
+      signatureMessage.value = '';
+      try {
+        await apiJson('/auth/signature', {
+          method: 'POST',
+          body: JSON.stringify({
+            currentSignature: currentSignature.value,
+            newSignature: newSignature.value,
+          }),
+        });
+        signatureType.value = 'success';
+        signatureMessage.value = 'Signature updated. Signing you out…';
+        currentSignature.value = '';
+        newSignature.value = '';
+        clearToken();
+        setTimeout(() => router.push('/admin-signature'), 1200);
+      } catch (e: any) {
+        signatureType.value = 'error';
+        signatureMessage.value = e?.message || 'Failed to change the signature';
+      } finally {
+        changingSignature.value = false;
+      }
+    };
+
     return {
       apiLoadingStore,
       responseMessage,
@@ -124,10 +147,16 @@ export default {
       siteSettings,
       validForm,
       githubWebsiteRules,
-      longTextRules,
       websiteRules,
       saveSettings,
       support2Themes,
+      currentSignature,
+      newSignature,
+      changingSignature,
+      validSignatureForm,
+      signatureMessage,
+      signatureType,
+      changeSignature,
     };
   }
 };
