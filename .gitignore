@@ -23,4 +23,18 @@ dist-ssr
 *.sln
 *.sw?
 .vscode
+
+# Environment — never commit these; the .example files are the templates
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Runtime state. config.json holds the admin signature hash and the live site content, so it is
+# per-deployment data, not source; backend/config.example.json is the template it seeds from.
 backend/db.json
+backend/config.json
+
+# Visitor- and admin-uploaded files
+backend/uploads/*
+!backend/uploads/.gitkeep
