@@ -1,47 +1,41 @@
-# Whoami
+# whoami
 
 A self-hosted personal site you configure instead of fork and edit. Vue 3 and Vuetify on the front,
 Express and two JSON files on the back. Clone it, sign in, and fill it in from the browser. No
-rebuild, no code changes, no name of anyone else's left in the source.
+rebuild, no code changes, nobody else's name left in the source.
 
-<!-- TODO: drop a screenshot at docs/screenshot.png and uncomment the block below.
+> **A note on support.** This powers my website. It is open-source. However, I won't be supporting
+> other people's use cases as this is just a personal project for personal use. If you're
+> interested in doing something similar, I encourage you to take a look at the code.
+
 <p align="center">
-  <img src="docs/screenshot.png" alt="The home page and the admin dashboard side by side" width="900">
+  <img src="docs/screenshot.png" width="900"
+    alt="The home page in the dark theme: navbar, a rotating welcome line, the bio, and buttons for the CV and contact">
 </p>
--->
-> **Screenshot goes here.** Add `docs/screenshot.png` and uncomment the block above this line.
 
 ## What you get
 
 - **Nothing hardcoded.** Every name, link, heading and piece of copy comes from config. A fresh
   clone shows an empty site, not somebody else's.
 - **Edit in place.** Sign in and the public pages grow add, edit, reorder, hide and delete controls
-  right next to the thing they change. The dashboard is nine tabs of site wide settings, not a
-  second copy of your content.
-- **Configurable theme.** Both palettes live in config, with a live WCAG contrast readout so you can
-  see when your text drops below the 4.5:1 floor.
-- **Real document head.** Title, description, Open Graph and Twitter tags, and the favicon come from
+  next to the thing they change. The dashboard holds site-wide settings, not a second copy of your
+  content.
+- **Configurable theme.** Both palettes live in config, with a live WCAG contrast readout so you
+  can see when text drops below the 4.5:1 floor.
+- **Real document head.** Title, description, Open Graph and Twitter tags and the favicon come from
   config, and the server injects them into the HTML so crawlers and link previews see them.
-- **Content built in.** Projects, articles, a blog, work history, a guestbook, and a "more" page.
-- **Real markdown posts.** Tables, syntax-highlighted code, Mermaid diagrams and KaTeX maths, in a
-  Write/Preview editor with GitHub-style image drop and paste. Heavy libraries load only when a post
-  actually uses them.
-- **Post reactions.** Up and down votes anyone can cast, no account and no replies.
-- **Public checklists.** `/lists` keeps plans in the open — missions, groups and tickable items,
-  all edited in place, with progress on every level.
-- **A bookshelf.** `/books` tracks what you are reading and what is queued, each linked to the
-  book's own page.
-- **Search.** Across whichever collections you choose to include.
-- **Guestbook anti-bot.** A question you write. The answer stays on the server.
-- **Uploads.** Images and PDFs, with a file manager in the dashboard.
-- **IndieWeb webring.** Optional `← IndieWeb Webring →` links in the footer.
-- **Web Sign-In.** Your contact channels are served as `rel="me"` in the HTML itself, so you can log
-  in to other sites as your own domain via IndieLogin.com without running any JavaScript.
-- **Authenticated API.** Every write endpoint is behind a bearer token.
-- **Responsive.** The dashboard is usable from a phone, not just the site.
+- **Content built in.** Projects, articles, a blog, work history, public checklists, a bookshelf, a
+  guestbook and a "more" page — plus search across whichever of them you choose.
+- **Real markdown posts.** Tables, syntax-highlighted code, Mermaid diagrams and KaTeX maths in a
+  Write/Preview editor with image drop and paste. The heavy libraries load only when a post uses
+  them.
+- **Web Sign-In.** Your contact channels are served as `rel="me"` in the HTML itself, so you can
+  sign in to other sites as your own domain via IndieLogin, no JavaScript required.
+- **Authenticated API.** Every write endpoint sits behind a bearer token.
+- **Responsive.** The dashboard works from a phone, not just the site.
 
-**Stack:** Vue 3, TypeScript, Vuetify, Vue Router, Pinia, VueUse. Express on Node 20+, with
-file-based JSON storage. No database to run.
+**Stack:** Vue 3, TypeScript, Vuetify, Vue Router, Pinia. Express on Node 20+, storing everything in
+JSON files. No database to run.
 
 ## Quick start
 
@@ -54,22 +48,56 @@ yarn dev      # frontend on :5173, in a second terminal
 ```
 
 The first boot creates `backend/config.json` and `backend/db.json` and prints a generated admin
-signature to the server log, once:
+signature to the log, once:
 
 ```
 warn: No admin signature was set. Generated one: 3Kd9xQ2mVpLw
 warn: Store it now. It is not recoverable and will not be printed again.
 ```
 
-Copy it, or set `ADMIN_SIGNATURE` in `.env` before the first run to choose your own. Sign in at
+Copy it, or set `ADMIN_SIGNATURE` in `.env` before the first run to choose your own. Then sign in at
 <http://localhost:5173/admin> and start filling the site in.
 
-For production, `yarn build` then `NODE_ENV=production yarn start`. One process serves the built
+For production, `yarn build` then `NODE_ENV=production yarn start`: one process serves the built
 frontend and the API on the same origin.
 
-**[docs/USAGE.md](docs/USAGE.md) has the rest**: every environment variable, what each dashboard tab
-owns, theming and the contrast check, the webring, Docker and reverse proxy setups, and what to back
-up.
+## Run it with Docker
+
+```bash
+cp .env.example .env             # ADMIN_SIGNATURE, SITE_OWNER and SITE_URL are enough
+docker compose up -d --build     # http://localhost:3000
+```
+
+There is no database container, and none is missing. Storage is two JSON files and an uploads
+directory, so the `whoami-data` volume is the whole storage layer — back that up and you have
+backed up the site.
+
+Which the stack does for you: a `backup` service tars that volume into `./backups` daily, keeps
+the last seven, and mounts the volume read-only so it can't damage what it's protecting. It parses
+both JSON files first and skips the run rather than write a torn backup. `make backup` takes one
+now, `make restore FILE=…` puts one back.
+
+Three Dockerfiles are included:
+
+| File | Builds |
+| --- | --- |
+| `Dockerfile` | The whole site in one container. Use this one. |
+| `Dockerfile.backend` | The API alone. |
+| `Dockerfile.frontend` | The built SPA behind Caddy, proxying `/api` to the backend. |
+
+`docker-compose.split.yml` runs the second pair together. Only reach for it if the frontend truly
+has to live somewhere else: the document head is injected by the Node server, so splitting them
+means crawlers and link previews see the generic tags from `index.html` instead of your configured
+ones.
+
+To build and push your own images:
+
+```bash
+make docker-push IMAGE=ghcr.io/you/whoami TAG=v1.0.0
+```
+
+The `Publish images` workflow does the same on every push to the default branch and on every `v*`
+tag, to the GitHub Container Registry, for amd64 and arm64.
 
 ## Configuration model
 
@@ -77,10 +105,10 @@ Environment variables seed `backend/config.json` on the first boot. The dashboar
 on. The server never overwrites a field you have edited, so a stale `.env` on an old server cannot
 revert your changes.
 
-In production the server validates the environment before it binds a port and exits with a message
-naming each problem. It only demands a variable when the config cannot already supply the value, so
-`ADMIN_SIGNATURE`, `SITE_OWNER` and `SITE_URL` are required for a new deploy and stop being required
-once those fields are filled.
+In production the server validates the environment before it binds a port and exits naming each
+problem. It only demands a variable when config cannot already supply the value, so
+`ADMIN_SIGNATURE`, `SITE_OWNER` and `SITE_URL` are required for a new deploy and stop being
+required once those fields are filled.
 
 ## Security model
 
@@ -89,87 +117,27 @@ once those fields are filled.
 - Logging in exchanges the signature for a bearer token, held in memory server side and in
   `sessionStorage` client side. Tokens last 12 hours and are dropped on restart.
 - Failed logins are rate limited per IP: 5 attempts, then a 15 minute lockout. Set `TRUST_PROXY=1`
-  behind a proxy so this counts real client IPs.
-- Every mutating endpoint sits behind `requireAuth`. The router guard on `/admin-dashboard` and the
-  in place edit buttons are convenience. The backend is the security boundary.
+  behind a proxy so this counts real client IPs — and only there, since it means trusting a header
+  the client sends.
+- Every mutating endpoint sits behind `requireAuth`. The router guard and the in-place edit buttons
+  are convenience; the backend is the security boundary.
 - Changing the signature requires the current one and signs out every session.
-- `POST /api/guestbooks` is the only public write endpoint. It whitelists and length caps its fields
-  and checks the anti-bot answer server side.
-- `.env`, `backend/config.json`, `backend/db.json` and `backend/uploads/*` are gitignored. They hold
-  credentials and per-deployment content, not source.
+- `POST /api/guestbooks` is the only public write endpoint. It whitelists and length-caps its
+  fields and checks the anti-bot answer server side.
+- `.env`, `backend/config.json`, `backend/db.json` and `backend/uploads/*` are gitignored. They
+  hold credentials and per-deployment content, not source.
 
-## API
+## Documentation
 
-Everything is namespaced under `/api`. 🔒 marks endpoints that require
-`Authorization: Bearer <token>`.
+- **[docs/](docs/readme.md)** — the manual. First run and the configuration model, what each
+  dashboard tab owns, theming and the contrast check, the webring and Web Sign-In, every
+  environment variable, the API reference, deployment, and backups.
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — repository layout, how to add a config key, and the one
+  rule: no personal data in the source tree.
 
-| Endpoint | Description |
-| --- | --- |
-| `GET /api` · `GET /api/health` | API index and health check |
-| `POST /api/auth/login` | Exchange the admin signature for a token |
-| `POST /api/auth/logout` 🔒 | Invalidate the current token |
-| `GET /api/auth/session` | Report whether a token is still valid |
-| `POST /api/auth/signature` 🔒 | Change the admin signature |
-| `GET /api/settings` | Public site settings, never including credentials |
-| `POST /api/settings` 🔒 | Update site settings |
-| `GET /api/search?q=` | Search the enabled collections |
-| `GET /api/guestbooks` · `POST /api/guestbooks` | List and sign the guestbook (both public) |
-| `PUT`/`DELETE /api/guestbooks/:id` 🔒 | Edit or remove an entry |
-| `GET /api/projects` · `/api/articles` · `/api/posts` | Public content listings |
-| `POST`/`PUT`/`DELETE` on those 🔒 | Content management |
-| `GET`/`POST /api/posts/:id/reactions` | Read or cast an anonymous up/down vote |
-| `GET /api/lists` · `GET /api/lists/:slug` | Public checklists |
-| `POST`/`PUT`/`DELETE /api/lists` 🔒 | Manage checklists, ticking a box included |
-| `GET /api/books` | The public bookshelf |
-| `POST`/`PUT`/`DELETE /api/books` 🔒 | Manage the shelf |
-| `POST /api/upload` 🔒 | Upload a file (JPEG, PNG, GIF or PDF, up to 5 MB) |
-| `GET /api/uploads` 🔒 · `DELETE /api/uploads/:filename` 🔒 | Manage uploaded files |
-
-Uploaded files are served publicly from `/uploads/<filename>`.
-
-## Scripts
-
-| Script | Description |
-| --- | --- |
-| `yarn dev` | Frontend dev server with hot reload |
-| `yarn server` | Backend API only |
-| `yarn build` | Typecheck, then bundle into `dist/` |
-| `yarn start` | Production server, serving `dist/` and the API together |
-| `yarn typecheck` | `vue-tsc` only |
-| `yarn lint` | ESLint |
-| `yarn preview` | Preview the production bundle with Vite |
-| `./scripts/check-identity.sh <url>` | Check the deployed site works as a Web Sign-In identity |
-
-Equivalent `make` targets exist for each (`make build`, `make start`, `make check`, and so on).
-
-## Layout
-
-```
-├── src/
-│   ├── components/
-│   │   ├── admin/       # In place owner controls
-│   │   ├── forms/       # Dashboard forms, one per tab
-│   │   └── home/        # Home page sections
-│   ├── composables/     # useAdmin, useFormFeedback, useDocumentHead
-│   ├── layouts/         # Layout components
-│   ├── plugins/         # Vuetify, fed from config
-│   ├── router/          # Routes and the admin guard
-│   ├── store/           # Pinia store and the default settings factories
-│   ├── types/           # TypeScript types, mirroring the config schema
-│   ├── utils/           # Helpers; api.ts is the authed API client
-│   └── views/           # Pages
-├── backend/
-│   ├── server.cjs           # Express: API, config, auth, static serving
-│   ├── config.example.json  # Reference copy of the runtime config
-│   └── uploads/             # Uploaded files (gitignored)
-└── docs/                # USAGE.md and the open source plan
-```
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). The one rule is that no personal data belongs in the source
-tree. If you are typing a name, handle, URL or piece of site copy into a `.vue` or `.ts` file, add a
-config key instead.
+The manual is written for [hero_doc_generator](https://forge.ourworld.tf/lhumina_code/hero_skills):
+`hero_doc_generator build docs` turns `docs/content/` into HTML, an ebook, a PDF and a DOCX. The
+Markdown reads fine on its own, so the tool is optional.
 
 ## License
 

@@ -1,0 +1,30 @@
+# Caddy config baked into the frontend image (Dockerfile.frontend).
+#
+# The site address defaults to plain HTTP on :8080. Set SITE_ADDRESS to a real hostname
+# (SITE_ADDRESS=example.com) and Caddy fetches and renews a certificate on its own — publish
+# ports 80 and 443 for that.
+{$SITE_ADDRESS::8080} {
+	root * /srv
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# The API and the uploaded files live in the backend container. Proxying them from here,
+	# rather than pointing the browser at a second origin, keeps the whole site same-origin: the
+	# bundle needs no VITE_SERVER_URL and the backend needs no CORS allowlist.
+	@backend path /api/* /uploads/*
+	reverse_proxy @backend {$BACKEND_ORIGIN:http://backend:3000}
+
+	# Bundle filenames carry a content hash, so they can be cached forever.
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	# Anything left is a client-side route. Hand back index.html and let vue-router resolve it.
+	try_files {path} /index.html
+	file_server
+}

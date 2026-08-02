@@ -1,4 +1,4 @@
-# Whoami portfolio — mahmoud-emad.dev
+# whoami portfolio — mahmoud-emad.dev
 #
 # Caddy is the only publicly reachable process. The Node backend listens on 127.0.0.1:3000 and
 # is never exposed directly: there is no API subdomain and no open port 3000. The SPA and the

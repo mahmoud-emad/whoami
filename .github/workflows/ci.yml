@@ -31,18 +31,30 @@ jobs:
           # uses relative URLs and works under any domain without a rebuild.
           VITE_SERVER_URL: ''
 
-      - name: Backend build
-        run: yarn build:server
-
-  no-personal-data:
-    # This project is a template. A name or handle hardcoded in the source means a fresh clone
-    # renders somebody else's identity, so the build fails on it.
+  docker:
+    # The three images are the supported way to deploy, so a Dockerfile that no longer builds is
+    # a broken release. Built but not pushed — publishing happens in docker-publish.yml.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fail on hardcoded identity in src/
+
+      - name: Build the combined image
+        run: docker build -t whoami:ci .
+
+      - name: Build the split images
         run: |
-          if grep -rniE 'mahmoud|omdanii|hassanein' src/ index.html; then
+          docker build -f Dockerfile.backend -t whoami-backend:ci .
+          docker build -f Dockerfile.frontend -t whoami-frontend:ci .
+
+  no-personal-data:
+    # Every name, handle and URL belongs in config, not in the source. One hardcoded here means a
+    # fresh clone renders somebody else's identity, so the build fails on it.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail on hardcoded identity in frontend/src/
+        run: |
+          if grep -rniE 'mahmoud|omdanii|hassanein' frontend/src/ frontend/index.html; then
             echo "::error::Hardcoded personal data found in the source tree. Move it into config."
             exit 1
           fi

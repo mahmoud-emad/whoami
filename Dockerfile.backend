@@ -1,0 +1,53 @@
+# The Express API on its own, without the frontend build.
+#
+# Pair it with Dockerfile.frontend. If you want one container instead of two, use the root
+# Dockerfile — it is the same server with the frontend build included.
+#
+# Build from the repository root, not from backend/: the workspace's yarn.lock lives there.
+#
+#   docker build -f Dockerfile.backend -t whoami-backend .
+
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+COPY package.json yarn.lock ./
+COPY frontend/package.json ./frontend/
+COPY backend/package.json ./backend/
+RUN yarn install --frozen-lockfile
+
+COPY backend ./backend
+RUN yarn build:server
+
+
+FROM node:20-alpine AS runtime
+
+WORKDIR /app
+
+ENV NODE_ENV=production \
+    HOST=0.0.0.0 \
+    PORT=3000 \
+    WHOAMI_DATA_DIR=/data
+
+# The backend manifest is the image's package.json: `type: commonjs` for the compiled output, and
+# express, cors and multer as the only dependencies.
+COPY backend/package.json ./package.json
+COPY yarn.lock ./
+RUN yarn install --production && yarn cache clean
+
+COPY --from=build /app/backend/dist ./dist
+
+# config.json, db.json and uploads/ are written here at runtime. Mount a volume, or the site's
+# content and its admin signature go with the container.
+RUN mkdir -p /data && chown -R node:node /data
+VOLUME ["/data"]
+
+USER node
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+# No frontend build is present, so the server serves the API alone — and then also exposes every
+# endpoint at the root as well as under /api, since there are no client-side routes to collide with.
+CMD ["node", "dist/index.js"]

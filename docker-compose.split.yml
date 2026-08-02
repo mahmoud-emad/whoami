@@ -1,0 +1,93 @@
+# whoami as two containers: Caddy serving the built SPA in front of an API-only backend.
+#
+#   docker compose -f docker-compose.split.yml up -d --build
+#
+# Use this when the frontend has to live somewhere the backend does not — an edge node, a
+# separate scaling group. Otherwise prefer docker-compose.yml: one container, one origin, and a
+# document head rendered per request. Splitting them means crawlers, link previews and IndieLogin
+# see the generic tags baked into index.html instead of your configured ones, because that
+# injection happens in the Node server and here Caddy is what answers.
+#
+# Caddy proxies /api and /uploads through to the backend, so the browser still sees one origin
+# and the backend still needs no CORS allowlist. The backend port is deliberately not published:
+# nothing reaches it except through the frontend container.
+#
+# As in the single-container file, there is no database service. The two JSON files and the
+# uploads directory on the `whoami-data` volume are the whole of the storage layer.
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: ${WHOAMI_BACKEND_IMAGE:-whoami-backend:local}
+    restart: unless-stopped
+    init: true
+    expose:
+      - "3000"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      # Correct here: Caddy is in front, so X-Forwarded-For is the only way the login rate
+      # limiter can see a real client IP rather than the proxy's.
+      TRUST_PROXY: "1"
+      ADMIN_SIGNATURE: ${ADMIN_SIGNATURE:-}
+      SITE_OWNER: ${SITE_OWNER:-}
+      SITE_URL: ${SITE_URL:-http://localhost:8080}
+      SITE_ROLE: ${SITE_ROLE:-}
+      SITE_EMAIL: ${SITE_EMAIL:-}
+      SITE_GITHUB: ${SITE_GITHUB:-}
+      SITE_DESCRIPTION: ${SITE_DESCRIPTION:-}
+      ANTIBOT_QUESTION: ${ANTIBOT_QUESTION:-}
+      ANTIBOT_ANSWER: ${ANTIBOT_ANSWER:-}
+    volumes:
+      - whoami-data:/data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    image: ${WHOAMI_FRONTEND_IMAGE:-whoami-frontend:local}
+    restart: unless-stopped
+    ports:
+      - "${WHOAMI_PORT:-8080}:8080"
+    environment:
+      # ":8080" is plain HTTP. Set SITE_ADDRESS to a hostname (example.com) and Caddy gets a
+      # certificate on its own — publish 80 and 443 above when you do.
+      SITE_ADDRESS: ${SITE_ADDRESS:-:8080}
+      BACKEND_ORIGIN: http://backend:3000
+    depends_on:
+      backend:
+        # Wait for the API to answer /api/health, so the first request through Caddy cannot land
+        # on a backend that is still writing its config on first boot.
+        condition: service_healthy
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+
+  # Same backup job as the single-container file: a scheduled tarball of the data volume, which is
+  # the whole of the storage layer. Mounted read-only.
+  backup:
+    image: node:20-alpine
+    restart: unless-stopped
+    init: true
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      BACKUP_INTERVAL: ${BACKUP_INTERVAL:-86400}
+      BACKUP_KEEP: ${BACKUP_KEEP:-7}
+      BACKUP_ON_START: ${BACKUP_ON_START:-1}
+    volumes:
+      - whoami-data:/data:ro
+      - ./docker/backup.sh:/backup.sh:ro
+      - ${BACKUP_DIR:-./backups}:/backups
+    command: ["sh", "/backup.sh"]
+
+volumes:
+  whoami-data:
+  # Caddy's certificates and its own state. Losing these means re-issuing certificates on every
+  # restart, which runs into Let's Encrypt rate limits.
+  caddy-data:
+  caddy-config:

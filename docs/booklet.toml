@@ -1,0 +1,45 @@
+# Build manifest for hero_doc_generator.
+#
+#   hero_doc_generator build docs
+#
+# Output lands in ~/Downloads/whoami-manual/ as whoami-manual.{html,docx,pdf,ebook}.
+# Command-line flags override anything set here.
+
+title    = "whoami Manual"
+subtitle = "Running and configuring a self-hosted personal site"
+author   = "Mahmoud Emad"
+date     = "2026"
+template = "clean-eu"
+formats  = ["html", "ebook", "pdf", "docx"]
+
+[input]
+sort      = "alphabetical"
+recursive = true
+
+[headings]
+auto_number  = true
+number_depth = 3
+
+[toc]
+enabled = true
+depth   = 3
+title   = "Contents"
+
+[images]
+default_width  = "85%"
+default_align  = "center"
+caption        = true
+caption_source = "alt"
+break_inside   = "avoid"
+
+[mermaid]
+enabled       = true
+caption       = true
+default_width = "90%"
+
+[pagination]
+h1_page_break_before        = true
+keep_headings_with_next     = true
+avoid_break_inside_tables   = true
+avoid_break_inside_figures  = true
+avoid_break_inside_callouts = true

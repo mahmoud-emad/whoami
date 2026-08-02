@@ -12,8 +12,15 @@
 #   /etc/whoami/env               runtime environment
 set -euo pipefail
 
-HOST="${DEPLOY_HOST:-root@185.206.122.33}"
+# No default. This is a public repository, and a default here would publish the address and the
+# login user of a live server. Export it from your shell profile, or pass it inline:
+#   DEPLOY_HOST=root@203.0.113.10 ./scripts/deploy.sh
+HOST="${DEPLOY_HOST:?set DEPLOY_HOST, e.g. DEPLOY_HOST=root@your.server ./scripts/deploy.sh}"
+# Fixed, because the remote block below is a quoted heredoc that hardcodes the same path.
 APP_DIR=/opt/whoami
+
+# The URL the post-deploy check polls. Unset means skip the check.
+SITE_URL="${SITE_URL:-}"
 
 say() { printf '\n\033[1;34m==>\033[0m %s\n' "$1"; }
 
@@ -94,10 +101,15 @@ sleep 4
 zinit list
 REMOTE
 
+if [ -z "$SITE_URL" ]; then
+	say "Deploy finished. Set SITE_URL to have this script verify the site afterwards."
+	exit 0
+fi
+
 say "Verifying the site is serving"
 for i in 1 2 3 4 5; do
-	code=$(curl -s -m 10 -o /dev/null -w '%{http_code}' https://mahmoud-emad.dev/ || echo 000)
-	api=$(curl -s -m 10 -o /dev/null -w '%{http_code}' https://mahmoud-emad.dev/api/health || echo 000)
+	code=$(curl -s -m 10 -o /dev/null -w '%{http_code}' "${SITE_URL%/}/" || echo 000)
+	api=$(curl -s -m 10 -o /dev/null -w '%{http_code}' "${SITE_URL%/}/api/health" || echo 000)
 	if [ "$code" = "200" ] && [ "$api" = "200" ]; then
 		printf '   site %s | api %s — deploy OK\n' "$code" "$api"
 		exit 0

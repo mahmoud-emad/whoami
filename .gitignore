@@ -39,5 +39,9 @@ backend/config.json
 backend/uploads/*
 !backend/uploads/.gitkeep
 
+# Backup tarballs written by the compose backup service. They contain the signature hash and all
+# of your content — treat them as credentials, and never commit them.
+backups/
+
 # Compiled backend
 backend/dist

@@ -1,0 +1,70 @@
+# whoami as a single container: one Node process serving the frontend and the API on one origin.
+# This is the recommended setup.
+#
+#   docker compose up -d --build
+#
+# For the two-container split (Caddy in front of an API-only backend), use the other file:
+#
+#   docker compose -f docker-compose.split.yml up -d --build
+#
+# There is no database service here, and nothing is missing. whoami stores everything in two JSON
+# files and an uploads directory, so the `whoami-data` volume below *is* the database. Back that
+# volume up and you have backed up the site.
+#
+# Variables come from .env, which Docker Compose reads automatically. Only ADMIN_SIGNATURE,
+# SITE_OWNER and SITE_URL are needed for a first boot, and only until the dashboard owns them.
+
+services:
+  whoami:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${WHOAMI_IMAGE:-whoami:local}
+    restart: unless-stopped
+    # Reap zombies and pass SIGTERM to node as PID 1, so `compose down` is prompt.
+    init: true
+    ports:
+      - "${WHOAMI_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      # Only set this to 1 when something else terminates TLS in front of the container. It makes
+      # Express believe X-Forwarded-For, which the login rate limiter counts against — trusting it
+      # on a directly-exposed port lets a client forge the header and sidestep the lockout.
+      TRUST_PROXY: ${TRUST_PROXY:-}
+      ADMIN_SIGNATURE: ${ADMIN_SIGNATURE:-}
+      SITE_OWNER: ${SITE_OWNER:-}
+      SITE_URL: ${SITE_URL:-http://localhost:3000}
+      SITE_ROLE: ${SITE_ROLE:-}
+      SITE_EMAIL: ${SITE_EMAIL:-}
+      SITE_GITHUB: ${SITE_GITHUB:-}
+      SITE_DESCRIPTION: ${SITE_DESCRIPTION:-}
+      ANTIBOT_QUESTION: ${ANTIBOT_QUESTION:-}
+      ANTIBOT_ANSWER: ${ANTIBOT_ANSWER:-}
+    volumes:
+      - whoami-data:/data
+
+  # The storage layer is two JSON files and an uploads directory, so this is the closest thing to
+  # a database backup job. It tars /data on a schedule into ./backups on the host, keeps the last
+  # BACKUP_KEEP of them, and mounts the data volume read-only so it can never damage what it is
+  # protecting.
+  backup:
+    image: node:20-alpine
+    restart: unless-stopped
+    init: true
+    depends_on:
+      whoami:
+        condition: service_healthy
+    environment:
+      BACKUP_INTERVAL: ${BACKUP_INTERVAL:-86400}
+      BACKUP_KEEP: ${BACKUP_KEEP:-7}
+      BACKUP_ON_START: ${BACKUP_ON_START:-1}
+    volumes:
+      - whoami-data:/data:ro
+      - ./docker/backup.sh:/backup.sh:ro
+      - ${BACKUP_DIR:-./backups}:/backups
+    command: ["sh", "/backup.sh"]
+
+volumes:
+  whoami-data:

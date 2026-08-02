@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { UPLOADS_DIR } from './config/paths';
+import { DATA_DIR, UPLOADS_DIR } from './config/paths';
 import { HOST, IS_PRODUCTION, NODE_ENV, PORT, SERVE_FRONTEND } from './config/runtime';
 import { bootstrapConfig, validateEnvironment } from './config/env';
 import { initializeConfig } from './config/store';
@@ -9,6 +9,10 @@ import { log } from './lib/logger';
 import { createApp } from './server/app';
 
 const startServer = async (): Promise<void> => {
+  // Before anything reads or writes: with WHOAMI_DATA_DIR pointing somewhere new, the first boot
+  // finds nothing there at all, and both initializers below write files into it straight away.
+  await fs.mkdir(DATA_DIR, { recursive: true });
+
   await initializeDatabase();
   await initializeConfig();
 

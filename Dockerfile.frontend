@@ -1,0 +1,35 @@
+# The built SPA, served by Caddy, with /api and /uploads proxied to the backend container.
+#
+# Pair it with Dockerfile.backend. One caveat comes with splitting them: the document head
+# (title, description, Open Graph, rel="me") is injected per request by the Node server, and only
+# when that server is the one serving index.html. A static frontend serves the generic tags from
+# index.html instead, so crawlers, link previews and IndieLogin see those. If any of that
+# matters, use the root Dockerfile — one container, one origin, head tags included.
+#
+#   docker build -f Dockerfile.frontend -t whoami-frontend .
+
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+COPY package.json yarn.lock ./
+COPY frontend/package.json ./frontend/
+COPY backend/package.json ./backend/
+RUN yarn install --frozen-lockfile
+
+COPY frontend ./frontend
+
+# Empty on purpose: Caddy proxies /api to the backend, so the bundle talks to its own origin and
+# the same image works under any domain without a rebuild.
+ENV VITE_SERVER_URL=""
+RUN yarn build:frontend
+
+
+FROM caddy:2-alpine AS runtime
+
+COPY --from=build /app/frontend/dist /srv
+COPY docker/frontend.Caddyfile /etc/caddy/Caddyfile
+
+# 8080 is the default. 80 and 443 are for SITE_ADDRESS with a real hostname, where Caddy
+# terminates TLS itself.
+EXPOSE 8080 80 443

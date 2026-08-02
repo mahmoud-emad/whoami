@@ -1,5 +1,7 @@
-dist
 node_modules
+dist
+frontend/dist
+frontend/public
+backend/dist
 backend/uploads
-public
 *.min.js
