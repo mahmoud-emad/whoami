@@ -15,8 +15,9 @@ what the numeric prefixes are for.
 | 6 | Deployment — [Single server](content/06_deployment/01_single_server.md) · [Docker](content/06_deployment/02_docker.md) · [Reverse proxy](content/06_deployment/03_reverse_proxy.md) |
 | 7 | Operations — [Backups](content/07_operations/01_backups.md) |
 
-[OPEN_SOURCE_PLAN.md](OPEN_SOURCE_PLAN.md) sits outside `content/` on purpose — it is a record of
-how this repository was made publishable, not part of the manual.
+`booklet.toml` beside this file is the render manifest: the title, the chapter order, and how
+headings, images and page breaks are handled when `content/` is turned into HTML, a PDF, a DOCX or
+an ebook. The chapters are plain Markdown and read fine without it.
 
 ## Writing conventions
 

@@ -46,7 +46,7 @@ Two yarn workspaces. The root holds tooling and deployment files only — no app
 │   └── dist/            # compiled output
 ├── docker/              # Caddyfile baked into the frontend image
 ├── deploy/              # zinit units and the Caddyfile for a single-server deploy
-└── docs/                # the manual (booklet.toml + content/) and the open source plan
+└── docs/                # the manual: booklet.toml and content/
 ```
 
 Data paths are overridable: `WHOAMI_DATA_DIR` moves `config.json`, `db.json` and `uploads/` off
