@@ -94,10 +94,22 @@
           minLength: 10,
         })" :counter="600" title="Bio" label="Bio" variant="outlined" hide-details="auto" rows="4" auto-grow
           class="mb-4"></v-textarea>
+        <!--
+          Upload sits above the URL field and fills it in, the same pairing the logo uses. The URL
+          stays editable because a CV hosted elsewhere is a perfectly good answer; uploading is
+          just the path that does not require having somewhere to host it.
+        -->
+        <v-file-input v-model="resumeFile" :rules="fileRules({ fieldName: 'Resume', accept: RESUME_TYPES })"
+          :loading="uploadingResume" :disabled="uploadingResume" label="Upload a resume (PDF)"
+          title="Upload a resume" variant="outlined" hide-details="auto" show-size prepend-icon=""
+          append-icon="mdi-upload" accept="application/pdf" @update:model-value="uploadResume"
+          class="mb-4"></v-file-input>
         <v-text-field v-model="draft.resumeUrl" type="url"
-          :rules="urlRules({ fieldName: 'Resume URL' })" title="Resume URL" label="Resume URL"
-          variant="outlined" hide-details="auto" hint="Leave empty to hide the “Read the CV” button." persistent-hint
-          class="mb-4"></v-text-field>
+          :rules="urlRules({ fieldName: 'Resume URL', allowRelative: true })" title="Resume URL"
+          label="Resume URL"
+          variant="outlined" hide-details="auto"
+          hint="Filled in by the upload above, or paste a link. Empty hides the “Read the CV” button."
+          persistent-hint class="mb-4"></v-text-field>
       </v-form>
 
       <template #actions>
@@ -117,7 +129,8 @@ import InlineActions from '../admin/InlineActions.vue';
 import { useAdmin } from '../../composables/useAdmin';
 import { useFormFeedback } from '../../composables/useFormFeedback';
 import type { SectionConfig } from '../../types';
-import { deepClone, emojiRules, longTextRules, nameRules, sectionHeading, stringListRules, urlRules, websiteRules } from '../../utils';
+import { deepClone, emojiRules, fileRules, longTextRules, nameRules, sectionHeading, stringListRules, urlRules, websiteRules } from '../../utils';
+import { apiFetch } from '../../utils/api';
 
 const ROTATE_MS = 3000;
 
@@ -139,6 +152,9 @@ const emptyDraft = (): IntroDraft => ({
   // editing the intro never reshuffles the page.
   section: { title: '', emoji: '', intro: '', show: true, order: 1 },
 });
+
+/** The upload endpoint takes images and PDFs; a resume is only ever the latter. */
+const RESUME_TYPES = ['application/pdf'];
 
 export default defineComponent({
   name: 'IntroSection',
@@ -167,6 +183,7 @@ export default defineComponent({
 
     const role = computed<string>(() => settingsStore.profile?.role?.trim() || '');
     const resumeUrl = computed<string>(() => settingsStore.profile?.resumeUrl?.trim() || '');
+
 
     const messageIndex = ref(0);
 
@@ -213,6 +230,40 @@ export default defineComponent({
     // In-place editing state.
     const editorOpen = ref(false);
     const draft = ref<IntroDraft>(emptyDraft());
+
+    // Upload state for the editor's file input.
+    const resumeFile = ref<File | File[] | null>(null);
+    const uploadingResume = ref(false);
+
+    /**
+     * Send the picked PDF to /upload and put the returned path in the URL field.
+     *
+     * It does not save on its own: the dialog's Save is still what writes the profile, so picking
+     * a file and then cancelling leaves the site exactly as it was. The upload itself is not undone
+     * by cancelling, but an orphaned file in the uploads list is cheap and removable, whereas
+     * silently rewriting the live CV link would not be.
+     */
+    const uploadResume = async (val: File | File[] | null) => {
+      const file = Array.isArray(val) ? val[0] : val;
+      if (!file) return;
+      try {
+        uploadingResume.value = true;
+        const fd = new FormData();
+        // The field is named `image` because that is what the endpoint's multer instance expects;
+        // it accepts PDFs too.
+        fd.append('image', file);
+        const res = await apiFetch('/upload', { method: 'POST', body: fd });
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok || !result.url) throw new Error(result.error || 'Upload failed.');
+        draft.value.resumeUrl = result.url;
+        success('Resume uploaded. Press Save to publish it.');
+      } catch (e: any) {
+        error(e?.message || 'Upload failed.');
+      } finally {
+        uploadingResume.value = false;
+        resumeFile.value = null;
+      }
+    };
     const validForm = ref(false);
     const saving = ref(false);
 
@@ -272,6 +323,11 @@ export default defineComponent({
       bio,
       role,
       resumeUrl,
+      resumeFile,
+      uploadingResume,
+      uploadResume,
+      fileRules,
+      RESUME_TYPES,
       isAdmin,
       editorOpen,
       draft,
