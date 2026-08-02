@@ -1,20 +1,27 @@
 <template>
   <v-card @mouseleave="resetCardBackground(project)" @mousemove="(e) => changeCardBackground(e, project)"
-    class="mx-auto project-card" :style="{ background: project.background + '!important' }" rel="noopener">
+    class="mx-auto project-card d-flex flex-column" :style="{ background: project.background + '!important' }" rel="noopener">
     <div class="project-logo">{{ project.title.toLocaleUpperCase() }}</div>
     <h2 style="cursor: pointer; color: var(--v-theme-text-color);" @click="openLink(project)">{{ project.title }}</h2>
-    <v-card-text class="ma-0 pa-0 mt-4 mb-4" style="height: 90px;">
+    <v-card-text class="ma-0 pa-0 mt-4 mb-4" style="min-height: 90px;">
       {{
-        project.description.length > 200 ? project.description.slice(0, 200) + '...' :
-          project.description
+        project.description
       }}
     </v-card-text>
-    <div class="mb-2">
+    <div class="mb-2 mt-auto">
       <v-chip-group>
         <v-chip v-for="(tag, tagIndex) in project.tags" :key="tagIndex" :title="tag" :class="getChipClass(tag)">
           {{ tag }}
         </v-chip>
       </v-chip-group>
+    </div>
+    <!--
+      Owner controls sit on their own row under the tags rather than floating over the card corner:
+      the corner already holds the decorative glow, and a row cannot collide with a long title at
+      390px. The card never fetches anything itself — it just reports which project was acted on.
+    -->
+    <div v-if="editable" class="project-card__actions">
+      <InlineActions label="project" @edit="$emit('edit', project)" @remove="$emit('remove', project)" />
     </div>
   </v-card>
 </template>
@@ -22,16 +29,24 @@
 <script lang="ts">
 import { ProjectType } from '../types';
 import { type PropType } from 'vue';
+import InlineActions from './admin/InlineActions.vue';
 
 
 export default {
   name: 'Card',
+  components: { InlineActions },
   props: {
     project: {
       type: Object as PropType<ProjectType>,
       required: true
+    },
+    // Set by the page from `isAdmin`. Off by default, so a visitor's card is unchanged.
+    editable: {
+      type: Boolean,
+      default: false
     }
   },
+  emits: ['edit', 'remove'],
   setup() {
     // Handle Card Background Change
     const handleCardBackgroundChange = (e: any, project: ProjectType) => {
@@ -114,3 +129,13 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.project-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+  border-top: 1px solid rgba(var(--v-theme-border-color), 0.6);
+  padding-top: 4px;
+}
+</style>
