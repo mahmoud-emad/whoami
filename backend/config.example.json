@@ -1,0 +1,232 @@
+{
+  "_comment": "Reference copy of the runtime config, matching the defaultConfig in backend/server.cjs. backend/config.json is gitignored and is created automatically on first boot from these defaults, seeded from the environment (see .env.production.example) and then edited through the admin dashboard — the dashboard is the source of truth from that point on. security.adminSignature holds a scrypt hash and its salt, never a plaintext signature; configuration.antiBot.answer is stored here but is stripped from every public response.",
+  "server": {
+    "host": "localhost",
+    "port": 3000
+  },
+  "configuration": {
+    "githubURL": "",
+    "adminDashboard": true,
+    "multipleThemes": true,
+    "enableSearch": true,
+    "searchModels": [
+      "projects",
+      "guestbooks",
+      "articles",
+      "posts"
+    ],
+    "antiBot": {
+      "enabled": true,
+      "question": "",
+      "answer": ""
+    }
+  },
+  "theme": {
+    "defaultTheme": "dark",
+    "dark": {
+      "background": "#01061F",
+      "text-color": "#ffffff",
+      "border-color": "#123869",
+      "gray-color": "#cdd4df",
+      "link-color": "#cdd4df",
+      "box-bg-color": "#120131bb",
+      "link-hover-color": "#82adf3",
+      "front-end-bg-color": "#05143dbb",
+      "back-end-bg-color": "#05283dbb",
+      "form": "#091C21FF"
+    },
+    "light": {
+      "background": "#ffffff",
+      "text-color": "#11161f",
+      "border-color": "#e2e6ec",
+      "gray-color": "#5b6473",
+      "link-color": "#2a4d8f",
+      "box-bg-color": "#ffffff",
+      "link-hover-color": "#2f6bd4",
+      "front-end-bg-color": "#cedeff",
+      "back-end-bg-color": "#c4e1ff",
+      "form": "#f4f6fa"
+    }
+  },
+  "indieweb": {
+    "webring": {
+      "enabled": false,
+      "name": "IndieWeb Webring",
+      "baseUrl": "https://xn--sr8hvo.ws"
+    }
+  },
+  "meta": {
+    "title": "",
+    "description": "",
+    "siteUrl": "",
+    "ogImage": "",
+    "faviconUrl": "",
+    "twitterHandle": ""
+  },
+  "security": {
+    "debug": false,
+    "adminSignature": {
+      "salt": "",
+      "hash": ""
+    }
+  },
+  "profile": {
+    "fullName": "",
+    "role": "",
+    "bio": "",
+    "welcomeMessages": [],
+    "resumeUrl": "",
+    "brand": {
+      "displayName": "",
+      "handle": "",
+      "handleUrl": "",
+      "logoUrl": "",
+      "copyrightOwner": "",
+      "copyrightYear": 2026,
+      "navItems": [
+        {
+          "link": "/",
+          "name": "❄️ About",
+          "title": "About me",
+          "show": true
+        },
+        {
+          "link": "/contact",
+          "name": "📞 Contact",
+          "title": "Contact me",
+          "show": true
+        },
+        {
+          "link": "/projects",
+          "name": "🎨 Projects",
+          "title": "See my projects",
+          "show": true
+        },
+        {
+          "link": "/blog",
+          "name": "✍️ Blog",
+          "title": "See my blog",
+          "show": true
+        },
+        {
+          "link": "/guestbook",
+          "name": "🧁 Guestbook",
+          "title": "Write me a guestbook",
+          "show": true
+        },
+        {
+          "link": "/more",
+          "name": "🌏 More",
+          "title": "Wanna to see more?",
+          "show": true
+        }
+      ]
+    },
+    "problemSolving": {
+      "enabled": true,
+      "description": "",
+      "repoUrl": ""
+    },
+    "socials": {
+      "email": "",
+      "signalUrl": "",
+      "githubUrl": "",
+      "linkedinUrl": "",
+      "xUrl": "",
+      "timezone": ""
+    },
+    "contact": {
+      "intro": "",
+      "elsewhereIntro": "",
+      "emailLabel": "",
+      "emailDescription": "",
+      "signalLabel": "",
+      "signalDescription": "",
+      "githubLabel": "",
+      "linkedinLabel": "",
+      "xLabel": ""
+    },
+    "more": {
+      "intro": "",
+      "cards": [],
+      "shoeboxIntro": "",
+      "shoebox": []
+    },
+    "experience": [],
+    "sections": {
+      "intro": {
+        "title": "",
+        "emoji": "",
+        "intro": "",
+        "show": true,
+        "order": 1
+      },
+      "experience": {
+        "title": "Experience",
+        "emoji": "⚙️",
+        "intro": "",
+        "show": true,
+        "order": 2
+      },
+      "projects": {
+        "title": "Selected Work",
+        "emoji": "🎨",
+        "intro": "",
+        "show": true,
+        "order": 3
+      },
+      "openSource": {
+        "title": "Open Source",
+        "emoji": "🌟",
+        "intro": "",
+        "show": true,
+        "order": 4
+      },
+      "problemSolving": {
+        "title": "Problem Solving",
+        "emoji": "🧠",
+        "intro": "",
+        "show": true,
+        "order": 5
+      },
+      "articles": {
+        "title": "Articles",
+        "emoji": "📝",
+        "intro": "",
+        "show": true,
+        "order": 6
+      }
+    },
+    "pages": {
+      "contact": {
+        "title": "Contact",
+        "intro": ""
+      },
+      "projects": {
+        "title": "Projects",
+        "intro": ""
+      },
+      "blog": {
+        "title": "Blog",
+        "intro": ""
+      },
+      "guestbook": {
+        "title": "Guestbook",
+        "intro": ""
+      },
+      "guestbookNotice": {
+        "title": "",
+        "intro": ""
+      },
+      "search": {
+        "title": "Search",
+        "intro": ""
+      },
+      "notFound": {
+        "title": "This page does not exist yet.",
+        "intro": ""
+      }
+    },
+    "channels": []
+  }
+}
