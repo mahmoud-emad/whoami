@@ -190,6 +190,7 @@ type DerivedChannel = Omit<RenderChannel, 'index'>;
 const KINDS = [
   'email',
   'signal',
+  'telegram',
   'github',
   'linkedin',
   'x',
@@ -229,6 +230,7 @@ const readable = (url: string): string =>
 const KIND_NAMES: Record<string, string> = {
   email: 'E-mail',
   signal: 'Instant Messaging',
+  telegram: 'Telegram',
   github: 'GitHub',
   linkedin: 'LinkedIn',
   x: 'X',
