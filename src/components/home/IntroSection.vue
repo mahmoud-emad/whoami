@@ -5,7 +5,10 @@
   -->
   <!-- No `pa-2`: Vuetify's spacing utilities are !important, so that class was silently overriding
        the block's own padding and collapsing the hero's breathing room to 8px. -->
-  <div v-if="show" class="intro">
+  <!-- `|| isAdmin` keeps the block mounted for the owner when the section is switched off or still
+       empty — otherwise a fresh install offers nowhere to fill the hero in from. For a visitor the
+       condition is exactly the `show` it always was. -->
+  <div v-if="show || isAdmin" class="intro">
     <p v-if="role" class="intro__eyebrow">{{ role }}</p>
     <h1 v-if="claim" class="intro__claim">{{ claim }}</h1>
     <p v-if="bio" class="intro__bio">{{ bio }}</p>
@@ -17,19 +20,129 @@
       </a>
       <router-link to="/contact" class="intro__cta intro__cta--quiet">Get in touch</router-link>
     </div>
+
+    <!-- Owner-only strip, below the calls to action so the visitor layout above it is untouched. -->
+    <div v-if="isAdmin" class="owner-bar">
+      <InlineActions label="hero" :remove="false" @edit="openEditor" />
+      <!-- The owner is looking at a block nobody else can see; say so rather than let it read as a
+           rendering bug. -->
+      <span v-if="!show" class="owner-bar__note">Hidden from visitors</span>
+      <v-alert v-if="!editorOpen && responseMessage" :type="responseType" variant="tonal" density="compact"
+        class="owner-bar__alert">{{ responseMessage }}</v-alert>
+    </div>
+
+    <!-- Mounted only for the owner, so a visitor never loads the form at all. -->
+    <EditorDialog v-if="isAdmin" v-model="editorOpen" title="Edit hero">
+      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
+        {{ responseMessage }}
+      </v-alert>
+      <v-form v-model="validForm" :disabled="saving">
+        <!-- The section entry (profile.sections.intro) is edited here as well as in the dashboard,
+             so the hero can be retitled or hidden from the page it actually belongs to. -->
+        <div class="d-flex align-center justify-space-between flex-wrap ga-2 mb-2">
+          <span class="editor-group">Section</span>
+          <v-switch v-model="draft.section.show" color="primary" inset hide-details density="compact"
+            :label="draft.section.show ? 'Visible' : 'Hidden'"></v-switch>
+        </div>
+        <!-- Home.vue drops a hidden section from the page entirely, this editor included, so hiding
+             the hero is not undoable from here. Say so before it is switched off, not after. -->
+        <p v-if="!draft.section.show" class="editor-warning mb-2">
+          Hidden removes the whole hero from the page — including this editor. Bring it back from
+          Sections in the dashboard.
+        </p>
+        <v-row class="ma-0">
+          <v-col cols="12" sm="3" class="pa-1">
+            <v-text-field v-model="draft.section.emoji" title="Section Emoji" label="Emoji" placeholder="❄️"
+              variant="outlined" hide-details="auto" density="comfortable"></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="9" class="pa-1">
+            <!-- The hero has no <h2> of its own: emoji + heading stand in as the headline whenever
+                 no claim line is set, which is why this is worth filling in. -->
+            <v-text-field v-model="draft.section.title" title="Section Heading" label="Heading" variant="outlined"
+              hide-details="auto" density="comfortable"
+              hint="Used as the headline when no claim line is set." persistent-hint></v-text-field>
+          </v-col>
+          <v-col cols="12" class="pa-1">
+            <!-- The hero has no separate intro paragraph either: the bio fills that slot, and this
+                 is what shows when the bio is empty. -->
+            <v-textarea v-model="draft.section.intro" title="Section Intro" label="Intro paragraph" variant="outlined"
+              hide-details="auto" density="comfortable" rows="2" auto-grow
+              hint="Shown in place of the bio when the bio is empty." persistent-hint></v-textarea>
+          </v-col>
+        </v-row>
+
+        <v-divider class="my-4" />
+
+        <!-- Example in the placeholder, not the label: at 390px a label with an example in it is
+             ellipsised away. Same treatment as the dashboard's profile form. -->
+        <v-text-field v-model="draft.role" title="Role" label="Role" placeholder="Software Engineer" variant="outlined"
+          hide-details="auto" class="mb-4"></v-text-field>
+        <!-- An array, not a line: whatever is listed here rotates in the headline, and the section
+             only cycles once there is more than one. -->
+        <v-combobox v-model="draft.welcomeMessages" title="Claim Lines" label="Claim lines" variant="outlined"
+          hide-details="auto" multiple chips closable-chips
+          hint="The headline. Type a line and press enter; more than one rotates every 3 seconds."
+          persistent-hint class="mb-4 welcome-combobox"></v-combobox>
+        <!-- Rules only bite once something has been typed, so an empty hero is still savable. -->
+        <v-textarea v-model="draft.bio" :rules="draft.bio?.length ? longTextRules({
+          fieldName: 'Bio',
+          maxLength: 600,
+          minLength: 10,
+        }) : []" :counter="600" title="Bio" label="Bio" variant="outlined" hide-details="auto" rows="4" auto-grow
+          class="mb-4"></v-textarea>
+        <v-text-field v-model="draft.resumeUrl" type="url"
+          :rules="draft.resumeUrl?.length ? websiteRules() : []" title="Resume URL" label="Resume URL"
+          variant="outlined" hide-details="auto" hint="Leave empty to hide the “Read the CV” button." persistent-hint
+          class="mb-4"></v-text-field>
+      </v-form>
+
+      <template #actions>
+        <v-btn variant="text" :disabled="saving" class="text-capitalize" @click="editorOpen = false">Cancel</v-btn>
+        <v-btn color="primary" variant="tonal" :loading="saving" :disabled="!validForm || saving"
+          class="text-capitalize" @click="save">Save changes</v-btn>
+      </template>
+    </EditorDialog>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useSettingsStore } from '../../store';
-import { sectionHeading } from '../../utils';
+import EditorDialog from '../admin/EditorDialog.vue';
+import InlineActions from '../admin/InlineActions.vue';
+import { useAdmin } from '../../composables/useAdmin';
+import { useFormFeedback } from '../../composables/useFormFeedback';
+import type { SectionConfig } from '../../types';
+import { deepClone, longTextRules, sectionHeading, websiteRules } from '../../utils';
 
+const ROTATE_MS = 3000;
+
+/** The hero's own slice of the profile — exactly the keys `save` writes back, and no others. */
+type IntroDraft = {
+  role: string;
+  bio: string;
+  welcomeMessages: string[];
+  resumeUrl: string;
+  section: SectionConfig;
+};
+
+const emptyDraft = (): IntroDraft => ({
+  role: '',
+  bio: '',
+  welcomeMessages: [],
+  resumeUrl: '',
+  // `order` drives Home.vue's section sequence; the stored value replaces this default on open, so
+  // editing the hero never reshuffles the page.
+  section: { title: '', emoji: '', intro: '', show: true, order: 1 },
+});
 
 export default defineComponent({
   name: 'IntroSection',
+  components: { EditorDialog, InlineActions },
   setup() {
     const settingsStore = useSettingsStore();
+    const { isAdmin } = useAdmin();
+    const { responseType, responseMessage, success, error, clear } = useFormFeedback();
 
     const section = computed(() => settingsStore.profile?.sections?.intro);
     const show = computed(() => section.value?.show !== false);
@@ -63,23 +176,109 @@ export default defineComponent({
 
     let intervalId: ReturnType<typeof setInterval> | null = null;
 
-    onMounted(() => {
-      // Only cycle if more than one line was configured. A headline that rewrites itself every
-      // three seconds is a distraction when there is nothing to cycle through.
-      if (welcomeMessages.value.length > 1) {
-        intervalId = setInterval(pickMessage, 3000);
+    const stopRotation = () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
       }
+    };
+
+    /**
+     * Only cycle if more than one line is configured. A headline that rewrites itself every three
+     * seconds is a distraction when there is nothing to cycle through.
+     *
+     * Re-evaluated rather than decided once at mount: settings arrive asynchronously, and the owner
+     * can now add or remove lines without a reload, so the pool this depends on changes after mount.
+     */
+    const syncRotation = () => {
+      stopRotation();
+      if (welcomeMessages.value.length > 1) {
+        intervalId = setInterval(pickMessage, ROTATE_MS);
+      }
+    };
+
+    watch(welcomeMessages, () => {
+      // The old index can point past the end of a shortened list, which would blank the headline.
+      messageIndex.value = 0;
+      syncRotation();
     });
 
-    onUnmounted(() => {
-      if (intervalId) clearInterval(intervalId);
-    });
+    onMounted(syncRotation);
+    onUnmounted(stopRotation);
+
+    // In-place editing state.
+    const editorOpen = ref(false);
+    const draft = ref<IntroDraft>(emptyDraft());
+    const validForm = ref(false);
+    const saving = ref(false);
+
+    const openEditor = () => {
+      clear();
+      const profile = settingsStore.profile;
+      // Cloned, so typing in the dialog does not rewrite the hero behind it before anything is
+      // saved — and so Cancel really cancels.
+      draft.value = {
+        ...emptyDraft(),
+        role: profile?.role || '',
+        bio: profile?.bio || '',
+        welcomeMessages: deepClone(profile?.welcomeMessages || []),
+        resumeUrl: profile?.resumeUrl || '',
+        section: {
+          ...emptyDraft().section,
+          ...(deepClone(profile?.sections?.intro || {}) as Partial<SectionConfig>),
+        },
+      };
+      editorOpen.value = true;
+    };
+
+    const save = async () => {
+      try {
+        saving.value = true;
+        const full = settingsStore.getSettings();
+        // Only the keys this dialog owns are written back. brand/socials/contact/more/experience and
+        // every other `sections` entry are carried through from current store state, so saving the
+        // hero can never clobber another form's or another section's data.
+        full.profile = {
+          ...full.profile,
+          role: draft.value.role,
+          bio: draft.value.bio,
+          // Blank chips are dropped on the way in, so what is stored is what rotates.
+          welcomeMessages: draft.value.welcomeMessages
+            .map((message) => (message || '').trim())
+            .filter(Boolean),
+          resumeUrl: draft.value.resumeUrl,
+          sections: {
+            ...full.profile.sections,
+            intro: { ...full.profile.sections?.intro, ...draft.value.section },
+          },
+        };
+        await settingsStore.saveSettings(full);
+        editorOpen.value = false;
+        success('Hero saved.');
+      } catch (e: any) {
+        error(e?.message || 'Failed to save the hero.');
+      } finally {
+        saving.value = false;
+      }
+    };
+
     return {
       show,
       claim,
       bio,
       role,
       resumeUrl,
+      isAdmin,
+      editorOpen,
+      draft,
+      validForm,
+      saving,
+      responseType,
+      responseMessage,
+      openEditor,
+      save,
+      longTextRules,
+      websiteRules,
     };
   },
 });
@@ -166,5 +365,55 @@ export default defineComponent({
 .intro__cta:focus-visible {
   outline: 2px solid rgb(var(--v-theme-link-hover-color));
   outline-offset: 2px;
+}
+
+/* Owner chrome. Wraps so the alert drops onto its own line on a phone instead of squeezing the
+   pencil off the row. */
+.owner-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0.9rem;
+}
+
+.owner-bar__note {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: rgb(var(--v-theme-gray-color));
+}
+
+.owner-bar__alert {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.editor-group {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-color));
+}
+
+.editor-warning {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: rgb(var(--v-theme-warning));
+}
+
+/* A claim line is a whole phrase, but v-chip is `white-space: nowrap; overflow: hidden` with no
+   ellipsis, so on a phone every chip was cut off mid-word and the lines became indistinguishable.
+   Letting the chip wrap and grow keeps the whole message readable. */
+.welcome-combobox :deep(.v-chip) {
+  height: auto;
+  min-height: 32px;
+  white-space: normal;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.welcome-combobox :deep(.v-chip__content) {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 </style>

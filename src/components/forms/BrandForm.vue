@@ -167,13 +167,6 @@ export default {
 </script>
 
 <style scoped>
-.section-title {
-  margin-top: 8px;
-  margin-bottom: 12px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: rgb(var(--v-theme-text-color));
-}
 
 .section-hint {
   color: rgb(var(--v-theme-gray-color));

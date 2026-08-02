@@ -6,9 +6,20 @@
       matter what padding was applied. One layout system, one set of edges.
     -->
     <div class="nav-top">
-      <router-link v-if="logoSrc" to="/" class="nav-brand__logo">
-        <v-img :src="logoSrc" :alt="brandDisplayName || 'Logo'" :title="brandDisplayName || 'Home'" cover />
-      </router-link>
+      <!--
+        Signed in, the avatar doubles as the account control: hovering or focusing it reveals a
+        sign out button over the corner. Visitors see an ordinary link home, with no hint that an
+        account exists.
+      -->
+      <div v-if="logoSrc" class="nav-brand__avatar" :class="{ 'nav-brand__avatar--admin': isAdmin }">
+        <router-link to="/" class="nav-brand__logo">
+          <v-img :src="logoSrc" :alt="brandDisplayName || 'Logo'" :title="brandDisplayName || 'Home'" cover />
+        </router-link>
+        <button v-if="isAdmin" class="nav-signout" type="button" title="Sign out" aria-label="Sign out"
+          :disabled="signingOut" @click.stop="signOut">
+          <v-icon size="16">mdi-logout</v-icon>
+        </button>
+      </div>
 
       <div class="nav-brand__text">
         <h3 v-if="brandDisplayName" class="nav-brand__name" :title="brandHandle">{{ brandDisplayName }}</h3>
@@ -60,6 +71,8 @@ import { defineComponent, ref, computed } from "vue";
 import { useDisplay } from "vuetify";
 import { useRoute, useRouter } from "vue-router";
 import { useAPILoading, useSettingsStore } from "../store";
+import { useAdmin } from "../composables/useAdmin";
+import { logout } from "../utils/api";
 // Imported rather than referenced by path so Vite bundles and fingerprints them. A literal
 // "/src/assets/..." src only resolves under the dev server and 404s in a production build.
 import searchIcon from "../assets/icons/search.svg";
@@ -78,6 +91,21 @@ export default defineComponent({
     const display = useDisplay();
     const router = useRouter();
     const route = useRoute();
+    const { isAdmin, markSignedOut } = useAdmin();
+    const signingOut = ref(false);
+
+    const signOut = async () => {
+      signingOut.value = true;
+      try {
+        await logout();
+        markSignedOut();
+        // Home rather than staying put: half the page's controls vanish on sign out, and landing
+        // somewhere stable reads better than watching them disappear around you.
+        router.push('/');
+      } finally {
+        signingOut.value = false;
+      }
+    };
 
     // State
     const navbarClicked = ref(false);
@@ -166,6 +194,9 @@ export default defineComponent({
       navBarLinks,
       visibleNavItems,
       isActive,
+      isAdmin,
+      signingOut,
+      signOut,
       display,
       openNavbar,
       closeNavbar,
@@ -197,7 +228,53 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  padding: 0.5rem var(--nav-inset) 0.75rem;
+}
+
+.nav-brand__avatar {
+  position: relative;
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
+/* The button sits over the avatar's corner rather than beside it, so the header keeps the same
+   shape whether or not anyone is signed in. */
+.nav-signout {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgb(var(--v-theme-background)) !important;
+  color: rgb(var(--v-theme-gray-color)) !important;
+  border: 1px solid rgb(var(--v-theme-border-color));
+  opacity: 0;
+  transition: opacity .18s ease, color .18s ease, border-color .18s ease;
+}
+
+/* Revealed on hover or keyboard focus. On touch there is no hover, so it stays visible there. */
+.nav-brand__avatar--admin:hover .nav-signout,
+.nav-signout:focus-visible {
+  opacity: 1;
+}
+
+.nav-signout:hover {
+  color: rgb(var(--v-theme-link-hover-color)) !important;
+  border-color: rgb(var(--v-theme-link-hover-color));
+}
+
+.nav-signout:focus-visible {
+  outline: 2px solid rgb(var(--v-theme-link-hover-color));
+  outline-offset: 2px;
+}
+
+@media (hover: none) {
+  .nav-brand__avatar--admin .nav-signout {
+    opacity: 1;
+  }
 }
 
 .nav-brand__logo {

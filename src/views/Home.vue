@@ -31,6 +31,7 @@ import ArticleSection from '../components/home/ArticlesSection.vue';
 import ProplemSolvingSection from '../components/home/ProblemSolvingSection.vue';
 import ProjectsSection from '../components/home/ProjectsSection.vue';
 import { useSettingsStore } from '../store';
+import { useAdmin } from '../composables/useAdmin';
 import type { SectionConfig } from '../types';
 
 type SectionKey = 'intro' | 'experience' | 'projects' | 'openSource' | 'problemSolving' | 'articles';
@@ -59,6 +60,7 @@ export default defineComponent({
 
   setup() {
     const settingsStore = useSettingsStore();
+    const { isAdmin } = useAdmin();
 
     const orderedSections = computed<SectionKey[]>(() => {
       const sections = settingsStore.profile?.sections as Partial<Record<SectionKey, SectionConfig>> | undefined;
@@ -66,8 +68,12 @@ export default defineComponent({
         const order = sections?.[key]?.order;
         return typeof order === 'number' ? order : DEFAULT_ORDER[key];
       };
+      // The owner keeps every section mounted, including hidden ones. Filtering them out here
+      // would unmount the section's own in-place editor the moment it was switched off, leaving
+      // no way to switch it back on from the page. Each section renders its own "hidden from
+      // visitors" state instead.
       return SECTION_KEYS
-        .filter((key) => sections?.[key]?.show !== false)
+        .filter((key) => isAdmin.value || sections?.[key]?.show !== false)
         .sort((a, b) => orderOf(a) - orderOf(b));
     });
 

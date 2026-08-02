@@ -15,7 +15,7 @@
     </div>
 
     <!--
-      Phones get a dropdown instead of the vertical tab rail: two dozen tabs in a sidebar leave
+      Phones get a dropdown instead of the vertical tab rail: a sidebar of section names leaves
       almost no room for the form beside it. Desktop keeps the rail.
     -->
     <div v-if="isMobile" class="px-2 pt-2">
@@ -26,6 +26,12 @@
         </template>
       </v-select>
     </div>
+
+    <!-- Content no longer has a tab here, so say where it went rather than let the owner hunt. -->
+    <p class="dashboard-note px-4 pt-3">
+      Projects, posts, articles, experience, contact channels and the More page are edited on the
+      pages themselves while you are signed in — open a page and use the controls beside each entry.
+    </p>
 
     <div class="d-flex" :class="isMobile ? 'flex-column' : 'flex-row'">
       <!-- Sidebar navigation (desktop only) -->
@@ -38,10 +44,9 @@
       <!-- Content Window -->
       <v-tabs-window class="mb-2 mt-2 custom-border dashboard-window" :class="isMobile ? 'pa-2 mx-2' : 'pa-2 ml-2'"
         v-model="activeTab">
+        <!-- The description is the tab's tooltip and the dropdown's subtitle. Repeating it here as
+             a third blue box stacked on top of the form's own intro said the same thing twice. -->
         <v-tabs-window-item v-for="tab in tabs" :key="tab.value" class="mt-2" :value="tab.value">
-          <v-alert class="mb-4 custom-border" type="info" variant="tonal" :density="isMobile ? 'compact' : 'default'">
-            {{ tab.description }}
-          </v-alert>
           <component :is="tab.component" />
         </v-tabs-window-item>
       </v-tabs-window>
@@ -58,34 +63,93 @@ import { SettingsType } from '../types';
 import { logout } from '../utils/api';
 
 // Lazy-loaded form components
-const ProfileForm = defineAsyncComponent(() => import('../components/forms/ProfileForm.vue'));
 const BrandForm = defineAsyncComponent(() => import('../components/forms/BrandForm.vue'));
 const SocialsForm = defineAsyncComponent(() => import('../components/forms/SocialsForm.vue'));
-const ProjectForm = defineAsyncComponent(() => import('../components/forms/ProjectForm.vue'));
-const ArticleForm = defineAsyncComponent(() => import('../components/forms/ArticleForm.vue'));
-const PostForm = defineAsyncComponent(() => import('../components/forms/PostForm.vue'));
-const EditProject = defineAsyncComponent(() => import('../components/forms/EditProject.vue'));
-const EditArticle = defineAsyncComponent(() => import('../components/forms/EditArticle.vue'));
-const EditPost = defineAsyncComponent(() => import('../components/forms/EditPost.vue'));
-const EditGuestbook = defineAsyncComponent(() => import('../components/forms/EditGuestbook.vue'));
-const DeleteGuestbookForm = defineAsyncComponent(() => import('../components/forms/DeleteGuestbookForm.vue'));
-const DeleteProject = defineAsyncComponent(() => import('../components/forms/DeleteProject.vue'));
-const DeleteArticle = defineAsyncComponent(() => import('../components/forms/DeleteArticle.vue'));
-const DeletePost = defineAsyncComponent(() => import('../components/forms/DeletePost.vue'));
 const UploadsManager = defineAsyncComponent(() => import('../components/forms/UploadsManager.vue'));
 const SearchEngineForm = defineAsyncComponent(() => import('../components/forms/SearchEngineForm.vue'));
 const SettingsForm = defineAsyncComponent(() => import('../components/forms/SettingsForm.vue'));
-const MoreForm = defineAsyncComponent(() => import('../components/forms/MoreForm.vue'));
-const ExperienceForm = defineAsyncComponent(() => import('../components/forms/ExperienceForm.vue'));
 const SectionsForm = defineAsyncComponent(() => import('../components/forms/SectionsForm.vue'));
 const PagesForm = defineAsyncComponent(() => import('../components/forms/PagesForm.vue'));
-const ChannelsForm = defineAsyncComponent(() => import('../components/forms/ChannelsForm.vue'));
 const AppearanceForm = defineAsyncComponent(() => import('../components/forms/AppearanceForm.vue'));
 const MetaForm = defineAsyncComponent(() => import('../components/forms/MetaForm.vue'));
 
+/**
+ * What is left in the dashboard: the settings that shape the whole site and are edited rarely.
+ * Content — projects, posts, articles, experience, contact channels, the More page — is edited on
+ * the page it appears on, so it is not duplicated here.
+ *
+ * Module scope rather than inside setup(), so the default tab below can be the first entry instead
+ * of a hand-written key that goes stale the moment a tab is removed.
+ */
+const tabs = [
+  {
+    label: "Branding",
+    value: "branding",
+    icon: "mdi-palette-swatch",
+    component: BrandForm,
+    description: "Edit the navbar identity, logo, footer line, and which navigation links are visible."
+  },
+  {
+    label: "Socials",
+    value: "socials",
+    icon: "mdi-web",
+    component: SocialsForm,
+    description: "Edit the social links and timezone shown on the Contact page."
+  },
+  {
+    label: "Sections",
+    value: "sections",
+    icon: "mdi-view-dashboard-variant",
+    component: SectionsForm,
+    description: "Rename, reorder, hide or show the blocks that make up the home page."
+  },
+  {
+    label: "Pages",
+    value: "pages",
+    icon: "mdi-file-document-multiple",
+    component: PagesForm,
+    description: "Edit the heading and intro paragraph of the Contact, Projects, Blog, Guestbook, Search and 404 pages."
+  },
+  {
+    label: "Appearance",
+    value: "appearance",
+    icon: "mdi-palette",
+    component: AppearanceForm,
+    description: "Edit the dark and light palettes and the default theme, with a live WCAG contrast check."
+  },
+  {
+    label: "Site meta",
+    value: "site-meta",
+    icon: "mdi-tag-text",
+    component: MetaForm,
+    description: "Edit the browser tab title, search description, preview image and favicon."
+  },
+  {
+    label: "Uploads",
+    value: "uploads",
+    icon: "mdi-folder-image",
+    component: UploadsManager,
+    description: "Browse, copy URLs for, and delete files uploaded via posts or the profile resume field."
+  },
+  {
+    label: "Configure Search engine",
+    value: "search-engine",
+    icon: "mdi-database-search",
+    component: SearchEngineForm,
+    description: "Use this form to configure the search engine."
+  },
+  {
+    label: "Site Settings",
+    value: "settings",
+    icon: "mdi-cog",
+    component: SettingsForm,
+    description: "Use this form to configure site settings."
+  },
+];
+
 export default {
   setup() {
-    const activeTab = ref('profile');
+    const activeTab = ref(tabs[0].value);
     const settingsStore = useSettingsStore();
     const apiLoadingStore = useAPILoading();
     const siteSettings = ref<SettingsType>({} as SettingsType);
@@ -114,177 +178,6 @@ export default {
       apiLoadingStore.setLoading(false)
     })
 
-    const tabs = [
-      {
-        label: "Profile",
-        value: "profile",
-        icon: "mdi-card-account-details",
-        component: ProfileForm,
-        description: "Edit the public profile: hero name, bio, welcome messages, resume and problem-solving section."
-      },
-      {
-        label: "Branding",
-        value: "branding",
-        icon: "mdi-palette-swatch",
-        component: BrandForm,
-        description: "Edit the navbar identity, logo, footer line, and which navigation links are visible."
-      },
-      {
-        label: "More page",
-        value: "more-page",
-        icon: "mdi-view-list",
-        component: MoreForm,
-        description: "Edit the cards and shoebox links on the More page. Entries without a link never render."
-      },
-      {
-        label: "Socials",
-        value: "socials",
-        icon: "mdi-web",
-        component: SocialsForm,
-        description: "Edit the social links and timezone shown on the Contact page."
-      },
-      {
-        label: "Experience",
-        value: "experience",
-        icon: "mdi-briefcase",
-        component: ExperienceForm,
-        description: "Edit the work history on the home page: roles, bullet points, order, and the RUNNING/STOPPED marker."
-      },
-      {
-        label: "Sections",
-        value: "sections",
-        icon: "mdi-view-dashboard-variant",
-        component: SectionsForm,
-        description: "Rename, reorder, hide or show the blocks that make up the home page."
-      },
-      {
-        label: "Pages",
-        value: "pages",
-        icon: "mdi-file-document-multiple",
-        component: PagesForm,
-        description: "Edit the heading and intro paragraph of the Contact, Projects, Blog, Guestbook, Search and 404 pages."
-      },
-      {
-        label: "Channels",
-        value: "channels",
-        icon: "mdi-account-network",
-        component: ChannelsForm,
-        description: "Edit the ways visitors can reach you on the Contact page: add, reorder, feature or hide a channel."
-      },
-      {
-        label: "Appearance",
-        value: "appearance",
-        icon: "mdi-palette",
-        component: AppearanceForm,
-        description: "Edit the dark and light palettes and the default theme, with a live WCAG contrast check."
-      },
-      {
-        label: "Site meta",
-        value: "site-meta",
-        icon: "mdi-tag-text",
-        component: MetaForm,
-        description: "Edit the browser tab title, search description, preview image and favicon."
-      },
-      {
-        label: "Create a new project",
-        value: "new-project",
-        icon: "mdi-package",
-        component: ProjectForm,
-        description: "Use this form to create a new project."
-      },
-      {
-        label: "Create a new article",
-        value: "new-article",
-        icon: "mdi-marker",
-        component: ArticleForm,
-        description: "Use this form to create a new article."
-      },
-      {
-        label: "Create a new post",
-        value: "new-image",
-        icon: "mdi-image",
-        component: PostForm,
-        description: "Use this form to post a new blog post. Markdown supported."
-      },
-      {
-        label: "Edit a project",
-        value: "edit-project",
-        icon: "mdi-package-variant",
-        component: EditProject,
-        description: "Use this form to edit an existing project."
-      },
-      {
-        label: "Edit an article",
-        value: "edit-article",
-        icon: "mdi-pencil",
-        component: EditArticle,
-        description: "Use this form to edit an existing article."
-      },
-      {
-        label: "Edit a post",
-        value: "edit-post",
-        icon: "mdi-image-edit",
-        component: EditPost,
-        description: "Use this form to edit an existing blog post. Markdown supported."
-      },
-      {
-        label: "Edit a guestbook",
-        value: "edit-guestbook",
-        icon: "mdi-comment-edit",
-        component: EditGuestbook,
-        description: "Use this form to edit an existing guestbook entry."
-      },
-      {
-        label: "Delete a project",
-        value: "delete-project",
-        icon: "mdi-package",
-        component: DeleteProject,
-        description: "Use this form to delete a project from the database."
-      },
-      {
-        label: "Delete an article",
-        value: "delete-article",
-        icon: "mdi-marker",
-        component: DeleteArticle,
-        description: "Use this form to delete an article from the database."
-      },
-      {
-        label: "Delete a post",
-        value: "delete-post",
-        icon: "mdi-image",
-        component: DeletePost,
-        description: "Use this form to delete a blog post from the database."
-      },
-      {
-        label: "Delete a guestbook",
-        value: "delete-guestbook",
-        icon: "mdi-comment",
-        component: DeleteGuestbookForm,
-        description: "Use this form to delete a guestbook from the database."
-      },
-      {
-        label: "Uploads",
-        value: "uploads",
-        icon: "mdi-folder-image",
-        component: UploadsManager,
-        description: "Browse, copy URLs for, and delete files uploaded via posts or the profile resume field."
-      },
-      {
-        label: "Configure Search engine",
-        value: "search-engine",
-        icon: "mdi-database-search",
-        component: SearchEngineForm,
-        description: "Use this form to configure the search engine."
-      },
-      {
-        label: "Site Settings",
-        value: "settings",
-        icon: "mdi-cog",
-        component: SettingsForm,
-        description: "Use this form to configure site settings."
-      },
-    ];
-
     return { activeTab, tabs, siteSettings, signOut, signingOut, isMobile };
   }
 };
@@ -311,6 +204,14 @@ export default {
 
 .dashboard-title {
   min-width: 0;
+}
+
+.dashboard-note {
+  color: rgb(var(--v-theme-gray-color));
+  font-size: 0.9rem;
+  line-height: 1.6;
+  max-width: 70ch;
+  margin: 0;
 }
 
 @media (max-width: 600px) {

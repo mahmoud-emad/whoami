@@ -2,7 +2,7 @@
   <v-alert v-if="responseMessage" :type="responseType" variant="tonal" class="mb-4">{{ responseMessage }}</v-alert>
 
   <v-alert v-if="!apiLoadingStore.isLoading() && files.length === 0" type="info" variant="tonal" class="mb-4">
-    No uploaded files found. Files uploaded from PostForm or ProfileForm will appear here.
+    No uploaded files yet. Anything you upload while editing a post, your profile or your branding shows up here.
   </v-alert>
 
   <!-- The table has more columns than a phone can fit, so it scrolls inside its own container

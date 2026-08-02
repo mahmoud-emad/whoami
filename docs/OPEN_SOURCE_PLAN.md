@@ -49,16 +49,16 @@ because Vuetify is created before `GET /api/settings` answers. It is colours, no
 
 ## Phase 2: configure the rest of the content ✅ done
 
-6. ✅ **`profile.experience[]`** with an `ExperienceForm` tab.
+6. ✅ **`profile.experience[]`**, edited in place on the home page's Experience section.
 7. ✅ **`profile.sections{}`** with a `SectionsForm`: per-section title, emoji, intro, visibility and
    order for the six home page sections.
 8. ✅ **`profile.pages{}`** with a `PagesForm`: heading and intro for Contact, Projects, Blog,
    Guestbook, Search and 404.
-9. ✅ **`profile.channels[]`** with a `ChannelsForm`. The five channel ceiling is gone.
+9. ✅ **`profile.channels[]`**, edited in place on the Contact page. The five channel ceiling is gone.
 
 Also landed, beyond the original list:
 
-- ✅ **`profile.more{}`** with a `MoreForm`, so the More page only advertises pages that exist.
+- ✅ **`profile.more{}`**, edited in place on the More page, so it only advertises pages that exist.
 - ✅ **`profile.brand.navItems[]`**, so the navigation is editable.
 - ✅ **Search wired to its own settings.** `enableSearch` and `searchModels` were in the dashboard
   and read by nothing. `GET /api/search` now honours both.
@@ -71,7 +71,8 @@ Also landed, beyond the original list:
 11. ✅ **Document head from config.** `useDocumentHead` owns the meta tags and favicon in the SPA,
     and the production server injects real title, description, Open Graph and Twitter tags into the
     HTML it returns so crawlers see them without running JavaScript. `MetaForm` edits them.
-12. ❌ **First-run setup wizard.** Not started. Still 24 tabs from the first login.
+12. ❌ **First-run setup wizard.** Not started. A new owner still lands on nine tabs with no
+    guidance about which two matter.
 
 ## Phase 4: repo hygiene (2 of 4)
 
@@ -80,8 +81,9 @@ Also landed, beyond the original list:
 14. ✅ **CI**: typecheck, lint, build, `node --check` on the backend, and the no-personal-data grep.
 15. ⚠️ **README** rewritten with the feature list, quick start, security model, API and scripts
     tables, and a pointer to the new `docs/USAGE.md`. **The screenshot is still a placeholder.**
-16. ❌ **Consolidate the dashboard.** This got worse, not better: the tab count went from 18 to 24 as
-    the new forms landed. In place editing takes the pressure off, but the rail is still long.
+16. ✅ **Consolidate the dashboard.** 24 tabs down to nine. Everything that is content — projects,
+    posts, articles, experience, contact channels, the More page, the guestbook — is edited on the
+    page it appears on, so the dashboard holds only the settings that shape the whole site.
 
 Also landed, beyond the original list:
 
@@ -100,14 +102,9 @@ Short and honest.
 
 1. **Screenshots.** The README has a placeholder and nothing else. This is the biggest gap for
    anyone deciding whether to clone the repo, and the cheapest to close.
-2. **First-run wizard.** A new owner lands on 24 tabs with no guidance about which three matter.
+2. **First-run wizard.** A new owner lands on nine tabs with no guidance about which two matter.
    When `profile.fullName` is empty, the dashboard should open a short identity, socials, theme flow
    instead.
-3. **Dashboard consolidation.** 24 tabs, twelve of which are the create, edit and delete triples for
-   four collections. Now that the public pages carry those actions, those twelve can collapse into
-   one Content tab or disappear.
-4. **Finish wiring in place editing.** Projects has the controls. Blog, articles and the guestbook
-   still need theirs, and `EditorDialog.vue` currently has no importer.
 5. **Form pattern drift.** `SettingsForm.vue` still hand-rolls its feedback state instead of using
    `useFormFeedback`, and it pushes to the legacy `/admin-signature` path.
 6. **No tests.** CI typechecks, lints and builds, which catches a lot for a project this size, but

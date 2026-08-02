@@ -428,6 +428,18 @@ h2.title,
   margin-bottom: 1.1rem !important;
 }
 
+/* Group heading inside a dashboard form. Global because five forms carried their own identical
+   copy of it, and every one of those copies was losing its margins to the blanket
+   `h1..h6 { margin: 0 !important }` above — which left each heading sitting on top of the floating
+   label of the field underneath it. The bottom margin has to clear that label. */
+.section-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-color));
+  margin-top: 1.25rem !important;
+  margin-bottom: 1.15rem !important;
+}
+
 /* Row list — one list of links, one look.
    Bold title on the left, muted mono metadata on the right, hairline rule
    between rows, tight vertical rhythm. Global rather than per-page so the search

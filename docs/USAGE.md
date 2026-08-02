@@ -53,6 +53,10 @@ deliberately not linked from anywhere on the site, so bookmark it.
 The site will look empty. That is on purpose. Nothing is hardcoded, so a fresh clone shows nobody's
 details, and every blank space is a prompt to fill something in.
 
+Start in the dashboard's Branding tab to get your name and handle into the navbar, then Socials for
+your links. Everything else — your intro, work history, projects, posts, contact channels — is filled
+in on the pages themselves while you stay signed in.
+
 ---
 
 ## 2. How configuration works
@@ -127,16 +131,24 @@ Drop the variable once the site is configured, as with all the others.
 
 ## 4. Managing content
 
-There are two ways in, and they edit the same data.
+Content is edited on the page it appears on. The dashboard holds the settings that shape the whole
+site and have no place on a public page.
 
 ### In place, while signed in
 
-Sign in at `/admin`, then browse the site as normal. The owner controls appear on the public pages
-themselves:
+Sign in at `/admin`, then browse the site as normal. Your avatar in the navbar grows a sign out
+button, and the owner controls appear on the pages themselves:
 
+- **Home**: the intro copy, the problem solving blurb, the experience entries, and the project and
+  article lists — each with add, edit, reorder, hide and delete where it makes sense.
 - **Projects**: a "New project" button above the list, and edit and delete icons on each card.
 - **Blog and articles**: edit and delete on each entry, and a create button on the listing.
 - **Guestbook**: delete on each entry.
+- **Contact**: add, edit, reorder and delete contact channels, plus the page heading and intro.
+- **More**: add, edit and delete the cards and the small link list, plus the page copy.
+
+Entries you have hidden stay visible to you, dimmed and marked `HIDDEN`, so you can bring one back
+from the page it lives on rather than hunting for it in a form.
 
 Delete is two steps. The trash icon arms the action, a small "Delete?" confirmation appears next to
 it, and it disarms itself after a few seconds if you do nothing.
@@ -147,30 +159,20 @@ offered.
 
 ### The dashboard
 
-`/admin-dashboard` still exists and covers everything, including the settings that have no place on
-a public page. On a phone the tab rail collapses into a "Section" dropdown.
+`/admin-dashboard` holds the site wide settings. On a phone the tab rail collapses into a "Section"
+dropdown.
 
 | Tab | What it owns |
 | --- | --- |
-| Profile | Name, role, bio, welcome lines, resume upload |
 | Branding | Display name, handle, logo, copyright line, navigation items |
-| More page | The cards and the small link list on `/more` |
 | Socials | Email, Signal, GitHub, LinkedIn, X, timezone |
-| Experience | Work history entries |
 | Sections | Heading, emoji, intro, visibility and order of each home page section |
 | Pages | Heading and intro copy for Contact, Projects, Blog, Guestbook, Search and the 404 page |
-| Channels | Contact channels, if the five built in socials are not enough |
 | Appearance | Default theme and both colour palettes, with the contrast readout |
 | Site meta | Browser tab title, description, canonical URL, preview image, favicon, X handle, and the webring |
-| Create a new project / article / post | Create forms |
-| Edit a project / article / post / guestbook | Edit forms |
-| Delete a project / article / post / guestbook | Delete forms |
 | Uploads | Every uploaded file, with copy URL and delete |
 | Configure Search engine | Whether search is on, and which collections it looks at |
 | Site Settings | GitHub link, the dark/light toggle switch, whether the dashboard is reachable, and changing your signature |
-
-The create, edit and delete tabs predate the in place controls. They do the same thing. Use whichever
-suits you.
 
 ### Uploads
 

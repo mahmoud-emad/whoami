@@ -15,8 +15,9 @@ rebuild, no code changes, no name of anyone else's left in the source.
 
 - **Nothing hardcoded.** Every name, link, heading and piece of copy comes from config. A fresh
   clone shows an empty site, not somebody else's.
-- **Edit in place.** Sign in and the public pages grow create, edit and delete controls. The
-  dashboard is still there for everything else.
+- **Edit in place.** Sign in and the public pages grow add, edit, reorder, hide and delete controls
+  right next to the thing they change. The dashboard is nine tabs of site wide settings, not a
+  second copy of your content.
 - **Configurable theme.** Both palettes live in config, with a live WCAG contrast readout so you can
   see when your text drops below the 4.5:1 floor.
 - **Real document head.** Title, description, Open Graph and Twitter tags, and the favicon come from
