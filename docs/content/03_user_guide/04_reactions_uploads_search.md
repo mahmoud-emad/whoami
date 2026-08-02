@@ -41,6 +41,15 @@ handler after trimming and lowercasing.
 Nothing in the browser bundle knows the answer, which is the whole point. Leave the answer empty to
 accept every submission.
 
+Because the answer only exists on the server, a wrong one can only be caught there. The rejection
+comes back with the POST and is shown on the field itself, clearing as soon as the visitor edits it
+— otherwise a wrong answer fails silently and the visitor just presses the button again.
+
+`ANTIBOT_EXAMPLE` seeds a public hint about the *shape* of a correct answer — "one word,
+lowercase", "a number" — displayed under the field as *For example: …*. It describes the form
+without giving the answer away, so a visitor who reads the question but is unsure how to phrase
+their reply is not left guessing.
+
 ## See also
 
 - [API reference](../05_reference/02_api_reference.md)

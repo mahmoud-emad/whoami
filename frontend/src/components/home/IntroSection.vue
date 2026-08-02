@@ -52,20 +52,22 @@
         </p>
         <v-row class="ma-0">
           <v-col cols="12" sm="3" class="pa-1">
-            <v-text-field v-model="draft.section.emoji" title="Section Emoji" label="Emoji" placeholder="❄️"
-              variant="outlined" hide-details="auto" density="comfortable"></v-text-field>
+            <v-text-field v-model="draft.section.emoji" :rules="emojiRules()" title="Section Emoji" label="Emoji"
+              placeholder="❄️" variant="outlined" hide-details="auto" density="comfortable"></v-text-field>
           </v-col>
           <v-col cols="12" sm="9" class="pa-1">
             <!-- The intro has no <h2> of its own: emoji + heading stand in as the headline whenever
                  no claim line is set, which is why this is worth filling in. -->
-            <v-text-field v-model="draft.section.title" title="Section Heading" label="Heading" variant="outlined"
+            <v-text-field v-model="draft.section.title" :rules="nameRules({ fieldName: 'Heading', maxLength: 80 })"
+              title="Section Heading" label="Heading" variant="outlined"
               hide-details="auto" density="comfortable"
               hint="Used as the headline when no claim line is set." persistent-hint></v-text-field>
           </v-col>
           <v-col cols="12" class="pa-1">
             <!-- There is no separate intro paragraph either: the bio fills that slot, and this
                  is what shows when the bio is empty. -->
-            <v-textarea v-model="draft.section.intro" title="Section Intro" label="Intro paragraph" variant="outlined"
+            <v-textarea v-model="draft.section.intro" :rules="longTextRules({ fieldName: 'Intro paragraph', maxLength: 600 })"
+              title="Section Intro" label="Intro paragraph" variant="outlined"
               hide-details="auto" density="comfortable" rows="2" auto-grow
               hint="Shown in place of the bio when the bio is empty." persistent-hint></v-textarea>
           </v-col>
@@ -75,23 +77,25 @@
 
         <!-- Example in the placeholder, not the label: at 390px a label with an example in it is
              ellipsised away. Same treatment as the dashboard's profile form. -->
-        <v-text-field v-model="draft.role" title="Role" label="Role" placeholder="Software Engineer" variant="outlined"
+        <v-text-field v-model="draft.role" :rules="nameRules({ fieldName: 'Role', maxLength: 80 })" title="Role"
+          label="Role" placeholder="Software Engineer" variant="outlined"
           hide-details="auto" class="mb-4"></v-text-field>
         <!-- An array, not a line: whatever is listed here rotates in the headline, and the section
              only cycles once there is more than one. -->
-        <v-combobox v-model="draft.welcomeMessages" title="Claim Lines" label="Claim lines" variant="outlined"
+        <v-combobox v-model="draft.welcomeMessages" :rules="stringListRules({ fieldName: 'Claim lines', max: 12, maxItemLength: 120 })"
+          title="Claim Lines" label="Claim lines" variant="outlined"
           hide-details="auto" multiple chips closable-chips
           hint="The headline. Type a line and press enter; more than one rotates every 3 seconds."
           persistent-hint class="mb-4 welcome-combobox"></v-combobox>
         <!-- Rules only bite once something has been typed, so an empty intro is still savable. -->
-        <v-textarea v-model="draft.bio" :rules="draft.bio?.length ? longTextRules({
+        <v-textarea v-model="draft.bio" :rules="longTextRules({
           fieldName: 'Bio',
           maxLength: 600,
           minLength: 10,
-        }) : []" :counter="600" title="Bio" label="Bio" variant="outlined" hide-details="auto" rows="4" auto-grow
+        })" :counter="600" title="Bio" label="Bio" variant="outlined" hide-details="auto" rows="4" auto-grow
           class="mb-4"></v-textarea>
         <v-text-field v-model="draft.resumeUrl" type="url"
-          :rules="draft.resumeUrl?.length ? websiteRules() : []" title="Resume URL" label="Resume URL"
+          :rules="urlRules({ fieldName: 'Resume URL' })" title="Resume URL" label="Resume URL"
           variant="outlined" hide-details="auto" hint="Leave empty to hide the “Read the CV” button." persistent-hint
           class="mb-4"></v-text-field>
       </v-form>
@@ -113,7 +117,7 @@ import InlineActions from '../admin/InlineActions.vue';
 import { useAdmin } from '../../composables/useAdmin';
 import { useFormFeedback } from '../../composables/useFormFeedback';
 import type { SectionConfig } from '../../types';
-import { deepClone, longTextRules, sectionHeading, websiteRules } from '../../utils';
+import { deepClone, emojiRules, longTextRules, nameRules, sectionHeading, stringListRules, urlRules, websiteRules } from '../../utils';
 
 const ROTATE_MS = 3000;
 
@@ -279,6 +283,15 @@ export default defineComponent({
       save,
       longTextRules,
       websiteRules,
+
+      emojiRules,
+
+      nameRules,
+
+      stringListRules,
+
+      urlRules,
+
     };
   },
 });

@@ -32,6 +32,7 @@ Read by the backend on every start.
 | `SITE_DESCRIPTION` | no | `meta.description` | One line about the site. Used for search results and link previews. |
 | `ANTIBOT_QUESTION` | no | `configuration.antiBot.question` | Guestbook challenge question. Public. |
 | `ANTIBOT_ANSWER` | no | `configuration.antiBot.answer` | The expected answer. Never sent to the browser. Leave empty to turn the check off. |
+| `ANTIBOT_EXAMPLE` | no | `configuration.antiBot.example` | A public hint about the *shape* of the answer — "one word, lowercase". Shown under the field. Never the answer itself. |
 | `WEBRING_ENABLED` | no | `indieweb.webring.enabled` | Set to `1` to show the webring links in the footer. Accepts `1/0`, `true/false`, `yes/no`, `on/off`. |
 | `TRUST_PROXY` | no | nothing | Set to `1` behind a reverse proxy so rate limiting sees the real client IP. Only there — see the warning below. |
 | `ALLOWED_ORIGINS` | no | nothing | Comma-separated CORS allowlist. Only needed if the frontend is served from a different origin than the API. |

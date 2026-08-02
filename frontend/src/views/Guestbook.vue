@@ -70,14 +70,12 @@
         <v-row class="ma-0">
           <v-col cols="12" md="6" class="pa-0 pr-md-2 pb-4">
             <v-text-field v-model="newGuestbook.name" :counter="25" prepend-inner-icon="mdi-account"
-              :rules="newGuestbook.name && newGuestbook.name.length > 0 ? nameRules({
-                fieldName: 'Your Name', maxLength: 25, minLength: 5
-              }) : []" label="Your name" hint="Leave blank to sign as Anonymous." persistent-hint
+              :rules="nameRules({ fieldName: 'Your Name', maxLength: 25, minLength: 2 })" label="Your name" hint="Leave blank to sign as Anonymous." persistent-hint
               variant="outlined" hide-details="auto" />
           </v-col>
           <v-col cols="12" md="6" class="pa-0 pl-md-2 pb-4">
             <v-text-field v-model="newGuestbook.website" :counter="100" prepend-inner-icon="mdi-web"
-              :rules="newGuestbook.website?.length ? websiteRules() : []" label="Website or GitHub (optional)"
+              :rules="urlRules({ fieldName: 'Website' })" label="Website or GitHub (optional)"
               hint="Linked from your name." persistent-hint variant="outlined" hide-details="auto" />
           </v-col>
         </v-row>
@@ -87,9 +85,14 @@
           label="Your message" variant="outlined" rows="4" auto-grow class="mb-4" hide-details="auto" />
 
         <template v-if="antiBotEnabled">
+          <!-- error-messages carries the server's verdict. The answer is deliberately absent from
+               GET /api/settings, so the client cannot check it and the only real "wrong answer"
+               comes back from the POST. Without this the visitor was told nothing at all. -->
           <v-text-field v-model="antiBotAnswer" prepend-inner-icon="mdi-shield-check"
             :rules="antiBotRules(antiBotExpected)" :label="antiBotQuestion || 'Anti-bot check'"
-            :hint="antiBotQuestion ? 'Answering this keeps the spam out.' : ''" persistent-hint
+            :error-messages="antiBotError" :placeholder="antiBotExample"
+            :hint="antiBotHint" persistent-hint
+            @update:model-value="antiBotError = ''"
             variant="outlined" class="mb-4" hide-details="auto" />
         </template>
 
@@ -106,7 +109,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useTheme } from 'vuetify';
 import { apiFetch, apiJson } from '../utils/api';
-import { nameRules, antiBotRules, websiteRules, longTextRules, formatData } from '../utils';
+import { antiBotRules, formatData, longTextRules, nameRules, urlRules, websiteRules } from '../utils';
 import { type GuestBookType } from '../types';
 import LoadingComponent from '../components/LoadingComponent.vue';
 import InlineActions from '../components/admin/InlineActions.vue';
@@ -153,6 +156,22 @@ export default {
     const antiBotEnabled = computed(() => antiBot.value?.enabled !== false);
     const antiBotQuestion = computed(() => antiBot.value?.question?.trim() || '');
     const antiBotExpected = computed(() => antiBot.value?.answer?.trim() || '');
+    /** Owner-written hint about the form of the answer. Public by design; the answer is not. */
+    const antiBotExample = computed(() => antiBot.value?.example?.trim() || '');
+
+    /**
+     * Holds the server's rejection until the visitor edits the field again.
+     *
+     * A wrong answer can only be detected server side, so this is the field's only real error
+     * state. It clears on input rather than on the next submit, so the message goes away as soon
+     * as the visitor starts correcting it.
+     */
+    const antiBotError = ref('');
+
+    const antiBotHint = computed(() => {
+      if (antiBotExample.value) return `For example: ${antiBotExample.value}`;
+      return antiBotQuestion.value ? 'Answering this keeps the spam out.' : '';
+    });
 
     /**
      * A stable hue per author.
@@ -221,13 +240,22 @@ export default {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(submission),
         });
-        if (!res.ok) throw new Error('Failed to submit');
-        const result = await res.json();
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          // The server answers 400 with a specific reason. Showing it on the anti-bot field is
+          // the whole point: a rejected signature used to fail silently, so the visitor pressed
+          // the button again and again with no idea what was wrong.
+          const message = typeof result?.error === 'string' ? result.error : 'Could not sign the guestbook.';
+          antiBotError.value = message;
+          return;
+        }
         guestbooks.value.unshift({ ...result.data, createdAt: new Date().toISOString() });
         newGuestbook.value = { name: '', website: '', message: '' };
         antiBotAnswer.value = '';
+        antiBotError.value = '';
       } catch (error) {
         console.error('Failed to write guestbook:', error);
+        antiBotError.value = 'Could not reach the server. Please try again.';
       } finally {
         apiLoadingStore.setLoading(false);
       }
@@ -290,10 +318,16 @@ export default {
       antiBotEnabled,
       antiBotQuestion,
       antiBotExpected,
+      antiBotExample,
+      antiBotError,
+      antiBotHint,
       isAdmin,
       responseType,
       responseMessage,
       removeGuestbook,
+
+      urlRules,
+
     };
   }
 };

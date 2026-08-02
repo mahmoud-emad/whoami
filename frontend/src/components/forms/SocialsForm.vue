@@ -14,24 +14,25 @@
   <v-form v-model="validForm" :disabled="apiLoadingStore.isLoading()">
 
     <h3 class="section-title">📧 Email</h3>
-    <v-text-field v-model="socials.email" type="email"
-      :rules="socials.email?.length ? emailRules({ fieldName: 'Email', maxLength: 120, minLength: 5 }) : []"
+    <v-text-field v-model="socials.email" type="email" :rules="emailRules({ fieldName: 'Email' })"
       label="Email address" variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
 
     <v-divider class="my-4" />
 
     <h3 class="section-title">💬 Instant messaging</h3>
-    <v-text-field v-model="socials.signalUrl" type="url" :rules="socials.signalUrl?.length ? websiteRules() : []"
+    <v-text-field v-model="socials.signalUrl" type="url" :rules="urlRules({ fieldName: 'Signal URL' })"
       label="Signal URL" variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
 
     <v-divider class="my-4" />
 
+    <!-- Host-locked rules here rather than a plain URL check: these three feed rel="me", and a
+         LinkedIn address typed into the GitHub field silently breaks verification. -->
     <h3 class="section-title">🌐 Profiles</h3>
-    <v-text-field v-model="socials.githubUrl" type="url" :rules="socials.githubUrl?.length ? websiteRules() : []"
+    <v-text-field v-model="socials.githubUrl" type="url" :rules="githubWebsiteRules()"
       label="GitHub URL" variant="outlined" hide-details="auto" class="mb-3"></v-text-field>
-    <v-text-field v-model="socials.linkedinUrl" type="url" :rules="socials.linkedinUrl?.length ? websiteRules() : []"
+    <v-text-field v-model="socials.linkedinUrl" type="url" :rules="linkedinUrlRules()"
       label="LinkedIn URL" variant="outlined" hide-details="auto" class="mb-3"></v-text-field>
-    <v-text-field v-model="socials.xUrl" type="url" :rules="socials.xUrl?.length ? websiteRules() : []"
+    <v-text-field v-model="socials.xUrl" type="url" :rules="xUrlRules()"
       label="X (Twitter) URL" variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
 
     <v-divider class="my-4" />
@@ -40,9 +41,9 @@
     <!-- The IANA example moved from the label to a placeholder: at 390px the field is ~290px wide
          and the old label was clipped to "Timezone (IANA, e.g. Afri…". The hint below already
          explains what the value is for, so nothing is lost. -->
-    <v-text-field v-model="socials.timezone" label="Timezone" placeholder="Europe/London" variant="outlined"
-      hide-details="auto" class="mb-4" hint="IANA timezone string used for the live clock on Contact."
-      persistent-hint></v-text-field>
+    <v-text-field v-model="socials.timezone" :rules="timezoneRules()" label="Timezone"
+      placeholder="Europe/London" variant="outlined" hide-details="auto" class="mb-4"
+      hint="IANA timezone string used for the live clock on Contact." persistent-hint></v-text-field>
 
     <div class="form-actions mb-4">
       <v-btn @click="saveSocials" :loading="apiLoadingStore.isLoading()" :disabled="apiLoadingStore.isLoading()"
@@ -55,7 +56,10 @@
 import { onMounted, ref } from 'vue';
 import { useAPILoading, useSettingsStore } from '../../store';
 import { ProfileType } from '../../types';
-import { websiteRules, emailRules, deepClone } from '../../utils';
+import {
+  urlRules, emailRules, deepClone, timezoneRules,
+  githubWebsiteRules, linkedinUrlRules, xUrlRules,
+} from '../../utils';
 import { useFormFeedback } from '../../composables/useFormFeedback';
 
 type Socials = ProfileType['socials'];
@@ -109,8 +113,12 @@ export default {
       responseType,
       responseMessage,
       saveSocials,
-      websiteRules,
       emailRules,
+      urlRules,
+      timezoneRules,
+      githubWebsiteRules,
+      linkedinUrlRules,
+      xUrlRules,
     };
   },
 };

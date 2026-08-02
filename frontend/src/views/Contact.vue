@@ -98,7 +98,8 @@
       <v-form v-model="validForm" :disabled="saving">
         <v-row class="ma-0">
           <v-col cols="12" sm="5" class="pa-0 pr-sm-2 mb-4">
-            <v-select v-model="draft.kind" :items="kinds" title="Kind" label="Kind" variant="outlined"
+            <v-select v-model="draft.kind" :items="kinds" :rules="selectRules({ fieldName: 'Kind' })"
+              title="Kind" label="Kind" variant="outlined"
               hide-details="auto" density="comfortable"></v-select>
           </v-col>
           <v-col cols="12" sm="7" class="pa-0 pl-sm-2 mb-4">
@@ -113,10 +114,12 @@
           :hint="draft.kind === 'email' ? 'Plain address — it is wrapped in mailto: for you' : 'https://…'"
           persistent-hint class="mb-4"></v-text-field>
         <!-- Only a featured channel prints its description, hence the hint rather than a rule. -->
-        <v-textarea v-model="draft.description" title="Description" label="Description" variant="outlined"
+        <v-textarea v-model="draft.description" :rules="longTextRules({ fieldName: 'Description', maxLength: 400 })"
+          title="Description" label="Description" variant="outlined"
           hide-details="auto" rows="2" auto-grow hint="Shown under the heading of a featured channel."
           persistent-hint class="mb-4"></v-textarea>
-        <v-text-field v-model="draft.icon" title="Icon" label="Icon" placeholder="mdi-github" variant="outlined"
+        <v-text-field v-model="draft.icon" :rules="nameRules({ fieldName: 'Icon', maxLength: 40 })"
+          title="Icon" label="Icon" placeholder="mdi-github" variant="outlined"
           hide-details="auto" hint="A Material Design Icon name (mdi-github), or an emoji like 📧" persistent-hint
           class="mb-4"></v-text-field>
 
@@ -142,12 +145,15 @@
         {{ responseMessage }}
       </v-alert>
       <v-form :disabled="saving">
-        <v-text-field v-model="pageDraft.title" title="Page Heading" label="Heading" variant="outlined"
+        <v-text-field v-model="pageDraft.title" :rules="nameRules({ fieldName: 'Heading', maxLength: 80 })"
+          title="Page Heading" label="Heading" variant="outlined"
           hide-details="auto" hint="Leave empty to fall back to “Contact”." persistent-hint
           class="mb-4"></v-text-field>
-        <v-textarea v-model="pageDraft.intro" title="Page Intro" label="Intro paragraph" variant="outlined"
+        <v-textarea v-model="pageDraft.intro" :rules="longTextRules({ fieldName: 'Intro paragraph', maxLength: 600 })"
+          title="Page Intro" label="Intro paragraph" variant="outlined"
           hide-details="auto" rows="2" auto-grow class="mb-4"></v-textarea>
-        <v-textarea v-model="pageDraft.elsewhereIntro" title="Elsewhere Intro" label="Elsewhere intro"
+        <v-textarea v-model="pageDraft.elsewhereIntro" :rules="longTextRules({ fieldName: 'Elsewhere intro', maxLength: 600 })"
+          title="Elsewhere Intro" label="Elsewhere intro"
           variant="outlined" hide-details="auto" rows="2" auto-grow
           hint="Sits under the “Elsewhere” heading. Empty drops it." persistent-hint class="mb-4"></v-textarea>
       </v-form>
@@ -171,7 +177,7 @@ import { useDisplay } from 'vuetify';
 import { useSettingsStore } from '../store';
 import { useAdmin } from '../composables/useAdmin';
 import { useFormFeedback } from '../composables/useFormFeedback';
-import { deepClone } from '../utils';
+import { deepClone, longTextRules, nameRules, selectRules } from '../utils';
 import type { ContactChannel } from '../types';
 
 /** A channel plus the text to print for its link. Internal to this view. */
@@ -675,6 +681,13 @@ export default defineComponent({
       openPageEditor,
       savePageCopy,
       requiredRules,
+
+      selectRules,
+
+      nameRules,
+
+      longTextRules,
+
     };
   },
 });

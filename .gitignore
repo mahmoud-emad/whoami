@@ -34,6 +34,10 @@ dist-ssr
 # per-deployment data, not source; backend/config.example.json is the template it seeds from.
 backend/db.json
 backend/config.json
+# Hand-made backups of the above (config.json.bak, config.json.pre-theme-reset). Same contents,
+# same signature hash, so they are just as much a credential.
+backend/config.json.*
+backend/db.json.*
 
 # Visitor- and admin-uploaded files
 backend/uploads/*

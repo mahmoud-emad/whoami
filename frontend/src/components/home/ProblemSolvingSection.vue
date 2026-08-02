@@ -52,15 +52,17 @@
         </p>
         <v-row class="ma-0">
           <v-col cols="12" sm="3" class="pa-1">
-            <v-text-field v-model="draft.section.emoji" title="Section Emoji" label="Emoji" placeholder="🧠"
-              variant="outlined" hide-details="auto" density="comfortable"></v-text-field>
+            <v-text-field v-model="draft.section.emoji" :rules="emojiRules()" title="Section Emoji" label="Emoji"
+              placeholder="🧠" variant="outlined" hide-details="auto" density="comfortable"></v-text-field>
           </v-col>
           <v-col cols="12" sm="9" class="pa-1">
-            <v-text-field v-model="draft.section.title" title="Section Heading" label="Heading" variant="outlined"
+            <v-text-field v-model="draft.section.title" :rules="nameRules({ fieldName: 'Heading', maxLength: 80 })"
+              title="Section Heading" label="Heading" variant="outlined"
               hide-details="auto" density="comfortable"></v-text-field>
           </v-col>
           <v-col cols="12" class="pa-1">
-            <v-textarea v-model="draft.section.intro" title="Section Intro" label="Intro paragraph" variant="outlined"
+            <v-textarea v-model="draft.section.intro" :rules="longTextRules({ fieldName: 'Intro paragraph', maxLength: 600 })"
+              title="Section Intro" label="Intro paragraph" variant="outlined"
               hide-details="auto" density="comfortable" rows="2" auto-grow></v-textarea>
           </v-col>
         </v-row>
@@ -71,11 +73,12 @@
              Both are here so the owner is never left hunting for the one that is off. -->
         <v-switch v-model="draft.enabled" color="primary" inset label="Show Problem Solving section"
           hide-details></v-switch>
-        <v-textarea v-model="draft.description" :counter="400" title="Description" label="Description"
+        <v-textarea v-model="draft.description" :rules="longTextRules({ fieldName: 'Description', maxLength: 400 })"
+          :counter="400" title="Description" label="Description"
           variant="outlined" hide-details="auto" rows="3" auto-grow hint="Basic HTML is allowed." persistent-hint
           class="mb-4 mt-2"></v-textarea>
         <!-- Rules only bite once something has been typed, so an empty URL is still savable. -->
-        <v-text-field v-model="draft.repoUrl" type="url" :rules="draft.repoUrl?.length ? websiteRules() : []"
+        <v-text-field v-model="draft.repoUrl" type="url" :rules="urlRules({ fieldName: 'Repository URL' })"
           title="Repository URL" label="Repository URL" variant="outlined" hide-details="auto"
           hint="Leave empty to hide the closing “open an issue” line." persistent-hint class="mb-4"></v-text-field>
       </v-form>
@@ -97,7 +100,7 @@ import InlineActions from '../admin/InlineActions.vue';
 import { useAdmin } from '../../composables/useAdmin';
 import { useFormFeedback } from '../../composables/useFormFeedback';
 import type { SectionConfig } from '../../types';
-import { deepClone, sectionHeading, websiteRules } from '../../utils';
+import { deepClone, emojiRules, longTextRules, nameRules, sectionHeading, urlRules, websiteRules } from '../../utils';
 
 /** This section's own slice of the profile — exactly the keys `save` writes back, and no others. */
 type ProblemSolvingDraft = {
@@ -215,6 +218,15 @@ export default defineComponent({
       openEditor,
       save,
       websiteRules,
+
+      emojiRules,
+
+      nameRules,
+
+      longTextRules,
+
+      urlRules,
+
     };
   },
 });

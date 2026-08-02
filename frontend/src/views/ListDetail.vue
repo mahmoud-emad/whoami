@@ -111,11 +111,13 @@
         <v-form v-model="validForm" :disabled="saving">
           <v-text-field v-model="detailsDraft.title" :rules="requiredRule('Title')" label="Title" variant="outlined"
             hide-details="auto" class="mb-4"></v-text-field>
-          <v-text-field v-model="detailsDraft.emoji" label="Emoji" placeholder="🎯" variant="outlined"
-            hide-details="auto" class="mb-4"></v-text-field>
-          <v-textarea v-model="detailsDraft.intro" label="One line about it" variant="outlined" hide-details="auto"
+          <v-text-field v-model="detailsDraft.emoji" :rules="emojiRules()" label="Emoji" placeholder="🎯"
+            variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
+          <v-textarea v-model="detailsDraft.intro" :rules="longTextRules({ fieldName: 'Intro', maxLength: 300 })"
+            label="One line about it" variant="outlined" hide-details="auto"
             rows="2" auto-grow class="mb-4"></v-textarea>
-          <v-textarea v-model="detailsDraft.northStar" label="North star" variant="outlined" hide-details="auto"
+          <v-textarea v-model="detailsDraft.northStar" :rules="longTextRules({ fieldName: 'North star', maxLength: 300 })"
+            label="North star" variant="outlined" hide-details="auto"
             rows="3" auto-grow hint="The thing every mission below is in service of." persistent-hint
             class="mb-4"></v-textarea>
           <v-switch v-model="detailsDraft.show" color="primary" inset hide-details density="compact"
@@ -132,9 +134,10 @@
         <v-form v-model="validForm" :disabled="saving">
           <v-text-field v-model="missionDraft.title" :rules="requiredRule('Title')" label="Title" variant="outlined"
             hide-details="auto" class="mb-4"></v-text-field>
-          <v-text-field v-model="missionDraft.emoji" label="Emoji" placeholder="🐧" variant="outlined"
-            hide-details="auto" class="mb-4"></v-text-field>
+          <v-text-field v-model="missionDraft.emoji" :rules="emojiRules()" label="Emoji" placeholder="🐧"
+            variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
           <v-select v-model="missionDraft.status" :items="STATUS_OPTIONS" item-title="label" item-value="value"
+            :rules="selectRules({ fieldName: 'Status' })"
             label="Status" variant="outlined" hide-details="auto" class="mb-4"></v-select>
         </v-form>
         <template #actions>
@@ -146,10 +149,12 @@
 
       <EditorDialog v-model="groupOpen" :title="groupIndex === null ? 'Add group' : 'Edit group'">
         <v-form v-model="validForm" :disabled="saving">
-          <v-text-field v-model="groupDraft.title" label="Group title" variant="outlined" hide-details="auto"
+          <v-text-field v-model="groupDraft.title" :rules="nameRules({ fieldName: 'Group title', maxLength: 80, required: true })"
+            label="Group title" variant="outlined" hide-details="auto"
             hint="A phase or a category, e.g. “Phase 1 — Fundamentals”. Leave empty for a bare list."
             persistent-hint class="mb-4"></v-text-field>
-          <v-textarea v-if="groupIndex === null" v-model="groupDraft.bulk" label="Items, one per line"
+          <v-textarea v-if="groupIndex === null" v-model="groupDraft.bulk"
+            :rules="longTextRules({ fieldName: 'Items', maxLength: 4000 })" label="Items, one per line"
             variant="outlined" hide-details="auto" rows="6" auto-grow
             hint="Paste a whole checklist here; each line becomes an item." persistent-hint
             class="mb-4"></v-textarea>
@@ -200,7 +205,7 @@ import InlineActions from '../components/admin/InlineActions.vue';
 import EditorDialog from '../components/admin/EditorDialog.vue';
 import { useAdmin } from '../composables/useAdmin';
 import { useFormFeedback } from '../composables/useFormFeedback';
-import { deepClone } from '../utils';
+import { deepClone, emojiRules, longTextRules, nameRules, selectRules } from '../utils';
 
 const STATUS_LABELS: Record<MissionStatus, string> = {
   'not-started': 'NOT STARTED',
@@ -479,6 +484,15 @@ export default defineComponent({
       openDetails, saveDetails, openMission, saveMission, removeMission, moveMission,
       openGroup, saveGroup, removeGroup, openItem, saveItem, removeItem, toggleItem,
       responseType, responseMessage,
+
+      emojiRules,
+
+      longTextRules,
+
+      selectRules,
+
+      nameRules,
+
     };
   },
 });

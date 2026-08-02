@@ -60,17 +60,21 @@
         <v-row class="ma-0">
           <v-col cols="12" sm="6" class="pa-0 pr-sm-2 mb-4">
             <v-select v-model="draft.status" :items="STATUS_OPTIONS" item-title="label" item-value="value"
+              :rules="selectRules({ fieldName: 'Status' })"
               label="Status" variant="outlined" hide-details="auto" density="comfortable"></v-select>
           </v-col>
           <v-col cols="12" sm="6" class="pa-0 pl-sm-2 mb-4">
-            <v-text-field v-model="draft.year" label="Year or edition" placeholder="2nd ed. 2019" variant="outlined"
+            <v-text-field v-model="draft.year" :rules="nameRules({ fieldName: 'Year or edition', maxLength: 40 })"
+              label="Year or edition" placeholder="2nd ed. 2019" variant="outlined"
               hide-details="auto" density="comfortable"></v-text-field>
           </v-col>
         </v-row>
-        <v-text-field v-model="draft.progress" label="Progress" placeholder="page 39" variant="outlined"
+        <v-text-field v-model="draft.progress" :rules="nameRules({ fieldName: 'Progress', maxLength: 40 })"
+          label="Progress" placeholder="page 39" variant="outlined"
           hide-details="auto" hint="Only shown while the status is Reading now." persistent-hint
           class="mb-4"></v-text-field>
-        <v-textarea v-model="draft.note" label="Note" variant="outlined" hide-details="auto" rows="2" auto-grow
+        <v-textarea v-model="draft.note" :rules="longTextRules({ fieldName: 'Note', maxLength: 600 })"
+          label="Note" variant="outlined" hide-details="auto" rows="2" auto-grow
           hint="Why it is here, or what it was good for." persistent-hint class="mb-4"></v-textarea>
       </v-form>
       <template #actions>
@@ -102,7 +106,7 @@ import InlineActions from '../components/admin/InlineActions.vue';
 import EditorDialog from '../components/admin/EditorDialog.vue';
 import { useAdmin } from '../composables/useAdmin';
 import { useFormFeedback } from '../composables/useFormFeedback';
-import { deepClone } from '../utils';
+import { deepClone, longTextRules, nameRules, selectRules } from '../utils';
 
 const STATUS_OPTIONS: Array<{ value: BookStatus, label: string }> = [
   { value: 'reading', label: 'Reading now' },
@@ -235,6 +239,13 @@ export default defineComponent({
       STATUS_OPTIONS, apiLoading, isAdmin, books, groups, readable,
       pageTitle, pageIntro, editorOpen, editingId, draft, validForm, saving, busy,
       requiredRule, openCreate, openEdit, saveBook, removeBook, responseType, responseMessage,
+
+      selectRules,
+
+      nameRules,
+
+      longTextRules,
+
     };
   },
 });

@@ -91,6 +91,8 @@ export const publicConfig = (config: SiteConfig): SiteConfig => {
       antiBot: {
         enabled: Boolean(antiBot.enabled),
         question: typeof antiBot.question === 'string' ? antiBot.question : '',
+        // The example describes the shape of the answer, never the answer, so it is public.
+        example: typeof antiBot.example === 'string' ? antiBot.example : '',
         // `answer` is intentionally absent. Do not add it back.
       },
     },

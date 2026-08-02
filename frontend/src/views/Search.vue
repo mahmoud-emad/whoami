@@ -3,7 +3,8 @@
     <h1 class="page-title">{{ pageTitle }}</h1>
     <p v-if="pageIntro" class="page-intro">{{ pageIntro }}</p>
 
-    <v-text-field v-model="query" ref="input" label="Search this site" variant="outlined" hide-details="auto"
+    <v-text-field v-model="query" ref="input" :rules="textRules({ fieldName: 'Search', maxLength: 100 })"
+      label="Search this site" variant="outlined" hide-details="auto"
       class="mt-4 mb-6" prepend-inner-icon="mdi-magnify" clearable autofocus @keyup.enter="run"
       @click:clear="clear"></v-text-field>
 
@@ -52,6 +53,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { apiFetch } from '../utils/api';
 import LoadingComponent from '../components/LoadingComponent.vue';
 import { useSettingsStore } from '../store';
+import { textRules } from '../utils';
 
 type SearchResponse = {
   query: string;
@@ -183,7 +185,7 @@ export default defineComponent({
       }
     );
 
-    return { query, lastQuery, loading, disabled, submitted, total, groups, run, clear, pageTitle, pageIntro };
+    return { query, lastQuery, loading, disabled, submitted, total, groups, run, clear, pageTitle, pageIntro, textRules, };
   },
 });
 </script>

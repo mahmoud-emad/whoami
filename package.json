@@ -18,7 +18,8 @@
     "start": "yarn workspace whoami-backend start",
     "preview": "yarn workspace whoami-frontend preview",
     "typecheck": "yarn workspace whoami-frontend typecheck && yarn workspace whoami-backend typecheck",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts"
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts",
+    "test": "yarn workspace whoami-frontend test"
   },
   "devDependencies": {
     "@vue/eslint-config-prettier": "^9.0.0",

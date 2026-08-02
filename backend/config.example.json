@@ -18,7 +18,8 @@
     "antiBot": {
       "enabled": true,
       "question": "",
-      "answer": ""
+      "answer": "",
+      "example": ""
     }
   },
   "setupCompleted": false,

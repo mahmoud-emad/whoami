@@ -9,6 +9,12 @@ export interface AntiBotConfig {
   enabled: boolean;
   question: string;
   answer: string;
+  /**
+   * A public hint about the form the answer should take, shown under the field — "one word,
+   * lowercase", "a number". Safe to expose, unlike `answer`: it describes the shape of a correct
+   * answer without giving it away, which is what stops a visitor guessing blindly.
+   */
+  example: string;
 }
 
 export type SearchModel = 'projects' | 'guestbooks' | 'articles' | 'posts';

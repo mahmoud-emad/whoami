@@ -80,14 +80,15 @@
       <v-form v-model="cardValid" :disabled="saving">
         <v-text-field v-model="cardDraft.title" :rules="requiredRules('Title')" title="Card Title" label="Title"
           variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
-        <v-textarea v-model="cardDraft.description" title="Card Description" label="Description" variant="outlined"
+        <v-textarea v-model="cardDraft.description" :rules="longTextRules({ fieldName: 'Description', maxLength: 400 })"
+          title="Card Description" label="Description" variant="outlined"
           hide-details="auto" rows="2" auto-grow class="mb-4"></v-textarea>
-        <v-text-field v-model="cardDraft.linkText" title="Card Link Text" label="Link text" variant="outlined"
+        <v-text-field v-model="cardDraft.linkText" :rules="nameRules({ fieldName: 'Link text', maxLength: 60 })"
+          title="Card Link Text" label="Link text" variant="outlined"
           hide-details="auto" hint="What the link itself says. Empty shows nothing to click."
           persistent-hint class="mb-4"></v-text-field>
-        <!-- Free text rather than websiteRules(): an internal route like /uses is as valid here as
-             an external URL. -->
-        <v-text-field v-model="cardDraft.link" :rules="requiredRules('Link')" title="Card Link"
+        <!-- allowRelative: an internal route like /uses is as valid here as an external URL. -->
+        <v-text-field v-model="cardDraft.link" :rules="linkRules({ fieldName: 'Link', required: true })" title="Card Link"
           label="Link (URL or /path)" placeholder="https://…" variant="outlined" hide-details="auto"
           class="mb-4"></v-text-field>
         <!-- `show` parks a card without deleting it, which is how the rest of the config models
@@ -110,7 +111,8 @@
       <v-form v-model="itemValid" :disabled="saving">
         <v-text-field v-model="itemDraft.name" :rules="requiredRules('Name')" title="Link Name" label="Name"
           variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
-        <v-text-field v-model="itemDraft.link" :rules="requiredRules('Link')" title="Link" label="Link (URL or /path)"
+        <v-text-field v-model="itemDraft.link" :rules="linkRules({ fieldName: 'Link', required: true })"
+          title="Link" label="Link (URL or /path)"
           placeholder="https://…" variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
         <v-switch v-model="itemDraft.show" color="primary" inset hide-details density="compact"
           :label="itemDraft.show ? 'Visible' : 'Hidden'"></v-switch>
@@ -131,13 +133,16 @@
       </v-alert>
       <v-form :disabled="saving">
         <template v-if="copyTarget === 'page'">
-          <v-text-field v-model="copyDraft.title" title="Page Heading" label="Heading" variant="outlined"
+          <v-text-field v-model="copyDraft.title" :rules="nameRules({ fieldName: 'Heading', maxLength: 80 })"
+            title="Page Heading" label="Heading" variant="outlined"
             hide-details="auto" :hint="`Leave empty to fall back to “${defaultPageTitle}”.`" persistent-hint
             class="mb-4"></v-text-field>
-          <v-textarea v-model="copyDraft.intro" title="Page Intro" label="Intro paragraph" variant="outlined"
+          <v-textarea v-model="copyDraft.intro" :rules="longTextRules({ fieldName: 'Intro paragraph', maxLength: 600 })"
+            title="Page Intro" label="Intro paragraph" variant="outlined"
             hide-details="auto" rows="2" auto-grow class="mb-4"></v-textarea>
         </template>
-        <v-textarea v-else v-model="copyDraft.shoeboxIntro" title="Shoebox Intro" label="Shoebox intro"
+        <v-textarea v-else v-model="copyDraft.shoeboxIntro" :rules="longTextRules({ fieldName: 'Shoebox intro', maxLength: 600 })"
+          title="Shoebox Intro" label="Shoebox intro"
           variant="outlined" hide-details="auto" rows="2" auto-grow
           hint="Sits under the Shoebox heading. Empty drops it." persistent-hint class="mb-4"></v-textarea>
       </v-form>
@@ -162,6 +167,7 @@ import { useAdmin } from "../composables/useAdmin";
 import { useFormFeedback } from "../composables/useFormFeedback";
 import { deepClone } from "../utils";
 import type { MoreCard, MoreShoeboxItem, MoreType, PageCopy, PagesConfig } from "../types";
+import { linkRules, longTextRules, nameRules } from '../utils';
 
 /** An entry plus its position in the stored array — what the editing controls address. */
 type RenderCard = MoreCard & { index: number };
@@ -464,6 +470,13 @@ export default defineComponent({
       openShoeboxCopy,
       saveCopy,
       requiredRules,
+
+      linkRules,
+
+      nameRules,
+
+      longTextRules,
+
     };
   },
 });

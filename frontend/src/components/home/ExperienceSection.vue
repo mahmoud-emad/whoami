@@ -83,11 +83,13 @@
           <!-- Where and period are free text with no rules: "Remote" and "2022 — now" are as valid
                as a city and a pair of dates, and an empty one simply renders nothing. -->
           <v-col cols="12" sm="6" class="pa-0 pr-sm-2 mb-4">
-            <v-text-field v-model="draft.where" title="Where" label="Where (optional)" variant="outlined"
+            <v-text-field v-model="draft.where" :rules="nameRules({ fieldName: 'Where', maxLength: 80 })"
+              title="Where" label="Where (optional)" variant="outlined"
               hide-details="auto" hint="Remote, Cairo, Berlin …" persistent-hint></v-text-field>
           </v-col>
           <v-col cols="12" sm="6" class="pa-0 pl-sm-2 mb-4">
-            <v-text-field v-model="draft.period" title="Period" label="Period (optional)" variant="outlined"
+            <v-text-field v-model="draft.period" :rules="nameRules({ fieldName: 'Period', maxLength: 40 })"
+              title="Period" label="Period (optional)" variant="outlined"
               hide-details="auto" hint="e.g. 2022 — now" persistent-hint></v-text-field>
           </v-col>
         </v-row>
@@ -107,7 +109,8 @@
 
         <!-- A row per bullet, so the remove button stays reachable with a thumb. -->
         <div v-for="(_, p) in draft.points" :key="`point-${p}`" class="point-row">
-          <v-textarea v-model="draft.points[p]" :label="`Point ${p + 1}`" variant="outlined" hide-details="auto"
+          <v-textarea v-model="draft.points[p]" :rules="longTextRules({ fieldName: 'Point', maxLength: 400 })"
+            :label="`Point ${p + 1}`" variant="outlined" hide-details="auto"
             density="comfortable" rows="2" auto-grow class="flex-grow-1"></v-textarea>
           <v-btn class="point-row__remove" icon="mdi-close" variant="text" density="comfortable" color="error"
             :title="`Remove point ${p + 1}`" aria-label="Remove this point" @click="removePoint(p)"></v-btn>
@@ -130,7 +133,7 @@
 import { computed, defineComponent, ref } from 'vue';
 import { useSettingsStore } from '../../store';
 import type { ExperienceRole } from '../../types';
-import { deepClone, nameRules, sectionHeading } from '../../utils';
+import { deepClone, longTextRules, nameRules, sectionHeading } from '../../utils';
 import InlineActions from '../admin/InlineActions.vue';
 import EditorDialog from '../admin/EditorDialog.vue';
 import { useAdmin } from '../../composables/useAdmin';
@@ -311,6 +314,9 @@ export default defineComponent({
       addPoint,
       removePoint,
       nameRules,
+
+      longTextRules,
+
     };
   },
 });

@@ -54,11 +54,11 @@
           variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
         <!-- Description is optional here, as in the dashboard form: the rules only apply once
              something has been typed, so an empty box is still a valid article. -->
-        <v-textarea v-model="draft.description" :rules="draft.description?.length ? longTextRules({
+        <v-textarea v-model="draft.description" :rules="longTextRules({
           fieldName: 'Article Description',
           maxLength: 400,
           minLength: 20
-        }) : []" :counter="400" title="Article Description" label="Article Description (optional)" variant="outlined"
+        })" :counter="400" title="Article Description" label="Article Description (optional)" variant="outlined"
           hide-details="auto" rows="3" auto-grow class="mb-4"></v-textarea>
       </v-form>
 

@@ -21,21 +21,24 @@
 
       <v-row class="ma-0">
         <v-col cols="12" sm="3" class="pa-1">
-          <v-text-field v-model="entry.section.emoji" label="Emoji" variant="outlined" hide-details="auto"
-            density="comfortable" placeholder="🎨"></v-text-field>
+          <v-text-field v-model="entry.section.emoji" :rules="emojiRules()" label="Emoji" variant="outlined"
+            hide-details="auto" density="comfortable" placeholder="🎨"></v-text-field>
         </v-col>
         <v-col cols="12" sm="6" class="pa-1">
-          <v-text-field v-model="entry.section.title" label="Heading" variant="outlined" hide-details="auto"
+          <v-text-field v-model="entry.section.title" :rules="nameRules({ fieldName: 'Heading', maxLength: 80 })"
+            label="Heading" variant="outlined" hide-details="auto"
             density="comfortable"></v-text-field>
         </v-col>
         <v-col cols="12" sm="3" class="pa-1">
           <!-- Bound through a number-safe handler: a raw v-model on type=number yields '' for an empty box. -->
           <v-text-field :model-value="entry.section.order" @update:model-value="setOrder(entry.section, $event)"
+            :rules="integerRules({ fieldName: 'Order', min: 1, max: 99 })"
             label="Order" type="number" inputmode="numeric" min="1" variant="outlined" hide-details="auto"
             density="comfortable"></v-text-field>
         </v-col>
         <v-col cols="12" class="pa-1">
-          <v-textarea v-model="entry.section.intro" label="Intro paragraph" variant="outlined" hide-details="auto"
+          <v-textarea v-model="entry.section.intro" :rules="longTextRules({ fieldName: 'Intro paragraph', maxLength: 600 })"
+            label="Intro paragraph" variant="outlined" hide-details="auto"
             density="comfortable" rows="2" auto-grow></v-textarea>
         </v-col>
       </v-row>
@@ -51,7 +54,7 @@
 <script lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useAPILoading, useSettingsStore } from '../../store';
-import { deepClone } from '../../utils';
+import { deepClone, nameRules, longTextRules, emojiRules, integerRules } from '../../utils';
 import { useFormFeedback } from '../../composables/useFormFeedback';
 import type { SectionConfig, SectionsConfig } from '../../types';
 
@@ -153,6 +156,10 @@ export default {
       responseMessage,
       setOrder,
       save,
+      nameRules,
+      longTextRules,
+      emojiRules,
+      integerRules,
     };
   },
 };

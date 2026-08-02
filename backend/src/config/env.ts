@@ -96,6 +96,11 @@ export const ENV_SPEC: EnvSpecEntry[] = [
   { name: 'ANTIBOT_QUESTION', required: false, describe: 'guestbook anti-bot question' },
   { name: 'ANTIBOT_ANSWER', required: false, describe: 'guestbook anti-bot answer (never exposed publicly)' },
   {
+    name: 'ANTIBOT_EXAMPLE',
+    required: false,
+    describe: 'public hint about the answer\'s form, e.g. "one word, lowercase"',
+  },
+  {
     name: 'WEBRING_ENABLED',
     required: false,
     describe: '1 to show the IndieWeb webring links in the footer',
@@ -261,6 +266,7 @@ export const ENV_SEED_MAP: EnvSeedEntry[] = [
   ['SITE_DESCRIPTION', ['meta.description']],
   ['ANTIBOT_QUESTION', ['configuration.antiBot.question']],
   ['ANTIBOT_ANSWER', ['configuration.antiBot.answer']],
+  ['ANTIBOT_EXAMPLE', ['configuration.antiBot.example']],
   ['WEBRING_ENABLED', ['indieweb.webring.enabled'], { flag: true }],
 ];
 

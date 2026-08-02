@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, defineAsyncComponent, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { useTheme } from 'vuetify';
 import ContainerLayout from "./layouts/ContainerLayout.vue";
 import { useRoute } from "vue-router";
@@ -24,6 +24,12 @@ const ready = ref(false);
 const retrying = ref(false);
 // Empty base URL means the API is served from this same origin (the production setup).
 const backendLabel = computed(() => getServerUrl() || window.location.origin);
+// Vite replaces import.meta.env.DEV with a literal, so in a production build this folds to `null`
+// and the dynamic import below becomes unreachable — Rollup then drops DevServerHint and the
+// shell command inside it from the bundle entirely, rather than merely hiding it with v-if.
+const DevServerHint = import.meta.env.DEV
+  ? defineAsyncComponent(() => import('./components/DevServerHint.vue'))
+  : null;
 
 const tryBootstrap = async () => {
   retrying.value = true;
@@ -83,18 +89,15 @@ watch(
         <h2 class="dialog-title">Server is not reachable</h2>
       </div>
 
-      <p class="dialog-text mb-3">
-        The backend at
-        <code class="inline-code">{{ backendLabel }}</code>
-        isn't responding. The app will resume automatically when it comes back.
+      <!-- Developer detail only exists in the dev build; see DevServerHint. A visitor to the live
+           site gets the neutral line below instead. -->
+      <component :is="DevServerHint" v-if="DevServerHint" :backend-label="backendLabel"
+        :last-error="settingsStore.getLastError()" />
+
+      <p v-else class="dialog-text mb-3">
+        This site is temporarily unavailable. It will come back on its own — the page is retrying
+        in the background.
       </p>
-
-      <p class="dialog-text mb-2">Start it in a terminal:</p>
-      <div class="code-block mb-3">yarn server</div>
-
-      <v-alert v-if="settingsStore.getLastError()" type="error" variant="tonal" density="compact" class="mb-3">
-        {{ settingsStore.getLastError() }}
-      </v-alert>
 
       <p class="dialog-hint mb-4">
         <v-icon size="14" class="mr-1">mdi-sync</v-icon>

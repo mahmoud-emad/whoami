@@ -23,6 +23,7 @@ export const defaultConfig: SiteConfig = {
       enabled: true,
       question: '',
       answer: '',
+      example: '',
     },
   },
   // Set by the first-run wizard when it is completed or skipped. Present in the defaults so it is

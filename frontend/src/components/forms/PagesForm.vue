@@ -17,11 +17,13 @@
 
       <v-row class="ma-0">
         <v-col cols="12" class="pa-1">
-          <v-text-field v-model="pages[group.key].title" label="Heading" variant="outlined" hide-details="auto"
+          <v-text-field v-model="pages[group.key].title" :rules="nameRules({ fieldName: 'Heading', maxLength: 80 })"
+            label="Heading" variant="outlined" hide-details="auto"
             density="comfortable"></v-text-field>
         </v-col>
         <v-col cols="12" class="pa-1">
-          <v-textarea v-model="pages[group.key].intro" label="Intro paragraph" variant="outlined" hide-details="auto"
+          <v-textarea v-model="pages[group.key].intro" :rules="longTextRules({ fieldName: 'Intro paragraph', maxLength: 600 })"
+            label="Intro paragraph" variant="outlined" hide-details="auto"
             density="comfortable" rows="2" auto-grow></v-textarea>
         </v-col>
       </v-row>
@@ -37,7 +39,7 @@
 <script lang="ts">
 import { onMounted, ref } from 'vue';
 import { useAPILoading, useSettingsStore } from '../../store';
-import { deepClone } from '../../utils';
+import { deepClone, nameRules, longTextRules } from '../../utils';
 import { useFormFeedback } from '../../composables/useFormFeedback';
 import type { PageCopy, PagesConfig } from '../../types';
 
@@ -104,7 +106,10 @@ export default {
       }
     };
 
-    return { apiLoadingStore, pages, groups: GROUPS, responseType, responseMessage, save };
+    return {
+      apiLoadingStore, pages, groups: GROUPS, responseType, responseMessage, save,
+      nameRules, longTextRules,
+    };
   },
 };
 </script>

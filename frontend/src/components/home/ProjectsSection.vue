@@ -53,9 +53,10 @@
           class="mb-4"></v-text-field>
         <v-text-field v-model="draft.link" type="url" :rules="websiteRules()" title="Project Link" label="Project Link"
           variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
-        <v-select v-model="draft.type" :items="projectTypes" label="Project Type" variant="outlined" hide-details="auto"
+        <v-select v-model="draft.type" :items="projectTypes" :rules="selectRules({ fieldName: 'Project Type' })"
+          label="Project Type" variant="outlined" hide-details="auto"
           class="mb-4"></v-select>
-        <v-combobox v-model="draft.tags" :items="knownTags" :rules="validateProjectTagsRules(draft.tags)"
+        <v-combobox v-model="draft.tags" :items="knownTags" :rules="tagsRules({ fieldName: 'Project Tags' })"
           title="Project Tags" label="Project Tags" multiple chips closable-chips
           hint="Up to 4. Type a tag and press enter to add your own." persistent-hint variant="outlined"
           hide-details="auto" class="mb-4"></v-combobox>
@@ -101,14 +102,7 @@ import LoadingComponent from '../LoadingComponent.vue';
 import EditorDialog from '../admin/EditorDialog.vue';
 import { useAdmin } from '../../composables/useAdmin';
 import { useFormFeedback } from '../../composables/useFormFeedback';
-import {
-  deepClone,
-  longTextRules,
-  nameRules,
-  sectionHeading,
-  validateProjectTagsRules,
-  websiteRules,
-} from '../../utils';
+import { deepClone, longTextRules, nameRules, sectionHeading, selectRules, tagsRules, websiteRules } from '../../utils';
 
 const PROJECT_TYPES = ['Project', 'Open Source'];
 
@@ -323,7 +317,11 @@ export default defineComponent({
       nameRules,
       websiteRules,
       longTextRules,
-      validateProjectTagsRules,
+
+      selectRules,
+
+      tagsRules,
+
     };
   },
 });

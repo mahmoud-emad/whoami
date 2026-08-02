@@ -29,12 +29,15 @@
         <v-text-field v-model="draft.displayName" :rules="required('Name')" label="Your name"
           placeholder="Ada Lovelace" variant="outlined" hide-details="auto" class="mb-4"
           hint="Shown in the navbar, the browser tab and the footer." persistent-hint></v-text-field>
-        <v-text-field v-model="draft.handle" label="Handle" placeholder="@ada" variant="outlined"
+        <v-text-field v-model="draft.handle" :rules="handleRules({ fieldName: 'Handle' })"
+          label="Handle" placeholder="@ada" variant="outlined"
           hide-details="auto" class="mb-4" hint="Optional. Sits under your name in the navbar."
           persistent-hint></v-text-field>
-        <v-text-field v-model="draft.role" label="What you do" placeholder="Infrastructure engineer"
+        <v-text-field v-model="draft.role" :rules="nameRules({ fieldName: 'Role', maxLength: 80 })"
+          label="What you do" placeholder="Infrastructure engineer"
           variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
-        <v-textarea v-model="draft.bio" label="A line or two about you" variant="outlined" hide-details="auto"
+        <v-textarea v-model="draft.bio" :rules="longTextRules({ fieldName: 'Bio', maxLength: 600 })"
+          label="A line or two about you" variant="outlined" hide-details="auto"
           rows="3" auto-grow class="mb-4"></v-textarea>
       </template>
 
@@ -45,15 +48,19 @@
           is invented for you. These also become the <code>rel="me"</code> links that let you sign
           in to other sites as your own domain.
         </p>
-        <v-text-field v-model="draft.email" type="email" label="Email" variant="outlined" hide-details="auto"
+        <v-text-field v-model="draft.email" type="email" :rules="emailRules({ fieldName: 'Email' })"
+          label="Email" variant="outlined" hide-details="auto"
           class="mb-4"></v-text-field>
-        <v-text-field v-model="draft.githubUrl" type="url" label="GitHub" placeholder="https://github.com/ada"
+        <v-text-field v-model="draft.githubUrl" type="url" :rules="githubWebsiteRules()"
+          label="GitHub" placeholder="https://github.com/ada"
           variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
-        <v-text-field v-model="draft.linkedinUrl" type="url" label="LinkedIn" variant="outlined"
+        <v-text-field v-model="draft.linkedinUrl" type="url" :rules="linkedinUrlRules()"
+          label="LinkedIn" variant="outlined"
           hide-details="auto" class="mb-4"></v-text-field>
-        <v-text-field v-model="draft.xUrl" type="url" label="X" variant="outlined" hide-details="auto"
-          class="mb-4"></v-text-field>
-        <v-text-field v-model="draft.timezone" label="Timezone" placeholder="Europe/London" variant="outlined"
+        <v-text-field v-model="draft.xUrl" type="url" :rules="xUrlRules()" label="X" variant="outlined"
+          hide-details="auto" class="mb-4"></v-text-field>
+        <v-text-field v-model="draft.timezone" :rules="timezoneRules()"
+          label="Timezone" placeholder="Europe/London" variant="outlined"
           hide-details="auto" class="mb-4" hint="IANA name. Drives the local clock on the Contact page."
           persistent-hint></v-text-field>
       </template>
@@ -129,6 +136,7 @@ import { computed, defineComponent, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useSettingsStore } from '../../store';
 import type { SettingsType } from '../../types';
+import { emailRules, githubWebsiteRules, handleRules, linkedinUrlRules, longTextRules, nameRules, timezoneRules, xUrlRules } from '../../utils';
 
 export const SETUP_DISMISSED_KEY = 'whoami.setup.dismissed';
 
@@ -268,6 +276,23 @@ export default defineComponent({
     return {
       STEPS, THEMES, NEXT, step, saving, validForm, draft, required,
       message, messageType, next, finish,
+
+      handleRules,
+
+      nameRules,
+
+      longTextRules,
+
+      emailRules,
+
+      githubWebsiteRules,
+
+      linkedinUrlRules,
+
+      xUrlRules,
+
+      timezoneRules,
+
     };
   },
 });

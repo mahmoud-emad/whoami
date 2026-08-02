@@ -53,9 +53,10 @@
       <v-form v-model="validForm" :disabled="saving">
         <v-text-field v-model="draft.title" :rules="requiredRule('Title')" label="Title" variant="outlined"
           hide-details="auto" class="mb-4"></v-text-field>
-        <v-text-field v-model="draft.emoji" label="Emoji" placeholder="🎯" variant="outlined" hide-details="auto"
-          class="mb-4"></v-text-field>
-        <v-textarea v-model="draft.intro" label="One line about it" variant="outlined" hide-details="auto" rows="2"
+        <v-text-field v-model="draft.emoji" :rules="emojiRules()" label="Emoji" placeholder="🎯"
+          variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
+        <v-textarea v-model="draft.intro" :rules="longTextRules({ fieldName: 'Intro', maxLength: 300 })"
+          label="One line about it" variant="outlined" hide-details="auto" rows="2"
           auto-grow class="mb-4"></v-textarea>
       </v-form>
       <template #actions>
@@ -84,6 +85,7 @@ import InlineActions from '../components/admin/InlineActions.vue';
 import EditorDialog from '../components/admin/EditorDialog.vue';
 import { useAdmin } from '../composables/useAdmin';
 import { useFormFeedback } from '../composables/useFormFeedback';
+import { emojiRules, longTextRules } from '../utils';
 
 export default defineComponent({
   name: 'Lists',
@@ -172,6 +174,11 @@ export default defineComponent({
       apiLoading, isAdmin, lists, visible, percent, pageTitle, pageIntro,
       editorOpen, draft, validForm, saving, busy, requiredRule,
       openCreate, createList, removeList, responseType, responseMessage,
+
+      emojiRules,
+
+      longTextRules,
+
     };
   },
 });

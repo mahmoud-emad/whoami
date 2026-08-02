@@ -9,7 +9,7 @@
   <v-form v-model="validForm" :disabled="apiLoadingStore.isLoading()">
     <v-text-field :loading="apiLoadingStore.isLoading()" v-model="siteSettings.configuration.githubURL"
       title="Your GitHub Link" class="mb-4" label="Your GitHub Link" type="url" variant="outlined" hide-details="auto"
-      :rules="[...websiteRules(), ...githubWebsiteRules()]"></v-text-field>
+      :rules="githubWebsiteRules()"></v-text-field>
 
     <v-switch :loading="apiLoadingStore.isLoading()" v-model="support2Themes" title="Support 2 themes Dark/Light"
       color="primary" inset label="Support 2 themes Dark/Light" hide-details />
@@ -39,12 +39,10 @@
   <v-form v-model="validSignatureForm" :disabled="changingSignature">
     <v-text-field v-model="currentSignature" type="password" title="Current signature" class="mb-4"
       label="Current signature" variant="outlined" hide-details="auto"
-      :rules="[(v: string) => !!v || 'Current signature is required']"></v-text-field>
+      :rules="signatureRules({ fieldName: 'Current signature', forLogin: true })"></v-text-field>
     <v-text-field v-model="newSignature" type="password" title="New signature" class="mb-4" label="New signature"
-      variant="outlined" hide-details="auto" :rules="[
-        (v: string) => !!v || 'New signature is required',
-        (v: string) => (v || '').length >= 8 || 'Use at least 8 characters',
-      ]"></v-text-field>
+      variant="outlined" hide-details="auto"
+      :rules="signatureRules({ fieldName: 'New signature' })"></v-text-field>
     <div class="form-actions mb-4">
       <v-btn @click="changeSignature" :loading="changingSignature" :disabled="!validSignatureForm || changingSignature"
         title="Change signature" color="warning" variant="tonal">Change signature</v-btn>
@@ -57,7 +55,7 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAPILoading, useSettingsStore, defaultSettings } from '../../store';
 import { SettingsType } from '../../types';
-import { websiteRules, githubWebsiteRules } from '../../utils';
+import { githubWebsiteRules, signatureRules } from '../../utils';
 import { apiJson, clearToken } from '../../utils/api';
 
 
@@ -147,7 +145,6 @@ export default {
       siteSettings,
       validForm,
       githubWebsiteRules,
-      websiteRules,
       saveSettings,
       support2Themes,
       currentSignature,
@@ -157,6 +154,7 @@ export default {
       signatureMessage,
       signatureType,
       changeSignature,
+      signatureRules,
     };
   }
 };

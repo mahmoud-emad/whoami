@@ -17,11 +17,13 @@
     <!-- The parenthetical examples used to live in the labels. A field is only ~290px wide at
          390px, so every one of them was ellipsised down to a useless stub.
          Moving the example to a placeholder or hint keeps it visible and the label intact. -->
-    <v-text-field v-model="brand.displayName" title="Display name in navbar" class="mb-4" label="Display name"
+    <v-text-field v-model="brand.displayName" :rules="nameRules({ fieldName: 'Display name', maxLength: 60 })"
+      title="Display name in navbar" class="mb-4" label="Display name"
       placeholder="Ada Lovelace" variant="outlined" hide-details="auto"></v-text-field>
-    <v-text-field v-model="brand.handle" title="Public handle shown under the name" class="mb-4" label="Handle"
+    <v-text-field v-model="brand.handle" :rules="handleRules({ fieldName: 'Handle' })"
+      title="Public handle shown under the name" class="mb-4" label="Handle"
       placeholder="@ada" variant="outlined" hide-details="auto"></v-text-field>
-    <v-text-field v-model="brand.handleUrl" type="url" :rules="brand.handleUrl?.length ? websiteRules() : []"
+    <v-text-field v-model="brand.handleUrl" type="url" :rules="urlRules({ fieldName: 'Handle URL' })"
       title="Where the handle links to" class="mb-4" label="Handle URL" variant="outlined" hide-details="auto"
       hint="Where the handle links to — usually your GitHub profile." persistent-hint></v-text-field>
 
@@ -29,19 +31,23 @@
 
     <!-- Logo -->
     <h3 class="section-title">🖼️ Logo</h3>
-    <v-file-input v-model="logoFile" :loading="uploading" :disabled="uploading" label="Upload logo (PNG / JPEG / GIF)"
+    <v-file-input v-model="logoFile" :rules="fileRules({ fieldName: 'Logo' })" :loading="uploading"
+      :disabled="uploading" label="Upload logo (PNG / JPEG / GIF)"
       title="Upload logo" variant="outlined" hide-details="auto" show-size prepend-icon="" append-icon="mdi-upload"
       @update:model-value="uploadLogo" class="mb-4"></v-file-input>
-    <v-text-field v-model="brand.logoUrl" title="Logo URL" label="Logo URL" variant="outlined" hide-details="auto"
+    <v-text-field v-model="brand.logoUrl" :rules="imageUrlRules({ fieldName: 'Logo URL' })" title="Logo URL"
+      label="Logo URL" variant="outlined" hide-details="auto"
       class="mb-4" hint="Auto-filled after upload; can also be set manually." persistent-hint></v-text-field>
 
     <v-divider class="my-4" />
 
     <!-- Footer -->
     <h3 class="section-title">📎 Footer</h3>
-    <v-text-field v-model="brand.copyrightOwner" title="Footer copyright owner" class="mb-4" label="Copyright owner"
+    <v-text-field v-model="brand.copyrightOwner" :rules="nameRules({ fieldName: 'Copyright owner', maxLength: 80 })"
+      title="Footer copyright owner" class="mb-4" label="Copyright owner"
       placeholder="Ada Lovelace" variant="outlined" hide-details="auto"></v-text-field>
-    <v-text-field v-model.number="brand.copyrightYear" type="number" title="Footer copyright year" class="mb-4"
+    <v-text-field v-model.number="brand.copyrightYear" type="number" :rules="yearRules({ fieldName: 'Copyright year' })"
+      title="Footer copyright year" class="mb-4"
       label="Copyright year" variant="outlined" hide-details="auto"></v-text-field>
 
     <v-divider class="my-4" />
@@ -62,9 +68,11 @@
       </div>
       <!-- The route is already printed above, so the labels no longer repeat it; interpolating it
            made them long enough to be ellipsised in a phone-width field. -->
-      <v-text-field v-model="item.name" label="Label" :title="`Label for ${item.link}`" variant="outlined"
+      <v-text-field v-model="item.name" :rules="nameRules({ fieldName: 'Label', maxLength: 40, required: true })"
+        label="Label" :title="`Label for ${item.link}`" variant="outlined"
         hide-details="auto" density="compact" class="mb-2"></v-text-field>
-      <v-text-field v-model="item.title" label="Hover tooltip" :title="`Hover tooltip for ${item.link}`"
+      <v-text-field v-model="item.title" :rules="nameRules({ fieldName: 'Hover tooltip', maxLength: 120 })"
+        label="Hover tooltip" :title="`Hover tooltip for ${item.link}`"
         variant="outlined" hide-details="auto" density="compact"></v-text-field>
       <input type="hidden" :value="index" />
     </v-card>
@@ -83,7 +91,7 @@ import { onMounted, ref } from 'vue';
 import { apiFetch } from '../../utils/api';
 import { useAPILoading, useSettingsStore } from '../../store';
 import { BrandType } from '../../types';
-import { websiteRules, deepClone } from '../../utils';
+import { deepClone, fileRules, handleRules, imageUrlRules, nameRules, urlRules, yearRules } from '../../utils';
 import { useFormFeedback } from '../../composables/useFormFeedback';
 
 const emptyBrand = (): BrandType => ({
@@ -160,7 +168,14 @@ export default {
       logoFile,
       uploadLogo,
       saveBrand,
-      websiteRules,
+      urlRules,
+      nameRules,
+      handleRules,
+      imageUrlRules,
+      yearRules,
+
+      fileRules,
+
     };
   },
 };

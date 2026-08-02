@@ -119,7 +119,7 @@ const defaultSettings = (): SettingsType => ({
         multipleThemes: false,
         enableSearch: false,
         searchModels: [],
-        antiBot: { enabled: true, question: '', answer: '' },
+        antiBot: { enabled: true, question: '', answer: '', example: '' },
     },
     security: { debug: false },
     server: { host: '', port: 0 },
@@ -154,7 +154,7 @@ const useSettingsStore = defineStore('settingsStore', {
                 githubURL: "",
                 multipleThemes: false,
                 searchModels: [],
-                antiBot: { enabled: true, question: '', answer: '' },
+                antiBot: { enabled: true, question: '', answer: '', example: '' },
             },
             security: {
                 debug: false,

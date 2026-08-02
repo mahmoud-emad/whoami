@@ -13,10 +13,12 @@
   <v-form :disabled="apiLoadingStore.isLoading()">
     <h3 class="section-title">🔖 Title and description</h3>
 
-    <v-text-field v-model="meta.title" label="Site title" variant="outlined" hide-details="auto" class="mb-4"
+    <v-text-field v-model="meta.title" :rules="nameRules({ fieldName: 'Site title', maxLength: 70 })"
+      label="Site title" variant="outlined" hide-details="auto" class="mb-4"
       hint="Fills the browser tab and is the headline in search results." persistent-hint></v-text-field>
 
-    <v-textarea v-model="meta.description" label="Description" variant="outlined" hide-details="auto" rows="3"
+    <v-textarea v-model="meta.description" :rules="longTextRules({ fieldName: 'Description', maxLength: 300 })"
+      label="Description" variant="outlined" hide-details="auto" rows="3"
       auto-grow :counter="155" class="mb-6"
       hint="Around 155 characters is all a search result will show — anything past that gets cut off."
       persistent-hint></v-textarea>
@@ -25,16 +27,19 @@
 
     <h3 class="section-title">🔗 Addresses and images</h3>
 
-    <v-text-field v-model="meta.siteUrl" label="Site URL" variant="outlined" hide-details="auto" class="mb-4"
+    <v-text-field v-model="meta.siteUrl" :rules="urlRules({ fieldName: 'Site URL' })"
+      label="Site URL" variant="outlined" hide-details="auto" class="mb-4"
       placeholder="https://example.com"
       hint="The canonical address. Relative image paths below are resolved against it." persistent-hint></v-text-field>
 
-    <v-text-field v-model="meta.ogImage" label="Preview image (og:image)" variant="outlined" hide-details="auto"
+    <v-text-field v-model="meta.ogImage" :rules="imageUrlRules({ fieldName: 'Preview image' })"
+      label="Preview image (og:image)" variant="outlined" hide-details="auto"
       class="mb-4" placeholder="/uploads/preview.png"
       hint="Shown on social and chat previews. A /uploads/… path from the Uploads tab works here."
       persistent-hint></v-text-field>
 
-    <v-text-field v-model="meta.faviconUrl" label="Favicon URL" variant="outlined" hide-details="auto" class="mb-6"
+    <v-text-field v-model="meta.faviconUrl" :rules="imageUrlRules({ fieldName: 'Favicon URL' })"
+      label="Favicon URL" variant="outlined" hide-details="auto" class="mb-6"
       placeholder="/favicon.ico" hint="The little tab icon. An /uploads/… path works here too."
       persistent-hint></v-text-field>
 
@@ -42,7 +47,8 @@
 
     <h3 class="section-title">🐦 Social attribution</h3>
 
-    <v-text-field v-model="meta.twitterHandle" label="X / Twitter handle" variant="outlined" hide-details="auto"
+    <v-text-field v-model="meta.twitterHandle" :rules="twitterHandleRules()"
+      label="X / Twitter handle" variant="outlined" hide-details="auto"
       class="mb-6" placeholder="@you" hint="Credited on the X preview card. Leave empty to omit the tag."
       persistent-hint></v-text-field>
 
@@ -72,11 +78,13 @@
       label="Show the webring links in the footer" title="Show the webring links in the footer"
       hide-details></v-switch>
 
-    <v-text-field v-model="webring.name" label="Ring name" variant="outlined" hide-details="auto" class="mb-4"
+    <v-text-field v-model="webring.name" :rules="nameRules({ fieldName: 'Ring name', maxLength: 60 })"
+      label="Ring name" variant="outlined" hide-details="auto" class="mb-4"
       placeholder="IndieWeb Webring" hint="Shown between the two arrows and used for the link titles."
       persistent-hint></v-text-field>
 
-    <v-text-field v-model="webring.baseUrl" label="Ring base URL" variant="outlined" hide-details="auto" class="mb-6"
+    <v-text-field v-model="webring.baseUrl" :rules="urlRules({ fieldName: 'Ring base URL' })"
+      label="Ring base URL" variant="outlined" hide-details="auto" class="mb-6"
       placeholder="https://xn--sr8hvo.ws"
       hint="The arrows point at /previous and /next under this address. Leave it as it is unless you joined a different ring."
       persistent-hint></v-text-field>
@@ -89,7 +97,7 @@
 <script lang="ts">
 import { onMounted, ref } from 'vue';
 import { useAPILoading, useSettingsStore } from '../../store';
-import { deepClone } from '../../utils';
+import { deepClone, nameRules, longTextRules, urlRules, imageUrlRules, twitterHandleRules } from '../../utils';
 import { useFormFeedback } from '../../composables/useFormFeedback';
 import type { SiteMeta } from '../../types';
 
@@ -196,6 +204,11 @@ export default {
       webringType,
       webringMessage,
       saveWebring,
+      nameRules,
+      longTextRules,
+      urlRules,
+      imageUrlRules,
+      twitterHandleRules,
     };
   },
 };

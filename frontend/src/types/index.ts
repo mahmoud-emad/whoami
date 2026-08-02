@@ -229,7 +229,10 @@ export type SettingsType = {
     antiBot: {
       enabled: boolean,
       question: string,
+      /** Never present in a public response — the server strips it. See publicConfig. */
       answer: string,
+      /** Public hint about the shape of the answer, shown under the guestbook field. */
+      example: string,
     },
   },
   /** True once the first-run wizard has been completed or skipped. See the backend type. */

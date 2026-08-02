@@ -16,7 +16,7 @@
     <h3 class="section-title">🌓 Default theme</h3>
     <p class="section-hint mb-3">What a visitor gets before they touch the dark/light switch.</p>
     <v-select v-model="theme.defaultTheme" :items="themeOptions" item-title="label" item-value="value"
-      label="Default theme" variant="outlined" hide-details="auto" density="comfortable" class="mb-6"></v-select>
+      :rules="selectRules({ fieldName: 'Default theme' })" label="Default theme" variant="outlined" hide-details="auto" density="comfortable" class="mb-6"></v-select>
 
     <v-divider class="my-4" />
 
@@ -48,7 +48,8 @@
             <input type="color" class="color-swatch" :value="pickerValue(theme[palette][key])"
               :aria-label="`${key} colour picker`" :disabled="apiLoadingStore.isLoading()"
               @input="onPick(palette, key, ($event.target as HTMLInputElement).value)" />
-            <v-text-field v-model="theme[palette][key]" :label="key" variant="outlined" hide-details="auto"
+            <v-text-field v-model="theme[palette][key]" :rules="hexColorRules({ fieldName: key })"
+              :label="key" variant="outlined" hide-details="auto"
               density="comfortable" spellcheck="false" autocapitalize="none" class="flex-grow-1"></v-text-field>
           </div>
         </v-col>
@@ -65,7 +66,7 @@
 <script lang="ts">
 import { onMounted, ref } from 'vue';
 import { useAPILoading, useSettingsStore } from '../../store';
-import { deepClone } from '../../utils';
+import { deepClone, hexColorRules, selectRules } from '../../utils';
 import { useFormFeedback } from '../../composables/useFormFeedback';
 import type { SettingsType, ThemeColors } from '../../types';
 
@@ -241,6 +242,8 @@ export default {
       onPick,
       contrastChecks,
       save,
+      hexColorRules,
+      selectRules,
     };
   },
 };
