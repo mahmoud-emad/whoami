@@ -3,7 +3,7 @@
     <p>Loading the home-page sections from the server</p>
   </v-alert>
 
-  <v-alert v-if="responseMessage" :type="responseType" class="mb-4" variant="tonal">{{ responseMessage }}</v-alert>
+  <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
 
   <v-alert type="info" class="mb-4" variant="tonal">
     These are the blocks that make up the home page. <strong>Order</strong> controls the sequence they appear
@@ -53,6 +53,7 @@
 
 <script lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { useAPILoading, useSettingsStore } from '../../store';
 import { deepClone, nameRules, longTextRules, emojiRules, integerRules } from '../../utils';
 import { useFormFeedback } from '../../composables/useFormFeedback';
@@ -95,6 +96,7 @@ const emptySections = (): SectionsConfig =>
 
 export default {
   name: 'SectionsForm',
+  components: { FeedbackNote },
   setup() {
     const apiLoadingStore = useAPILoading();
     const settingsStore = useSettingsStore();

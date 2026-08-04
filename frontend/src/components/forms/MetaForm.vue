@@ -3,7 +3,7 @@
     <p>Loading the site meta from the server</p>
   </v-alert>
 
-  <v-alert v-if="responseMessage" :type="responseType" class="mb-4" variant="tonal">{{ responseMessage }}</v-alert>
+  <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
 
   <v-alert type="info" class="mb-4" variant="tonal">
     What search engines and chat apps show when someone links to the site: the browser tab title, the
@@ -96,6 +96,7 @@
 
 <script lang="ts">
 import { onMounted, ref } from 'vue';
+import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { useAPILoading, useSettingsStore } from '../../store';
 import { deepClone, nameRules, longTextRules, urlRules, imageUrlRules, twitterHandleRules } from '../../utils';
 import { useFormFeedback } from '../../composables/useFormFeedback';
@@ -126,6 +127,7 @@ const emptyWebring = (): WebringForm => ({
 
 export default {
   name: 'MetaForm',
+  components: { FeedbackNote },
   setup() {
     const apiLoadingStore = useAPILoading();
     const settingsStore = useSettingsStore();

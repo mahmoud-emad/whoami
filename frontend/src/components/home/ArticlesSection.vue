@@ -9,8 +9,7 @@
     <div v-if="isAdmin" class="owner-bar pa-2">
       <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Add a new article"
         class="text-capitalize" @click="openCreate">New article</v-btn>
-      <v-alert v-if="!editorOpen && responseMessage" :type="responseType" variant="tonal" density="compact"
-        class="owner-bar__alert">{{ responseMessage }}</v-alert>
+      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
     </div>
 
     <LoadingComponent type="article" :content-length="2" :content-name="sectionTitle || 'Articles'"
@@ -40,9 +39,7 @@
     </div>
 
     <EditorDialog v-if="isAdmin" v-model="editorOpen" :title="editorTitle">
-      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
-        {{ responseMessage }}
-      </v-alert>
+      <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
       <v-form v-model="validForm" :disabled="saving">
         <v-text-field v-model="draft.title" :rules="nameRules({
           fieldName: 'Article Title',
@@ -87,6 +84,7 @@
 
 <script lang="ts">
 import { computed, onMounted, Ref, ref } from 'vue';
+import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { apiFetch, apiJson } from '../../utils/api';
 import { ArticleType } from '../../types';
 import { useAPILoading, useSettingsStore } from '../../store';
@@ -102,7 +100,7 @@ const emptyArticle = (): ArticleType => ({ title: '', link: '', description: '' 
 
 export default {
   name: 'ArticlesSection',
-  components: { LoadingComponent, InlineActions, EditorDialog },
+  components: { FeedbackNote, LoadingComponent, InlineActions, EditorDialog },
 
   setup() {
     // Vuetify display utility

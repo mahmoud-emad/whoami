@@ -10,8 +10,7 @@
         <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Add a contact channel"
           class="text-capitalize" :disabled="busy" @click="openCreate">Add channel</v-btn>
         <InlineActions label="page copy" :remove="false" @edit="openPageEditor" />
-        <v-alert v-if="!editorOpen && !pageEditorOpen && responseMessage" :type="responseType" variant="tonal"
-          density="compact" class="owner-bar__alert">{{ responseMessage }}</v-alert>
+        <FeedbackNote v-if="!editorOpen && !pageEditorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
       </div>
 
       <p v-if="isAdmin && !channels.length" class="owner-hint">
@@ -92,9 +91,7 @@
 
     <!-- Both dialogs are mounted only for the owner, so a visitor never loads a form at all. -->
     <EditorDialog v-if="isAdmin" v-model="editorOpen" :title="editorTitle">
-      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
-        {{ responseMessage }}
-      </v-alert>
+      <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
       <v-form v-model="validForm" :disabled="saving">
         <v-row class="ma-0">
           <v-col cols="12" sm="5" class="pa-0 pr-sm-2 mb-4">
@@ -141,9 +138,7 @@
     </EditorDialog>
 
     <EditorDialog v-if="isAdmin" v-model="pageEditorOpen" title="Edit page copy">
-      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
-        {{ responseMessage }}
-      </v-alert>
+      <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
       <v-form :disabled="saving">
         <v-text-field v-model="pageDraft.title" :rules="nameRules({ fieldName: 'Heading', maxLength: 80 })"
           title="Page Heading" label="Heading" variant="outlined"
@@ -170,6 +165,7 @@
 
 <script lang="ts">
 import { computed, ref, onMounted, onUnmounted, defineComponent } from 'vue';
+import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import ContactInfo from '../components/ContactInfo.vue';
 import EditorDialog from '../components/admin/EditorDialog.vue';
 import InlineActions from '../components/admin/InlineActions.vue';
@@ -242,7 +238,7 @@ const KIND_NAMES: Record<string, string> = {
 
 export default defineComponent({
   name: 'Contact',
-  components: { ContactInfo, EditorDialog, InlineActions },
+  components: { FeedbackNote, ContactInfo, EditorDialog, InlineActions },
   setup() {
     const display = useDisplay();
     const settingsStore = useSettingsStore();

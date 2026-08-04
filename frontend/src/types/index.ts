@@ -195,6 +195,14 @@ export type ThemeColors = {
    * because red, green and orange carry meaning that a palette should not reassign.
    */
   info: string,
+  /**
+   * Feedback after an action. These were left at Vuetify's factory green and red, which shouted
+   * next to a warm, quiet palette. They are palette slots now so the whole site can be recoloured
+   * without a green box appearing in the middle of it — but still green-ish and red-ish, because
+   * "it worked" and "it failed" are not the owner's to reassign.
+   */
+  success: string,
+  error: string,
 }
 
 /**

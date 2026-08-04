@@ -3,7 +3,7 @@
     <p>Loading the theme from the server</p>
   </v-alert>
 
-  <v-alert v-if="responseMessage" :type="responseType" class="mb-4" variant="tonal">{{ responseMessage }}</v-alert>
+  <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
 
   <v-alert type="info" class="mb-4" variant="tonal">
     Both palettes ship with the site — the default below decides which one a first-time visitor sees.
@@ -65,6 +65,7 @@
 
 <script lang="ts">
 import { onMounted, ref } from 'vue';
+import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { useAPILoading, useSettingsStore } from '../../store';
 import { deepClone, hexColorRules, selectRules } from '../../utils';
 import { useFormFeedback } from '../../composables/useFormFeedback';
@@ -87,6 +88,8 @@ const COLOR_KEYS: ColorKey[] = [
   'form',
   'primary',
   'info',
+  'success',
+  'error',
 ];
 
 /** WCAG 2.1 AA minimum for normal-size body text. */
@@ -162,6 +165,7 @@ const contrastRatio = (fg: string, bg: string): number | null => {
 
 export default {
   name: 'AppearanceForm',
+  components: { FeedbackNote },
   setup() {
     const apiLoadingStore = useAPILoading();
     const settingsStore = useSettingsStore();

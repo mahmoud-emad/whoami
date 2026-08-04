@@ -27,15 +27,12 @@
       <!-- The owner is looking at a block nobody else can see; say so rather than let it read as a
            rendering bug. -->
       <span v-if="!show" class="owner-bar__note">Hidden from visitors</span>
-      <v-alert v-if="!editorOpen && responseMessage" :type="responseType" variant="tonal" density="compact"
-        class="owner-bar__alert">{{ responseMessage }}</v-alert>
+      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
     </div>
 
     <!-- Mounted only for the owner, so a visitor never loads the form at all. -->
     <EditorDialog v-if="isAdmin" v-model="editorOpen" title="Edit intro">
-      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
-        {{ responseMessage }}
-      </v-alert>
+      <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
       <v-form v-model="validForm" :disabled="saving">
         <!-- The section entry (profile.sections.intro) is edited here as well as in the dashboard,
              so the intro can be retitled or hidden from the page it actually belongs to. -->
@@ -123,6 +120,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
+import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { useSettingsStore } from '../../store';
 import EditorDialog from '../admin/EditorDialog.vue';
 import InlineActions from '../admin/InlineActions.vue';
@@ -158,7 +156,7 @@ const RESUME_TYPES = ['application/pdf'];
 
 export default defineComponent({
   name: 'IntroSection',
-  components: { EditorDialog, InlineActions },
+  components: { FeedbackNote, EditorDialog, InlineActions },
   setup() {
     const settingsStore = useSettingsStore();
     const { isAdmin } = useAdmin();

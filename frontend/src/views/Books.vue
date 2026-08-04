@@ -7,8 +7,7 @@
       <div v-if="isAdmin" class="owner-bar">
         <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Add a book"
           class="text-capitalize" :disabled="busy" @click="openCreate">Add book</v-btn>
-        <v-alert v-if="!editorOpen && responseMessage" :type="responseType" variant="tonal" density="compact"
-          class="owner-bar__alert">{{ responseMessage }}</v-alert>
+        <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
       </div>
     </header>
 
@@ -46,9 +45,7 @@
     </template>
 
     <EditorDialog v-if="isAdmin" v-model="editorOpen" :title="editingId === null ? 'Add book' : 'Edit book'">
-      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
-        {{ responseMessage }}
-      </v-alert>
+      <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
       <v-form v-model="validForm" :disabled="saving">
         <v-text-field v-model="draft.title" :rules="requiredRule('Title')" label="Title" variant="outlined"
           hide-details="auto" class="mb-4"></v-text-field>
@@ -98,6 +95,7 @@
  * have a picture and half do not looks broken, and the link is the useful part anyway.
  */
 import { computed, defineComponent, onMounted, ref } from 'vue';
+import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import { apiFetch, apiJson } from '../utils/api';
 import { useAPILoading, useSettingsStore } from '../store';
 import type { BookStatus, BookType } from '../types';
@@ -120,7 +118,7 @@ const emptyBook = (): BookType => ({
 
 export default defineComponent({
   name: 'Books',
-  components: { LoadingComponent, InlineActions, EditorDialog },
+  components: { FeedbackNote, LoadingComponent, InlineActions, EditorDialog },
   setup() {
     const apiLoading = useAPILoading();
     const settingsStore = useSettingsStore();

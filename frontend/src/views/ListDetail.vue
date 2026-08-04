@@ -25,8 +25,7 @@
           <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Add a mission"
             class="text-capitalize" :disabled="busy" @click="openMission(null)">Add mission</v-btn>
           <InlineActions label="list details" :remove="false" @edit="openDetails" />
-          <v-alert v-if="!anyDialogOpen && responseMessage" :type="responseType" variant="tonal" density="compact"
-            class="owner-bar__alert">{{ responseMessage }}</v-alert>
+          <FeedbackNote v-if="!anyDialogOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
         </div>
       </header>
 
@@ -196,6 +195,7 @@
  * disagree about shape. A list is a few kilobytes; the round trip is not the bottleneck.
  */
 import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { apiFetch, apiJson } from '../utils/api';
 import { useAPILoading } from '../store';
@@ -223,7 +223,7 @@ const emptyMission = (): ListMission => ({ title: '', emoji: '', status: 'not-st
 
 export default defineComponent({
   name: 'ListDetail',
-  components: { RouterLink, LoadingComponent, InlineActions, EditorDialog },
+  components: { FeedbackNote, RouterLink, LoadingComponent, InlineActions, EditorDialog },
   setup() {
     const route = useRoute();
     const apiLoading = useAPILoading();

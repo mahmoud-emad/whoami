@@ -37,7 +37,9 @@
       "back-end-bg-color": "#2A2A1C",
       "form": "#1A1613",
       "primary": "#E0A458",
-      "info": "#A8B89A"
+      "info": "#A8B89A",
+      "success": "#93C08A",
+      "error": "#E08A72"
     },
     "light": {
       "background": "#FDFCFA",
@@ -51,7 +53,9 @@
       "back-end-bg-color": "#EDE9DA",
       "form": "#F7F4EF",
       "primary": "#9A5A1C",
-      "info": "#46603D"
+      "info": "#46603D",
+      "success": "#3F6B34",
+      "error": "#9A3B23"
     }
   },
   "indieweb": {

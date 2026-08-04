@@ -12,8 +12,7 @@
           class="text-capitalize" @click="openCreate">New project</v-btn>
       </div>
       <!-- List-level feedback (deletes, failed saves). While the dialog is open it shows in there. -->
-      <v-alert v-if="isAdmin && !editorOpen && responseMessage" :type="responseType" variant="tonal"
-        density="comfortable" class="mt-3">{{ responseMessage }}</v-alert>
+      <FeedbackNote v-if="isAdmin && !editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="mt-3" />
     </div>
     <LoadingComponent type="card" :content-length="4" :content-name="'Projects'" v-if="apiLoadingStore.isLoading()" />
     <div class="projects pa-2 mb-4" v-else>
@@ -41,9 +40,7 @@
 
     <!-- Create/edit shell. Mounted only for the owner, so a visitor never loads the form at all. -->
     <EditorDialog v-if="isAdmin" v-model="editorOpen" :title="editorTitle">
-      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
-        {{ responseMessage }}
-      </v-alert>
+      <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
       <v-form v-model="validForm" :disabled="saving">
         <v-text-field v-model="draft.title" :rules="nameRules({
           fieldName: 'Project Title',
@@ -81,6 +78,7 @@
 
 <script lang="ts">
 import ProjectCard from '../components/ProjectCard.vue';
+import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import { apiFetch, apiJson } from '../utils/api';
 import { computed, onMounted, Ref, ref, watch } from 'vue';
 import { ProjectType } from '../types';
@@ -106,7 +104,7 @@ const emptyProject = (): ProjectType => ({
 
 export default {
   name: 'Projects',
-  components: { ProjectCard, LoadingComponent, EditorDialog },
+  components: { FeedbackNote, ProjectCard, LoadingComponent, EditorDialog },
   setup() {
     const projects: Ref<ProjectType[]> = ref([]);
 

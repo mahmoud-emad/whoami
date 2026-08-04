@@ -11,8 +11,7 @@
         <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Write a new post"
           class="text-capitalize" @click="openCreate">New post</v-btn>
       </div>
-      <v-alert v-if="isAdmin && !editorOpen && responseMessage" :type="responseType" variant="tonal"
-        density="comfortable" class="mt-3">{{ responseMessage }}</v-alert>
+      <FeedbackNote v-if="isAdmin && !editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="mt-3" />
     </div>
 
     <!-- Loading State -->
@@ -69,38 +68,21 @@
     </div>
 
     <!--
-      Pinning is confirmed in a dialog rather than armed in place like delete. Delete's two-step is
-      about preventing loss; this is about a change every reader sees, so the prompt spells out what
-      will happen before it happens.
+      Pinning changes what every reader sees first, so it asks in words rather than arming in
+      place the way delete does.
     -->
-    <v-dialog v-if="isAdmin" v-model="pinDialog" max-width="440">
-      <v-card class="pin-card">
-        <v-card-title class="pin-card__title">{{ pinTarget?.pinnedAt ? 'Unpin this post?' : 'Pin this post?' }}</v-card-title>
-        <v-card-text class="pin-card__body">
-          <p class="mb-2"><strong>{{ pinTarget?.title }}</strong></p>
-          <p v-if="pinTarget?.pinnedAt">
-            It will drop back among the other posts, in date order. Nothing else changes.
-          </p>
-          <p v-else>
-            It will move to the very top of the blog for everyone, above every other post,
-            including any that are already pinned.
-          </p>
-        </v-card-text>
-        <v-card-actions class="pin-card__actions">
-          <v-btn variant="text" class="text-capitalize" :disabled="pinning" @click="pinDialog = false">Cancel</v-btn>
-          <v-btn color="primary" variant="tonal" class="text-capitalize" :loading="pinning" @click="confirmPin">
-            {{ pinTarget?.pinnedAt ? 'Unpin' : 'Pin to top' }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <ConfirmDialog v-if="isAdmin" v-model="pinDialog" :busy="pinning"
+      :title="pinTarget?.pinnedAt ? 'Unpin this post?' : 'Pin this post?'" :subject="pinTarget?.title || ''"
+      :message="pinTarget?.pinnedAt
+        ? 'It will drop back among the other posts, in date order. Nothing else changes.'
+        : 'It will move to the very top of the blog for everyone, above every other post, including any that are already pinned.'"
+      :confirm-text="pinTarget?.pinnedAt ? 'Unpin' : 'Pin to top'" @confirm="confirmPin" />
+
 
     <!-- Create/edit shell. Reuses the same markdown editor the dashboard form uses, so posts written
          here and there go through identical tooling. -->
     <EditorDialog v-if="isAdmin" v-model="editorOpen" :title="editorTitle" :max-width="900">
-      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
-        {{ responseMessage }}
-      </v-alert>
+      <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
       <v-form v-model="validForm" :disabled="saving">
         <v-text-field v-model="draft.title" :rules="nameRules({
           fieldName: 'Post Title',
@@ -121,6 +103,7 @@
 
 <script lang="ts">
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
+import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import { apiFetch, apiJson } from '../utils/api';
 import { useAPILoading, useSettingsStore } from '../store';
 import { PostType } from '../types';
@@ -128,6 +111,7 @@ import LoadingComponent from '../components/LoadingComponent.vue';
 import InlineActions from '../components/admin/InlineActions.vue';
 import PostVotes from '../components/PostVotes.vue';
 import EditorDialog from '../components/admin/EditorDialog.vue';
+import ConfirmDialog from '../components/admin/ConfirmDialog.vue';
 import { useAdmin } from '../composables/useAdmin';
 import { useFormFeedback } from '../composables/useFormFeedback';
 import { deepClone, nameRules } from '../utils';
@@ -141,7 +125,7 @@ const emptyPost = (): PostType => ({ title: '', content: '' });
 
 export default {
   name: 'Blog',
-  components: { LoadingComponent, MarkdownView, MarkdownEditor, InlineActions, EditorDialog, PostVotes },
+  components: { FeedbackNote, LoadingComponent, MarkdownView, MarkdownEditor, InlineActions, EditorDialog, ConfirmDialog, PostVotes },
   setup() {
     const apiLoading = useAPILoading();
     const settingsStore = useSettingsStore();
@@ -359,32 +343,10 @@ export default {
   vertical-align: middle;
 }
 
-.pin-card {
-  background: rgb(var(--v-theme-box-bg-color)) !important;
-  border: 1px solid rgb(var(--v-theme-border-color));
-}
 
-.pin-card__title {
-  font-family: var(--font-display);
-  font-size: 1.05rem !important;
-  font-weight: 700;
-  color: rgb(var(--v-theme-text-color));
-}
 
-.pin-card__body {
-  color: rgb(var(--v-theme-gray-color));
-  line-height: 1.6;
-}
 
-.pin-card__actions {
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 0 1rem 1rem;
-}
 
-.pin-card__actions .v-btn {
-  min-height: 40px;
-}
 
 .post-card {
   border-radius: 0px !important;

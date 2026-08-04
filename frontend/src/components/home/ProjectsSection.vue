@@ -15,8 +15,7 @@
     <div v-if="isAdmin" class="owner-bar pa-2">
       <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" :title="createTitle"
         class="text-capitalize" @click="openCreate">{{ createLabel }}</v-btn>
-      <v-alert v-if="!editorOpen && responseMessage" :type="responseType" variant="tonal" density="compact"
-        class="owner-bar__alert">{{ responseMessage }}</v-alert>
+      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
     </div>
 
     <div class="projects pa-2">
@@ -42,9 +41,7 @@
     </div>
 
     <EditorDialog v-if="isAdmin" v-model="editorOpen" :title="editorTitle">
-      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
-        {{ responseMessage }}
-      </v-alert>
+      <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
       <v-form v-model="validForm" :disabled="saving">
         <v-text-field v-model="draft.title" :rules="nameRules({
           fieldName: 'Project Title',
@@ -95,6 +92,7 @@
 
 <script lang="ts">
 import ProjectCard from '../ProjectCard.vue';
+import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { apiFetch, apiJson } from '../../utils/api';
 import { computed, defineComponent, onMounted, Ref, ref, watch } from 'vue';
 import { ProjectType } from '../../types';
@@ -160,7 +158,7 @@ const loadAllProjects = (): Promise<ProjectType[]> => {
 
 export default defineComponent({
   name: 'ProjectsSection',
-  components: { ProjectCard, LoadingComponent, EditorDialog },
+  components: { FeedbackNote, ProjectCard, LoadingComponent, EditorDialog },
   props: {
     section: {
       type: String as () => 'projects' | 'openSource',

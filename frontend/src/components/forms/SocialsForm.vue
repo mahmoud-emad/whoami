@@ -3,7 +3,7 @@
     <p>Loading socials from the server</p>
   </v-alert>
 
-  <v-alert v-if="responseMessage" :type="responseType" class="mb-4" variant="tonal">{{ responseMessage }}</v-alert>
+  <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
 
   <v-alert type="info" class="mb-4" variant="tonal">
     Where you are on the rest of the web. These addresses seed the Contact page and identify you to
@@ -54,6 +54,7 @@
 
 <script lang="ts">
 import { onMounted, ref } from 'vue';
+import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { useAPILoading, useSettingsStore } from '../../store';
 import { ProfileType } from '../../types';
 import {
@@ -75,6 +76,7 @@ const emptySocials = (): Socials => ({
 
 export default {
   name: 'SocialsForm',
+  components: { FeedbackNote },
   setup() {
     const apiLoadingStore = useAPILoading();
     const settingsStore = useSettingsStore();

@@ -37,6 +37,8 @@ export const BOOT_DARK_COLORS: ThemeColors = {
     "form": "#1A1613",
     "primary": "#E0A458",          //  8.61:1
     "info": "#A8B89A",             //  8.94:1 — sage, so a note reads apart from the amber accent
+    "success": "#93C08A",          //  9.09:1
+    "error": "#E08A72",            //  7.21:1 — terracotta rather than fire-engine red
 };
 
 export const BOOT_LIGHT_COLORS: ThemeColors = {
@@ -58,6 +60,8 @@ export const BOOT_LIGHT_COLORS: ThemeColors = {
     "form": "#F7F4EF",
     "primary": "#9A5A1C",          //  5.32:1
     "info": "#46603D",             //  6.82:1
+    "success": "#3F6B34",          //  6.09:1
+    "error": "#9A3B23",            //  6.77:1
 };
 
 /** A config palette is allowed to be partial, or missing entirely. */

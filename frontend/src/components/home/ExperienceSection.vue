@@ -14,8 +14,7 @@
     <div v-if="isAdmin" class="owner-bar">
       <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Add a new role"
         class="text-capitalize" :disabled="busy" @click="openCreate">Add role</v-btn>
-      <v-alert v-if="!editorOpen && responseMessage" :type="responseType" variant="tonal" density="compact"
-        class="owner-bar__alert">{{ responseMessage }}</v-alert>
+      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
     </div>
 
     <p v-if="isAdmin && !roles.length" class="owner-hint">No roles yet — add the first one above.</p>
@@ -61,9 +60,7 @@
 
     <!-- Mounted only for the owner, so a visitor never loads the form at all. -->
     <EditorDialog v-if="isAdmin" v-model="editorOpen" :title="editorTitle">
-      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
-        {{ responseMessage }}
-      </v-alert>
+      <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
       <v-form v-model="validForm" :disabled="saving">
         <v-row class="ma-0">
           <v-col cols="12" sm="6" class="pa-0 pr-sm-2 mb-4">
@@ -131,6 +128,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
+import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { useSettingsStore } from '../../store';
 import type { ExperienceRole } from '../../types';
 import { deepClone, longTextRules, nameRules, sectionHeading } from '../../utils';
@@ -162,7 +160,7 @@ const normalise = (role?: Partial<ExperienceRole> | null): ExperienceRole => {
 
 export default defineComponent({
   name: 'ExperienceSection',
-  components: { InlineActions, EditorDialog },
+  components: { FeedbackNote, InlineActions, EditorDialog },
   setup() {
     const settingsStore = useSettingsStore();
     const { isAdmin } = useAdmin();

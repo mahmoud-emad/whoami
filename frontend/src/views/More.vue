@@ -15,8 +15,7 @@
            before in-place editing existed. -->
       <div v-if="isAdmin" class="owner-bar">
         <InlineActions label="page copy" :remove="false" @edit="openPageCopy" />
-        <v-alert v-if="!anyEditorOpen && responseMessage" :type="responseType" variant="tonal" density="compact"
-          class="owner-bar__alert">{{ responseMessage }}</v-alert>
+        <FeedbackNote v-if="!anyEditorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
       </div>
     </section>
 
@@ -74,9 +73,7 @@
 
     <!-- Every dialog is mounted only for the owner, so a visitor never loads a form at all. -->
     <EditorDialog v-if="isAdmin" v-model="cardEditorOpen" :title="cardEditorTitle">
-      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
-        {{ responseMessage }}
-      </v-alert>
+      <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
       <v-form v-model="cardValid" :disabled="saving">
         <v-text-field v-model="cardDraft.title" :rules="requiredRules('Title')" title="Card Title" label="Title"
           variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
@@ -105,9 +102,7 @@
     </EditorDialog>
 
     <EditorDialog v-if="isAdmin" v-model="itemEditorOpen" :title="itemEditorTitle">
-      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
-        {{ responseMessage }}
-      </v-alert>
+      <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
       <v-form v-model="itemValid" :disabled="saving">
         <v-text-field v-model="itemDraft.name" :rules="requiredRules('Name')" title="Link Name" label="Name"
           variant="outlined" hide-details="auto" class="mb-4"></v-text-field>
@@ -128,9 +123,7 @@
     <!-- One dialog for both bits of copy, in the mode the control that opened it asked for: the
          shoebox pencil should not present the page heading, and vice versa. -->
     <EditorDialog v-if="isAdmin" v-model="copyEditorOpen" :title="copyEditorTitle">
-      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
-        {{ responseMessage }}
-      </v-alert>
+      <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
       <v-form :disabled="saving">
         <template v-if="copyTarget === 'page'">
           <v-text-field v-model="copyDraft.title" :rules="nameRules({ fieldName: 'Heading', maxLength: 80 })"
@@ -158,6 +151,7 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref } from "vue";
+import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import { useDisplay } from "vuetify";
 import ContactInfo from "../components/ContactInfo.vue";
 import EditorDialog from "../components/admin/EditorDialog.vue";
@@ -187,7 +181,7 @@ const normaliseItem = (item?: Partial<MoreShoeboxItem> | null): MoreShoeboxItem 
 
 export default defineComponent({
   name: "MoreView",
-  components: {
+  components: { FeedbackNote,
     ContactInfo,
     EditorDialog,
     InlineActions,

@@ -3,7 +3,7 @@
     <p>Loading branding from the server</p>
   </v-alert>
 
-  <v-alert v-if="responseMessage" :type="responseType" class="mb-4" variant="tonal">{{ responseMessage }}</v-alert>
+  <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
 
   <v-alert type="info" class="mb-4" variant="tonal">
     Controls the navbar identity, the footer line, and which navigation links are visible. Empty fields fall back to
@@ -88,6 +88,7 @@
 
 <script lang="ts">
 import { onMounted, ref } from 'vue';
+import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { apiFetch } from '../../utils/api';
 import { useAPILoading, useSettingsStore } from '../../store';
 import { BrandType } from '../../types';
@@ -106,6 +107,7 @@ const emptyBrand = (): BrandType => ({
 
 export default {
   name: 'BrandForm',
+  components: { FeedbackNote },
   setup() {
     const apiLoadingStore = useAPILoading();
     const settingsStore = useSettingsStore();

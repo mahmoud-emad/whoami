@@ -3,8 +3,7 @@
     <p>Loading settings from the server</p>
   </v-alert>
 
-  <v-alert v-if="responseMessage" :type="responseType == 'success' ? 'success' : 'error'" class="mb-4"
-    variant="tonal">{{ responseMessage }}</v-alert>
+  <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
 
   <v-form v-model="validForm" :disabled="apiLoadingStore.isLoading()">
     <v-text-field :loading="apiLoadingStore.isLoading()" v-model="siteSettings.configuration.githubURL"
@@ -52,6 +51,8 @@
 
 <script lang="ts">
 import { onMounted, ref } from 'vue';
+import { useFormFeedback } from '../../composables/useFormFeedback';
+import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { useRouter } from 'vue-router';
 import { useAPILoading, useSettingsStore, defaultSettings } from '../../store';
 import { SettingsType } from '../../types';
@@ -61,6 +62,7 @@ import { apiJson, clearToken } from '../../utils/api';
 
 export default {
   name: 'SettingsForm',
+  components: { FeedbackNote },
   setup() {
     const apiLoadingStore = useAPILoading();
     const settingsStore = useSettingsStore();
@@ -68,8 +70,9 @@ export default {
     const support2Themes = ref(false)
     const siteSettings = ref<SettingsType>(defaultSettings());
     const validForm = ref(false);
-    const responseType = ref('success');
-    const responseMessage = ref();
+    // The shared composable owns the message, its type and the auto-clear timer, so this form
+    // no longer hand-rolls a setTimeout that only fired on success.
+    const { responseType, responseMessage, success, error } = useFormFeedback();
     const router = useRouter();
 
     const currentSignature = ref('');
@@ -94,19 +97,12 @@ export default {
         siteSettings.value.configuration.multipleThemes = support2Themes.value;
         await settingsStore.saveSettings(siteSettings.value);
         siteSettings.value = settingsStore.getSettings();
-        responseMessage.value = 'Settings saved successfully';
-        responseType.value = 'success';
-      } catch (error) {
-        responseMessage.value = "Failed to save settings";
-        responseType.value = 'error';
-        console.error("Failed to save settings:", error);
+        success('Settings saved successfully');
+      } catch (err) {
+        error('Failed to save settings');
+        console.error('Failed to save settings:', err);
       } finally {
         apiLoadingStore.setLoading(false);
-        if (responseType.value == 'success') {
-          setTimeout(() => {
-            responseMessage.value = undefined;
-          }, 3000);
-        }
       }
     }
 

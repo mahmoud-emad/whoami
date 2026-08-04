@@ -1,5 +1,5 @@
 <template>
-  <v-alert v-if="responseMessage" :type="responseType" variant="tonal" class="mb-4">{{ responseMessage }}</v-alert>
+  <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
 
   <v-alert v-if="!apiLoadingStore.isLoading() && files.length === 0" type="info" variant="tonal" class="mb-4">
     No uploaded files yet. Anything you upload while editing a post, your profile or your branding shows up here.
@@ -67,6 +67,7 @@
 
 <script lang="ts">
 import { ref, onMounted } from 'vue';
+import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { apiFetch } from '../../utils/api';
 import { useAPILoading } from '../../store';
 import { formatData } from '../../utils';
@@ -100,6 +101,7 @@ const formatSize = (bytes: number): string => {
 
 export default {
   name: 'UploadsManager',
+  components: { FeedbackNote },
   setup() {
     const apiLoadingStore = useAPILoading();
     const { responseType, responseMessage, success, error } = useFormFeedback();

@@ -49,6 +49,8 @@ export const defaultConfig: SiteConfig = {
       form: '#1A1613',
       primary: '#E0A458',
       info: '#A8B89A',
+      success: '#93C08A',
+      error: '#E08A72',
     },
     light: {
       background: '#FDFCFA',
@@ -63,6 +65,8 @@ export const defaultConfig: SiteConfig = {
       form: '#F7F4EF',
       primary: '#9A5A1C',
       info: '#46603D',
+      success: '#3F6B34',
+      error: '#9A3B23',
     },
   },
   // IndieWeb. A webring is a reciprocal-link network: joining puts the site in other people's

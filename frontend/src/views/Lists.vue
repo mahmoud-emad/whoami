@@ -7,8 +7,7 @@
       <div v-if="isAdmin" class="owner-bar">
         <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Start a new list"
           class="text-capitalize" :disabled="busy" @click="openCreate">New list</v-btn>
-        <v-alert v-if="!editorOpen && responseMessage" :type="responseType" variant="tonal" density="compact"
-          class="owner-bar__alert">{{ responseMessage }}</v-alert>
+        <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
       </div>
     </header>
 
@@ -47,9 +46,7 @@
     </ul>
 
     <EditorDialog v-if="isAdmin" v-model="editorOpen" title="New list">
-      <v-alert v-if="responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-4">
-        {{ responseMessage }}
-      </v-alert>
+      <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
       <v-form v-model="validForm" :disabled="saving">
         <v-text-field v-model="draft.title" :rules="requiredRule('Title')" label="Title" variant="outlined"
           hide-details="auto" class="mb-4"></v-text-field>
@@ -76,6 +73,7 @@
  * in public at all. Following a card opens the list itself, where the boxes live.
  */
 import { computed, defineComponent, onMounted, ref } from 'vue';
+import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import { RouterLink } from 'vue-router';
 import { apiFetch, apiJson } from '../utils/api';
 import { useAPILoading, useSettingsStore } from '../store';
@@ -89,7 +87,7 @@ import { emojiRules, longTextRules } from '../utils';
 
 export default defineComponent({
   name: 'Lists',
-  components: { RouterLink, LoadingComponent, InlineActions, EditorDialog },
+  components: { FeedbackNote, RouterLink, LoadingComponent, InlineActions, EditorDialog },
   setup() {
     const apiLoading = useAPILoading();
     const settingsStore = useSettingsStore();

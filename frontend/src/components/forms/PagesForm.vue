@@ -3,7 +3,7 @@
     <p>Loading the page copy from the server</p>
   </v-alert>
 
-  <v-alert v-if="responseMessage" :type="responseType" class="mb-4" variant="tonal">{{ responseMessage }}</v-alert>
+  <FeedbackNote v-if="responseMessage" :message="responseMessage" :type="responseType" class="mb-4" />
 
   <v-alert type="info" class="mb-4" variant="tonal">
     The heading and the paragraph under it for each standalone page. Leave the intro empty and the page
@@ -38,6 +38,7 @@
 
 <script lang="ts">
 import { onMounted, ref } from 'vue';
+import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { useAPILoading, useSettingsStore } from '../../store';
 import { deepClone, nameRules, longTextRules } from '../../utils';
 import { useFormFeedback } from '../../composables/useFormFeedback';
@@ -70,6 +71,7 @@ const emptyPages = (): PagesConfig =>
 
 export default {
   name: 'PagesForm',
+  components: { FeedbackNote },
   setup() {
     const apiLoadingStore = useAPILoading();
     const settingsStore = useSettingsStore();

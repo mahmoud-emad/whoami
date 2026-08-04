@@ -21,9 +21,7 @@
     </v-alert>
 
     <!-- Owner-only result of a moderation action. Visitors never see this block. -->
-    <v-alert v-if="isAdmin && responseMessage" :type="responseType" variant="tonal" density="comfortable" class="mb-6">
-      {{ responseMessage }}
-    </v-alert>
+    <FeedbackNote v-if="isAdmin && responseMessage" :message="responseMessage" :type="responseType" class="mb-6" />
 
     <!--
       A grid of note cards, two per row, modelled on the reference: square corners, a hairline
@@ -107,6 +105,7 @@
 
 <script lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import { useTheme } from 'vuetify';
 import { apiFetch, apiJson } from '../utils/api';
 import { antiBotRules, formatData, longTextRules, nameRules, urlRules, websiteRules } from '../utils';
@@ -121,7 +120,7 @@ import guestbookGif from '../assets/images/guestbook.gif';
 
 export default {
   name: 'Guestbook',
-  components: { LoadingComponent, InlineActions },
+  components: { FeedbackNote, LoadingComponent, InlineActions },
   setup() {
     const { isAdmin } = useAdmin();
     const { responseType, responseMessage, success, error } = useFormFeedback();
