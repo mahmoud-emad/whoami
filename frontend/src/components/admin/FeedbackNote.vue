@@ -3,7 +3,7 @@
     `role` is assertive only for errors: a success note that steals focus mid-task is noise, but a
     failure the reader might otherwise miss is worth interrupting for.
   -->
-  <p v-if="message" class="fb" :class="`fb--${type}`" :role="type === 'error' ? 'alert' : 'status'"
+  <div v-if="message" class="fb" :class="`fb--${type}`" :role="type === 'error' ? 'alert' : 'status'"
     :aria-live="type === 'error' ? 'assertive' : 'polite'">
     <span v-if="resolvedLabel" class="fb__label">{{ resolvedLabel }}</span>
     <span class="fb__text"><slot>{{ message }}</slot></span>
@@ -11,7 +11,7 @@
       @click="$emit('dismiss')">
       <v-icon size="14">mdi-close</v-icon>
     </button>
-  </p>
+  </div>
 </template>
 
 <script lang="ts">
@@ -71,9 +71,10 @@ export default defineComponent({
   align-items: baseline;
   flex-wrap: wrap;
   gap: 0.1rem 0.6rem;
-  /* Beats the global `p { margin: 0 !important }` reset. */
-  margin: 0 0 1rem !important;
-  padding: 0.55rem 0.8rem !important;
+  /* Even vertical space, and no !important: this is a div precisely so the utility classes the
+     call sites pass (mb-4, mt-3) can still override it the normal way. */
+  margin: 1rem 0;
+  padding: 0.55rem 0.8rem;
   border-left: 2px solid rgb(var(--v-theme-gray-color));
   border-radius: 0 6px 6px 0;
   background: rgba(var(--v-theme-gray-color), 0.09);
@@ -148,10 +149,10 @@ export default defineComponent({
   color: rgb(var(--v-theme-link-hover-color));
 }
 
-/* Inside an owner bar it sits beside the buttons rather than under them, so it must be able to
-   shrink and must not carry the block margin. */
+/* Inside an owner bar it sits beside the buttons rather than under them, so it shrinks and drops
+   the block margin entirely — the bar's own gap is the spacing there. */
 .owner-bar .fb {
   flex: 1 1 220px;
-  margin-bottom: 0 !important;
+  margin: 0;
 }
 </style>
