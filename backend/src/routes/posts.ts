@@ -11,6 +11,30 @@ const errorMessage = (error: unknown): string => (error instanceof Error ? error
 
 export const postsRouter: Router = express.Router();
 
+/** A timestamp field as milliseconds, or 0 when it is missing or unparseable. */
+const at = (value: unknown): number => {
+  const ms = Date.parse(typeof value === 'string' ? value : '');
+  return Number.isNaN(ms) ? 0 : ms;
+};
+
+/**
+ * Blog order: pinned posts first, then everything else newest first.
+ *
+ * Within the pinned group the most recently pinned wins, so pinning something puts it above
+ * posts that were already pinned — which is what pinning is for. Within the rest it is
+ * `createdAt`, not `updatedAt`, so fixing a typo in an old post does not drag it back to the top.
+ *
+ * Sorted on the server rather than in the page, so the API, the browser and anything else reading
+ * this endpoint cannot disagree about what "first" means.
+ */
+export const sortPosts = (posts: DbRecord[]): DbRecord[] =>
+  [...posts].sort((a, b) => {
+    const pa = at(a.pinnedAt);
+    const pb = at(b.pinnedAt);
+    if (pa !== pb) return pb - pa;          // pinned above unpinned, newest pin first
+    return at(b.createdAt) - at(a.createdAt); // then newest first
+  });
+
 // Posts CRUD
 postsRouter.get('/posts', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -18,7 +42,7 @@ postsRouter.get('/posts', async (req: Request, res: Response): Promise<void> => 
     // Vote counts travel with the listing. Fetching them per post would be one request per card,
     // and the blog page would flash a column of zeroes while they arrived.
     const tallies = await tallyAll(req, dbData);
-    const data = dbData.posts.map((post) => ({
+    const data = sortPosts(dbData.posts).map((post) => ({
       ...post,
       reactions: typeof post.id === 'number' ? tallies[post.id] : { up: 0, down: 0, mine: null },
     }));

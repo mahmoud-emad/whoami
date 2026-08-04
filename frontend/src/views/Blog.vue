@@ -30,10 +30,18 @@
         <!-- Pinned to the card corner; the title gets extra right padding (only in the editable
              variant) so a long headline never runs under the buttons. -->
         <div v-if="isAdmin" class="post-card__actions">
-          <InlineActions label="post" @edit="openEdit(post)" @remove="removePost(post)" />
+          <InlineActions label="post" pinnable :pinned="Boolean(post.pinnedAt)" @edit="openEdit(post)"
+            @remove="removePost(post)" @toggle-pinned="askPin(post)" />
         </div>
         <v-card-title>
-          <p class="article-link">{{ post.title }}</p>
+          <p class="article-link">
+            <!-- Shown to everyone, not just the owner: a post sitting above newer ones needs to
+                 say why it is there. -->
+            <span v-if="post.pinnedAt" class="post-pin" title="Pinned to the top">
+              <v-icon size="14">mdi-pin</v-icon>Pinned
+            </span>
+            {{ post.title }}
+          </p>
           <small class="published-date">Published on: {{ formatPostDate(post.createdAt || '') }}</small>
         </v-card-title>
         <!--
@@ -59,6 +67,33 @@
         </v-card-text>
       </v-card>
     </div>
+
+    <!--
+      Pinning is confirmed in a dialog rather than armed in place like delete. Delete's two-step is
+      about preventing loss; this is about a change every reader sees, so the prompt spells out what
+      will happen before it happens.
+    -->
+    <v-dialog v-if="isAdmin" v-model="pinDialog" max-width="440">
+      <v-card class="pin-card">
+        <v-card-title class="pin-card__title">{{ pinTarget?.pinnedAt ? 'Unpin this post?' : 'Pin this post?' }}</v-card-title>
+        <v-card-text class="pin-card__body">
+          <p class="mb-2"><strong>{{ pinTarget?.title }}</strong></p>
+          <p v-if="pinTarget?.pinnedAt">
+            It will drop back among the other posts, in date order. Nothing else changes.
+          </p>
+          <p v-else>
+            It will move to the very top of the blog for everyone, above every other post,
+            including any that are already pinned.
+          </p>
+        </v-card-text>
+        <v-card-actions class="pin-card__actions">
+          <v-btn variant="text" class="text-capitalize" :disabled="pinning" @click="pinDialog = false">Cancel</v-btn>
+          <v-btn color="primary" variant="tonal" class="text-capitalize" :loading="pinning" @click="confirmPin">
+            {{ pinTarget?.pinnedAt ? 'Unpin' : 'Pin to top' }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!-- Create/edit shell. Reuses the same markdown editor the dashboard form uses, so posts written
          here and there go through identical tooling. -->
@@ -162,6 +197,43 @@ export default {
       expandedPosts.value[postId] = !expandedPosts.value[postId];
     };
 
+    // Pin confirmation state. `pinTarget` is the post the open dialog is about.
+    const pinDialog = ref(false);
+    const pinTarget = ref<PostType | null>(null);
+    const pinning = ref(false);
+
+    const askPin = (post: PostType) => {
+      clear();
+      pinTarget.value = post;
+      pinDialog.value = true;
+    };
+
+    /**
+     * Write the pin and re-read the list.
+     *
+     * `pinnedAt` is set to now, so pinning something puts it above posts pinned earlier. Unpinning
+     * clears it. Not optimistic: pinning reorders the whole page, and a list that reshuffles and
+     * then reshuffles back on failure is worse than one that waits for the round trip.
+     */
+    const confirmPin = async () => {
+      const post = pinTarget.value;
+      if (!post || post.id === undefined) return;
+      pinning.value = true;
+      const wasPinned = Boolean(post.pinnedAt);
+      try {
+        const body = { ...post, pinnedAt: wasPinned ? null : new Date().toISOString() };
+        delete body.reactions;
+        await apiJson(`/posts/${post.id}`, { method: 'PUT', body: JSON.stringify(body) });
+        pinDialog.value = false;
+        await loadPosts();
+        success(wasPinned ? 'Post unpinned.' : 'Post pinned to the top.');
+      } catch (e: any) {
+        error(e?.message || 'Failed to change that.');
+      } finally {
+        pinning.value = false;
+      }
+    };
+
     /**
      * Long enough to be worth clipping. Measured on the raw markdown rather than the rendered
      * height: the height is not known until after paint, and a threshold that moved as images
@@ -239,6 +311,11 @@ export default {
       formatPostDate,
       toggleContent,
       isLong,
+      pinDialog,
+      pinTarget,
+      pinning,
+      askPin,
+      confirmPin,
       errorMessage,
       expandedPosts,
       apiLoading,
@@ -265,6 +342,50 @@ export default {
 </script>
 
 <style scoped>
+/* Reads as a status marker on the headline, not as part of the title. */
+.post-pin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-right: 0.5rem;
+  padding: 2px 7px;
+  border: 1px solid rgb(var(--v-theme-link-hover-color));
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(var(--v-theme-link-hover-color));
+  vertical-align: middle;
+}
+
+.pin-card {
+  background: rgb(var(--v-theme-box-bg-color)) !important;
+  border: 1px solid rgb(var(--v-theme-border-color));
+}
+
+.pin-card__title {
+  font-family: var(--font-display);
+  font-size: 1.05rem !important;
+  font-weight: 700;
+  color: rgb(var(--v-theme-text-color));
+}
+
+.pin-card__body {
+  color: rgb(var(--v-theme-gray-color));
+  line-height: 1.6;
+}
+
+.pin-card__actions {
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 1rem 1rem;
+}
+
+.pin-card__actions .v-btn {
+  min-height: 40px;
+}
+
 .post-card {
   border-radius: 0px !important;
   margin: 0 auto;

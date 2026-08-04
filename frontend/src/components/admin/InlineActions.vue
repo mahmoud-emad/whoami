@@ -10,6 +10,15 @@
     <v-btn v-if="edit && !confirming" class="inline-actions__btn" variant="text" density="comfortable"
       icon="mdi-pencil-outline" :title="editTitle" :aria-label="editTitle" @click.stop="$emit('edit')"></v-btn>
 
+    <!--
+      Pinning asks in a dialog rather than arming in place like delete does: it changes what every
+      reader sees first, so the prompt should say that in words before it happens.
+    -->
+    <v-btn v-if="pinnable && !confirming" class="inline-actions__btn" variant="text" density="comfortable"
+      :class="{ 'inline-actions__btn--on': pinned }" :icon="pinned ? 'mdi-pin' : 'mdi-pin-outline'"
+      :title="pinTitle" :aria-label="pinTitle" :aria-pressed="pinned"
+      @click.stop="$emit('toggle-pinned')"></v-btn>
+
     <!-- Hiding is reversible, so unlike delete it fires on the first click. -->
     <v-btn v-if="hideable && !confirming" class="inline-actions__btn" variant="text" density="comfortable"
       :icon="hidden ? 'mdi-eye-outline' : 'mdi-eye-off-outline'" :title="hideTitle" :aria-label="hideTitle"
@@ -52,6 +61,10 @@ export default defineComponent({
     add: { type: Boolean, default: false },
     edit: { type: Boolean, default: true },
     remove: { type: Boolean, default: true },
+    /** Show the pin toggle. Off by default; only the blog pins things today. */
+    pinnable: { type: Boolean, default: false },
+    /** Current state, so the icon and the tooltip can offer the opposite action. */
+    pinned: { type: Boolean, default: false },
     /** Show the hide/unhide toggle. Off by default; only collections with a `show` field use it. */
     hideable: { type: Boolean, default: false },
     /** Current state, so the button can offer the opposite action. */
@@ -59,7 +72,7 @@ export default defineComponent({
     /** Noun used in the tooltips, e.g. 'project' -> "Edit project". */
     label: { type: String, default: '' },
   },
-  emits: ['edit', 'remove', 'add', 'toggle-hidden'],
+  emits: ['edit', 'remove', 'add', 'toggle-hidden', 'toggle-pinned'],
   setup(props, { emit }) {
     const { isAdmin } = useAdmin();
     const confirming = ref(false);
@@ -69,6 +82,9 @@ export default defineComponent({
     const addTitle = computed(() => `New${noun.value || ' item'}`);
     const editTitle = computed(() => `Edit${noun.value}`);
     const removeTitle = computed(() => `Delete${noun.value}`);
+    const pinTitle = computed(() =>
+      props.pinned ? `Unpin${noun.value}` : `Pin${noun.value} to the top`);
+
     // Says what the click will do, not what the current state is.
     const hideTitle = computed(() =>
       props.hidden ? `Show${noun.value} on the site` : `Hide${noun.value} from the site`);
@@ -106,6 +122,7 @@ export default defineComponent({
       editTitle,
       removeTitle,
       hideTitle,
+      pinTitle,
       confirmTitle,
       requestRemove,
       confirmRemove,
@@ -116,6 +133,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* A pinned post's button stays lit, so the state is visible without hovering for the tooltip. */
+.inline-actions__btn--on {
+  color: rgb(var(--v-theme-link-hover-color)) !important;
+}
+
 .inline-actions {
   display: inline-flex;
   align-items: center;

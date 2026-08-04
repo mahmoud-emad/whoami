@@ -271,6 +271,11 @@ export type PostType = {
   title: string,
   content: string,
   createdAt?: string,
+  /**
+   * When the post was pinned, or absent when it is not. A timestamp rather than a boolean so the
+   * most recently pinned post sorts above ones pinned earlier, which is what pinning is for.
+   */
+  pinnedAt?: string | null,
   /** Served with the listing so the counts do not need one request per card. Never sent back. */
   reactions?: PostReactions,
 }
