@@ -13,19 +13,19 @@
 
       <!-- Owner-only strip, below the intro, so a signed-out page emits exactly the markup it did
            before in-place editing existed. -->
-      <div v-if="isAdmin" class="owner-bar">
+      <OwnerBar >
         <InlineActions label="page copy" :remove="false" @edit="openPageCopy" />
-        <FeedbackNote v-if="!anyEditorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
-      </div>
+        <FeedbackNote v-if="!anyEditorOpen && responseMessage" :message="responseMessage" :type="responseType" />
+      </OwnerBar>
     </section>
 
     <template v-if="cards.length || isAdmin">
       <div class="long-line opacity-80 mt-2 mb-2"></div>
       <section class="section hidden-pages">
-        <div v-if="isAdmin" class="owner-bar">
+        <OwnerBar >
           <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Add a card"
             class="text-capitalize" :disabled="busy" @click="openCardCreate">Add card</v-btn>
-        </div>
+        </OwnerBar>
         <p v-if="isAdmin && !cards.length" class="owner-hint">No cards yet — add the first one above.</p>
 
         <v-row>
@@ -33,7 +33,7 @@
             <div v-if="isAdmin" class="entry-tools">
               <!-- The owner is looking at an entry nobody else can see; say so rather than let it
                    read as a rendering bug. -->
-              <span v-if="card.show === false" class="entry-tools__flag">HIDDEN</span>
+              <StatusBadge v-if="card.show === false" label="Hidden" title="Hidden from the public site" />
               <InlineActions label="card" @edit="openCardEdit(card)" @remove="removeCard(card)" />
             </div>
             <ContactInfo :class="{ 'entry--parked': isAdmin && card.show === false }" :title="card.title"
@@ -50,18 +50,18 @@
         <h1>📦 Shoebox</h1>
         <p v-if="shoeboxIntro" class="mb-3">{{ shoeboxIntro }}</p>
 
-        <div v-if="isAdmin" class="owner-bar">
+        <OwnerBar >
           <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Add a shoebox link"
             class="text-capitalize" :disabled="busy" @click="openItemCreate">Add shoebox link</v-btn>
           <InlineActions label="shoebox intro" :remove="false" @edit="openShoeboxCopy" />
-        </div>
+        </OwnerBar>
         <p v-if="isAdmin && !shoebox.length" class="owner-hint">No links yet — add the first one above.</p>
 
         <v-row>
           <v-col class="pt-0 pb-0" v-for="item in shoebox" :key="`shoe-${item.index}`" cols="12" md="4" sm="12"
             xl="4">
             <div v-if="isAdmin" class="entry-tools">
-              <span v-if="item.show === false" class="entry-tools__flag">HIDDEN</span>
+              <StatusBadge v-if="item.show === false" label="Hidden" title="Hidden from the public site" />
               <InlineActions label="link" @edit="openItemEdit(item)" @remove="removeItem(item)" />
             </div>
             <ContactInfo :class="{ 'entry--parked': isAdmin && item.show === false }" :link="item.link"
@@ -151,6 +151,8 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref } from "vue";
+import OwnerBar from '../components/admin/OwnerBar.vue';
+import StatusBadge from '../components/admin/StatusBadge.vue';
 import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import { useDisplay } from "vuetify";
 import ContactInfo from "../components/ContactInfo.vue";
@@ -181,7 +183,7 @@ const normaliseItem = (item?: Partial<MoreShoeboxItem> | null): MoreShoeboxItem 
 
 export default defineComponent({
   name: "MoreView",
-  components: { FeedbackNote,
+  components: { OwnerBar, StatusBadge, FeedbackNote,
     ContactInfo,
     EditorDialog,
     InlineActions,
@@ -509,19 +511,7 @@ export default defineComponent({
   animation: fadeIn 0.5s ease-in-out;
 }
 
-/* Owner-only rows. They wrap so a button never pushes the page sideways at 390px. */
-.owner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
 
-.owner-bar__alert {
-  flex: 1 1 220px;
-  min-width: 0;
-}
 
 .owner-hint {
   color: rgb(var(--v-theme-gray-color));
@@ -540,15 +530,6 @@ export default defineComponent({
   margin-bottom: 0.25rem;
 }
 
-.entry-tools__flag {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  padding: 1px 6px;
-  border-radius: 3px;
-  border: 1px dashed rgb(var(--v-theme-border-color));
-  color: rgb(var(--v-theme-gray-color));
-}
 
 /* Owner-only: a parked entry is dimmed so it reads as "not on the live page" at a glance. */
 .entry--parked {

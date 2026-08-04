@@ -4,11 +4,11 @@
       <h1 class="page-title">{{ pageTitle }}</h1>
       <p v-if="pageIntro" class="page-intro">{{ pageIntro }}</p>
 
-      <div v-if="isAdmin" class="owner-bar">
+      <OwnerBar >
         <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Add a book"
           class="text-capitalize" :disabled="busy" @click="openCreate">Add book</v-btn>
-        <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
-      </div>
+        <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" />
+      </OwnerBar>
     </header>
 
     <LoadingComponent v-if="apiLoading.isLoading()" type="article" :content-length="5" content-name="Books" />
@@ -95,6 +95,7 @@
  * have a picture and half do not looks broken, and the link is the useful part anyway.
  */
 import { computed, defineComponent, onMounted, ref } from 'vue';
+import OwnerBar from '../components/admin/OwnerBar.vue';
 import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import { apiFetch, apiJson } from '../utils/api';
 import { useAPILoading, useSettingsStore } from '../store';
@@ -118,7 +119,7 @@ const emptyBook = (): BookType => ({
 
 export default defineComponent({
   name: 'Books',
-  components: { FeedbackNote, LoadingComponent, InlineActions, EditorDialog },
+  components: { OwnerBar, FeedbackNote, LoadingComponent, InlineActions, EditorDialog },
   setup() {
     const apiLoading = useAPILoading();
     const settingsStore = useSettingsStore();
@@ -301,18 +302,7 @@ export default defineComponent({
   align-items: center;
 }
 
-.owner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 1rem;
-}
 
-.owner-bar__alert {
-  flex: 1 1 220px;
-  min-width: 0;
-}
 
 /* On a phone the address is noise next to a wrapping title, so it steps out of the way. */
 @media (max-width: 600px) {

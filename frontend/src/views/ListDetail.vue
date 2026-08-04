@@ -15,18 +15,15 @@
         <p v-if="doc.intro" class="page-intro">{{ doc.intro }}</p>
 
         <!-- The whole-list progress. A plan in public is only interesting because of this number. -->
-        <div class="lp__progress">
-          <span class="lp__progress-count">{{ totals.done }} / {{ totals.total }}</span>
-          <span class="lp__progress-bar"><span class="lp__progress-fill" :style="{ width: totals.percent + '%' }"></span></span>
-          <span class="lp__progress-pct">{{ totals.percent }}%</span>
-        </div>
+        <ProgressBar :done="totals.done" :total="totals.total" show-percent
+          :label="`${doc.title} progress`" class="lp__progress" />
 
-        <div v-if="isAdmin" class="owner-bar">
+        <OwnerBar >
           <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Add a mission"
             class="text-capitalize" :disabled="busy" @click="openMission(null)">Add mission</v-btn>
           <InlineActions label="list details" :remove="false" @edit="openDetails" />
-          <FeedbackNote v-if="!anyDialogOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
-        </div>
+          <FeedbackNote v-if="!anyDialogOpen && responseMessage" :message="responseMessage" :type="responseType" />
+        </OwnerBar>
       </header>
 
       <!-- The north star, if there is one: what every mission below is in service of. -->
@@ -43,16 +40,15 @@
           <span class="lp__mission-count">{{ missionDone(mission) }}/{{ missionTotal(mission) }}</span>
 
           <div v-if="isAdmin" class="lp__tools">
-            <v-btn class="lp__tool" variant="text" density="comfortable" icon="mdi-arrow-up" :disabled="busy || mIndex === 0"
-              title="Move this mission up" aria-label="Move this mission up" @click="moveMission(mIndex, -1)"></v-btn>
-            <v-btn class="lp__tool" variant="text" density="comfortable" icon="mdi-arrow-down"
-              :disabled="busy || mIndex === doc.missions.length - 1" title="Move this mission down"
-              aria-label="Move this mission down" @click="moveMission(mIndex, 1)"></v-btn>
+            <ReorderControls noun="mission" :disabled="busy" :can-up="mIndex > 0"
+              :can-down="mIndex < doc.missions.length - 1" @up="moveMission(mIndex, -1)"
+              @down="moveMission(mIndex, 1)" />
             <InlineActions label="mission" @edit="openMission(mIndex)" @remove="removeMission(mIndex)" />
           </div>
         </div>
 
-        <div class="lp__mission-bar"><span class="lp__mission-fill" :style="{ width: missionPercent(mission) + '%' }"></span></div>
+        <ProgressBar :done="missionDone(mission)" :total="missionTotal(mission)" slim :show-count="false"
+          :label="`${mission.title} progress`" class="lp__mission-progress" />
 
         <div v-for="(group, gIndex) in mission.groups" :key="`g-${mIndex}-${gIndex}`" class="lp__group">
           <div class="lp__group-head">
@@ -195,6 +191,9 @@
  * disagree about shape. A list is a few kilobytes; the round trip is not the bottleneck.
  */
 import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import ProgressBar from '../components/admin/ProgressBar.vue';
+import ReorderControls from '../components/admin/ReorderControls.vue';
+import OwnerBar from '../components/admin/OwnerBar.vue';
 import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { apiFetch, apiJson } from '../utils/api';
@@ -223,7 +222,7 @@ const emptyMission = (): ListMission => ({ title: '', emoji: '', status: 'not-st
 
 export default defineComponent({
   name: 'ListDetail',
-  components: { FeedbackNote, RouterLink, LoadingComponent, InlineActions, EditorDialog },
+  components: { ProgressBar, ReorderControls, OwnerBar, FeedbackNote, RouterLink, LoadingComponent, InlineActions, EditorDialog },
   setup() {
     const route = useRoute();
     const apiLoading = useAPILoading();
@@ -523,6 +522,14 @@ export default defineComponent({
 
 /* Whole-list progress, directly under the heading: the one number the page exists to show. */
 .lp__progress {
+  margin-top: 1rem;
+}
+
+.lp__mission-progress {
+  margin: 0.7rem 0 1.1rem;
+}
+
+.lp__progress-legacy {
   display: flex;
   align-items: center;
   gap: 0.7rem;
@@ -532,31 +539,9 @@ export default defineComponent({
   color: rgb(var(--v-theme-gray-color));
 }
 
-.lp__progress-count {
-  font-weight: 600;
-  color: rgb(var(--v-theme-text-color));
-  font-variant-numeric: tabular-nums;
-}
 
-.lp__progress-bar {
-  flex: 1 1 auto;
-  min-width: 60px;
-  height: 6px;
-  border-radius: 999px;
-  background: rgb(var(--v-theme-form));
-  overflow: hidden;
-}
 
-.lp__progress-fill {
-  display: block;
-  height: 100%;
-  background: rgb(var(--v-theme-link-hover-color));
-  transition: width .3s ease;
-}
 
-.lp__progress-pct {
-  font-variant-numeric: tabular-nums;
-}
 
 /* The north star reads as a statement, not as a paragraph of the intro. */
 .lp__north {
@@ -623,20 +608,7 @@ export default defineComponent({
   font-variant-numeric: tabular-nums;
 }
 
-.lp__mission-bar {
-  height: 3px;
-  margin: 0.7rem 0 1.1rem;
-  border-radius: 999px;
-  background: rgb(var(--v-theme-form));
-  overflow: hidden;
-}
 
-.lp__mission-fill {
-  display: block;
-  height: 100%;
-  background: rgb(var(--v-theme-link-hover-color));
-  transition: width .3s ease;
-}
 
 .lp__group {
   margin-bottom: 1.25rem;
@@ -748,18 +720,7 @@ export default defineComponent({
   margin-top: 0.25rem;
 }
 
-.owner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 1rem;
-}
 
-.owner-bar__alert {
-  flex: 1 1 220px;
-  min-width: 0;
-}
 
 .owner-hint {
   color: rgb(var(--v-theme-gray-color));

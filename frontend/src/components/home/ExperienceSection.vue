@@ -11,11 +11,11 @@
     <p v-if="intro" class="section-intro">{{ intro }}</p>
 
     <!-- Sits after the heading rather than wrapping it, so the signed-out layout is untouched. -->
-    <div v-if="isAdmin" class="owner-bar">
+    <OwnerBar >
       <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Add a new role"
         class="text-capitalize" :disabled="busy" @click="openCreate">Add role</v-btn>
-      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
-    </div>
+      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" />
+    </OwnerBar>
 
     <p v-if="isAdmin && !roles.length" class="owner-hint">No roles yet — add the first one above.</p>
 
@@ -33,18 +33,14 @@
           <span class="role__state">{{ role.active ? 'RUNNING' : 'STOPPED' }}</span>
           <!-- Owner-only badge: a parked role is invisible to visitors, so without this the owner
                would be looking at a role that is not actually on their site. -->
-          <span v-if="isAdmin && role.show === false" class="role__parked">HIDDEN</span>
+          <StatusBadge v-if="isAdmin && role.show === false" label="Hidden" title="Hidden from the public site" />
           <span class="role__period">{{ role.period }}</span>
 
           <!-- The whole strip is behind `isAdmin`, so a signed-out page emits exactly the markup it
                did before in-place editing existed. -->
           <div v-if="isAdmin" class="role__tools">
-            <v-btn class="role__tool" variant="text" density="comfortable" icon="mdi-arrow-up"
-              :disabled="busy || index === 0" title="Move this role up" aria-label="Move this role up"
-              @click="moveRole(index, -1)"></v-btn>
-            <v-btn class="role__tool" variant="text" density="comfortable" icon="mdi-arrow-down"
-              :disabled="busy || index === roles.length - 1" title="Move this role down"
-              aria-label="Move this role down" @click="moveRole(index, 1)"></v-btn>
+            <ReorderControls noun="role" :disabled="busy" :can-up="index > 0"
+              :can-down="index < roles.length - 1" @up="moveRole(index, -1)" @down="moveRole(index, 1)" />
             <InlineActions label="role" @edit="openEdit(index)" @remove="removeRole(index)" />
           </div>
         </div>
@@ -128,6 +124,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
+import ReorderControls from '../admin/ReorderControls.vue';
+import OwnerBar from '../../components/admin/OwnerBar.vue';
+import StatusBadge from '../../components/admin/StatusBadge.vue';
 import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { useSettingsStore } from '../../store';
 import type { ExperienceRole } from '../../types';
@@ -160,7 +159,7 @@ const normalise = (role?: Partial<ExperienceRole> | null): ExperienceRole => {
 
 export default defineComponent({
   name: 'ExperienceSection',
-  components: { FeedbackNote, InlineActions, EditorDialog },
+  components: { ReorderControls, OwnerBar, StatusBadge, FeedbackNote, InlineActions, EditorDialog },
   setup() {
     const settingsStore = useSettingsStore();
     const { isAdmin } = useAdmin();
@@ -325,19 +324,7 @@ export default defineComponent({
   min-width: 0;
 }
 
-/* Owner-only row under the heading. Wraps so the button never pushes the page sideways. */
-.owner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
 
-.owner-bar__alert {
-  flex: 1 1 220px;
-  min-width: 0;
-}
 
 .owner-hint {
   color: rgb(var(--v-theme-gray-color));
@@ -430,15 +417,6 @@ export default defineComponent({
   border-color: rgba(var(--v-theme-link-hover-color), 0.45);
 }
 
-.role__parked {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  padding: 1px 6px;
-  border-radius: 3px;
-  border: 1px dashed rgb(var(--v-theme-border-color));
-  color: rgb(var(--v-theme-gray-color));
-}
 
 .role__period {
   font-family: var(--font-mono);

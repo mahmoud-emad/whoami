@@ -7,10 +7,10 @@
       </v-alert>
 
       <!-- Owner-only: create a project from the page it appears on, instead of the dashboard. -->
-      <div v-if="isAdmin" class="owner-bar">
+      <OwnerBar >
         <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Create a new project"
           class="text-capitalize" @click="openCreate">New project</v-btn>
-      </div>
+      </OwnerBar>
       <!-- List-level feedback (deletes, failed saves). While the dialog is open it shows in there. -->
       <FeedbackNote v-if="isAdmin && !editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="mt-3" />
     </div>
@@ -78,6 +78,7 @@
 
 <script lang="ts">
 import ProjectCard from '../components/ProjectCard.vue';
+import OwnerBar from '../components/admin/OwnerBar.vue';
 import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import { apiFetch, apiJson } from '../utils/api';
 import { computed, onMounted, Ref, ref, watch } from 'vue';
@@ -104,7 +105,7 @@ const emptyProject = (): ProjectType => ({
 
 export default {
   name: 'Projects',
-  components: { FeedbackNote, ProjectCard, LoadingComponent, EditorDialog },
+  components: { OwnerBar, FeedbackNote, ProjectCard, LoadingComponent, EditorDialog },
   setup() {
     const projects: Ref<ProjectType[]> = ref([]);
 
@@ -311,13 +312,6 @@ export default {
   margin-bottom: 24px;
 }
 
-/* Owner-only row under the page intro. Wraps so the button never pushes the page sideways. */
-.owner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
 
 .text-info {
   font-weight: bold;

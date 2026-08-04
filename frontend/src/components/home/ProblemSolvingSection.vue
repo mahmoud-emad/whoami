@@ -22,13 +22,13 @@
     </p>
 
     <!-- Owner-only strip, appended after the copy so the signed-out layout is untouched. -->
-    <div v-if="isAdmin" class="owner-bar">
+    <OwnerBar >
       <InlineActions label="problem solving" :remove="false" @edit="openEditor" />
       <!-- The owner is looking at a block nobody else can see; say so rather than let it read as a
            rendering bug. -->
       <span v-if="!publiclyVisible" class="owner-bar__note">Hidden from visitors</span>
-      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
-    </div>
+      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" />
+    </OwnerBar>
 
     <!-- Mounted only for the owner, so a visitor never loads the form at all. -->
     <EditorDialog v-if="isAdmin" v-model="editorOpen" title="Edit problem solving">
@@ -91,6 +91,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
+import OwnerBar from '../../components/admin/OwnerBar.vue';
 import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { useSettingsStore } from '../../store';
 import EditorDialog from '../admin/EditorDialog.vue';
@@ -119,7 +120,7 @@ const emptyDraft = (): ProblemSolvingDraft => ({
 
 export default defineComponent({
   name: 'ProblemSolvingSection',
-  components: { FeedbackNote, EditorDialog, InlineActions },
+  components: { OwnerBar, FeedbackNote, EditorDialog, InlineActions },
   setup() {
     const settingsStore = useSettingsStore();
     const { isAdmin } = useAdmin();
@@ -249,15 +250,6 @@ export default defineComponent({
   margin-top: 1rem !important;
 }
 
-/* Owner chrome. Wraps so the alert drops onto its own line on a phone instead of squeezing the
-   pencil off the row. */
-.owner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 0.75rem;
-}
 
 .owner-bar__note {
   font-family: var(--font-mono);
@@ -266,10 +258,6 @@ export default defineComponent({
   color: rgb(var(--v-theme-gray-color));
 }
 
-.owner-bar__alert {
-  flex: 1 1 220px;
-  min-width: 0;
-}
 
 .editor-group {
   font-size: 0.95rem;

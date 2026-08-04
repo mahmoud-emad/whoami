@@ -6,11 +6,11 @@
     <p v-if="intro" class="text-light-gray pa-2">{{ intro }}</p>
 
     <!-- Sits after the heading rather than wrapping it, so the signed-out layout is untouched. -->
-    <div v-if="isAdmin" class="owner-bar pa-2">
+    <OwnerBar class="pa-2">
       <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Add a new article"
         class="text-capitalize" @click="openCreate">New article</v-btn>
-      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
-    </div>
+      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" />
+    </OwnerBar>
 
     <LoadingComponent type="article" :content-length="2" :content-name="sectionTitle || 'Articles'"
       v-if="apiLoadingStore.isLoading()" />
@@ -69,21 +69,12 @@
 </template>
 
 <style scoped>
-.owner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
 
-.owner-bar__alert {
-  flex: 1 1 220px;
-  min-width: 0;
-}
 </style>
 
 <script lang="ts">
 import { computed, onMounted, Ref, ref } from 'vue';
+import OwnerBar from '../../components/admin/OwnerBar.vue';
 import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { apiFetch, apiJson } from '../../utils/api';
 import { ArticleType } from '../../types';
@@ -100,7 +91,7 @@ const emptyArticle = (): ArticleType => ({ title: '', link: '', description: '' 
 
 export default {
   name: 'ArticlesSection',
-  components: { FeedbackNote, LoadingComponent, InlineActions, EditorDialog },
+  components: { OwnerBar, FeedbackNote, LoadingComponent, InlineActions, EditorDialog },
 
   setup() {
     // Vuetify display utility

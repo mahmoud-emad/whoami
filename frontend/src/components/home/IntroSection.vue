@@ -22,13 +22,13 @@
     </div>
 
     <!-- Owner-only strip, below the calls to action so the visitor layout above it is untouched. -->
-    <div v-if="isAdmin" class="owner-bar">
+    <OwnerBar >
       <InlineActions label="intro" :remove="false" @edit="openEditor" />
       <!-- The owner is looking at a block nobody else can see; say so rather than let it read as a
            rendering bug. -->
       <span v-if="!show" class="owner-bar__note">Hidden from visitors</span>
-      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
-    </div>
+      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" />
+    </OwnerBar>
 
     <!-- Mounted only for the owner, so a visitor never loads the form at all. -->
     <EditorDialog v-if="isAdmin" v-model="editorOpen" title="Edit intro">
@@ -120,6 +120,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
+import OwnerBar from '../../components/admin/OwnerBar.vue';
 import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { useSettingsStore } from '../../store';
 import EditorDialog from '../admin/EditorDialog.vue';
@@ -156,7 +157,7 @@ const RESUME_TYPES = ['application/pdf'];
 
 export default defineComponent({
   name: 'IntroSection',
-  components: { FeedbackNote, EditorDialog, InlineActions },
+  components: { OwnerBar, FeedbackNote, EditorDialog, InlineActions },
   setup() {
     const settingsStore = useSettingsStore();
     const { isAdmin } = useAdmin();
@@ -434,15 +435,6 @@ export default defineComponent({
   outline-offset: 2px;
 }
 
-/* Owner chrome. Wraps so the alert drops onto its own line on a phone instead of squeezing the
-   pencil off the row. */
-.owner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 0.9rem;
-}
 
 .owner-bar__note {
   font-family: var(--font-mono);
@@ -451,10 +443,6 @@ export default defineComponent({
   color: rgb(var(--v-theme-gray-color));
 }
 
-.owner-bar__alert {
-  flex: 1 1 220px;
-  min-width: 0;
-}
 
 .editor-group {
   font-size: 0.95rem;

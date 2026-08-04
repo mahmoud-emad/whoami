@@ -25,7 +25,7 @@
     <div v-if="editable" class="project-card__actions">
       <!-- The owner is looking at a card nobody else can see; say so rather than let the dimming
            read as a rendering fault. -->
-      <span v-if="project.show === false" class="project-card__flag">HIDDEN</span>
+      <StatusBadge v-if="project.show === false" label="Hidden" title="Hidden from the public site" />
       <InlineActions label="project" hideable :hidden="project.show === false" @edit="$emit('edit', project)"
         @remove="$emit('remove', project)" @toggle-hidden="$emit('toggle-hidden', project)" />
     </div>
@@ -34,13 +34,14 @@
 
 <script lang="ts">
 import { ProjectType } from '../types';
+import StatusBadge from '../components/admin/StatusBadge.vue';
 import { type PropType } from 'vue';
 import InlineActions from './admin/InlineActions.vue';
 
 
 export default {
   name: 'Card',
-  components: { InlineActions },
+  components: { StatusBadge, InlineActions },
   props: {
     project: {
       type: Object as PropType<ProjectType>,
@@ -143,16 +144,6 @@ export default {
   opacity: 0.55;
 }
 
-.project-card__flag {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  padding: 2px 6px;
-  border: 1px dashed rgb(var(--v-theme-border-color));
-  border-radius: 4px;
-  color: rgb(var(--v-theme-gray-color));
-  align-self: center;
-}
 
 .project-card__actions {
   display: flex;

@@ -4,11 +4,11 @@
       <h1 class="page-title">{{ pageTitle }}</h1>
       <p v-if="pageIntro" class="page-intro">{{ pageIntro }}</p>
 
-      <div v-if="isAdmin" class="owner-bar">
+      <OwnerBar >
         <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Start a new list"
           class="text-capitalize" :disabled="busy" @click="openCreate">New list</v-btn>
-        <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
-      </div>
+        <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" />
+      </OwnerBar>
     </header>
 
     <LoadingComponent v-if="apiLoading.isLoading()" type="article" :content-length="3" content-name="Lists" />
@@ -24,16 +24,14 @@
           <span class="list-card__head">
             <span v-if="list.emoji" class="list-card__emoji" aria-hidden="true">{{ list.emoji }}</span>
             <span class="list-card__title">{{ list.title }}</span>
-            <span v-if="isAdmin && list.show === false" class="list-card__flag">HIDDEN</span>
+            <StatusBadge v-if="isAdmin && list.show === false" label="Hidden" title="Hidden from the public site" />
           </span>
           <span v-if="list.intro" class="list-card__intro">{{ list.intro }}</span>
 
           <!-- The number is the point of a checklist, so it is the thing the card leads with. -->
           <span class="list-card__meta">
-            <span class="list-card__count">{{ list.done }} / {{ list.total }}</span>
-            <span class="list-card__bar" role="presentation">
-              <span class="list-card__fill" :style="{ width: percent(list) + '%' }"></span>
-            </span>
+            <ProgressBar :done="list.done" :total="list.total" slim
+              :label="`${list.title} progress`" class="list-card__progress" />
             <span class="list-card__missions">{{ list.missionCount }} {{ list.missionCount === 1 ? 'mission' :
               'missions' }}</span>
           </span>
@@ -73,6 +71,9 @@
  * in public at all. Following a card opens the list itself, where the boxes live.
  */
 import { computed, defineComponent, onMounted, ref } from 'vue';
+import ProgressBar from '../components/admin/ProgressBar.vue';
+import OwnerBar from '../components/admin/OwnerBar.vue';
+import StatusBadge from '../components/admin/StatusBadge.vue';
 import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import { RouterLink } from 'vue-router';
 import { apiFetch, apiJson } from '../utils/api';
@@ -87,7 +88,7 @@ import { emojiRules, longTextRules } from '../utils';
 
 export default defineComponent({
   name: 'Lists',
-  components: { FeedbackNote, RouterLink, LoadingComponent, InlineActions, EditorDialog },
+  components: { ProgressBar, OwnerBar, StatusBadge, FeedbackNote, RouterLink, LoadingComponent, InlineActions, EditorDialog },
   setup() {
     const apiLoading = useAPILoading();
     const settingsStore = useSettingsStore();
@@ -233,21 +234,17 @@ export default defineComponent({
   color: rgb(var(--v-theme-text-color));
 }
 
-.list-card__flag {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.08em;
-  padding: 2px 6px;
-  border: 1px solid rgb(var(--v-theme-border-color));
-  border-radius: 4px;
-  color: rgb(var(--v-theme-gray-color));
-}
 
 .list-card__intro {
   display: block;
   margin-top: 0.35rem;
   color: rgb(var(--v-theme-gray-color));
   line-height: 1.6;
+}
+
+.list-card__progress {
+  flex: 1 1 140px;
+  min-width: 120px;
 }
 
 .list-card__meta {
@@ -261,27 +258,8 @@ export default defineComponent({
   color: rgb(var(--v-theme-gray-color));
 }
 
-.list-card__count {
-  font-weight: 600;
-  color: rgb(var(--v-theme-text-color));
-  font-variant-numeric: tabular-nums;
-}
 
-.list-card__bar {
-  flex: 1 1 100px;
-  min-width: 80px;
-  height: 4px;
-  border-radius: 999px;
-  background: rgb(var(--v-theme-form));
-  overflow: hidden;
-}
 
-.list-card__fill {
-  display: block;
-  height: 100%;
-  background: rgb(var(--v-theme-link-hover-color));
-  transition: width .3s ease;
-}
 
 /* Owner controls sit over the corner rather than inside the link, which would nest a button in
    an anchor and make the whole card un-clickable in the middle. */
@@ -291,16 +269,5 @@ export default defineComponent({
   right: 8px;
 }
 
-.owner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 1rem;
-}
 
-.owner-bar__alert {
-  flex: 1 1 220px;
-  min-width: 0;
-}
 </style>

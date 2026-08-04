@@ -12,11 +12,11 @@
     </div>
 
     <!-- Sits after the heading rather than wrapping it, so the signed-out layout is untouched. -->
-    <div v-if="isAdmin" class="owner-bar pa-2">
+    <OwnerBar class="pa-2">
       <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" :title="createTitle"
         class="text-capitalize" @click="openCreate">{{ createLabel }}</v-btn>
-      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
-    </div>
+      <FeedbackNote v-if="!editorOpen && responseMessage" :message="responseMessage" :type="responseType" />
+    </OwnerBar>
 
     <div class="projects pa-2">
       <LoadingComponent :type="'card'" :content-length="2" :content-name="sectionTitle || 'Projects'"
@@ -76,22 +76,12 @@
 </template>
 
 <style scoped>
-.owner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
 
-.owner-bar__alert {
-  /* Grows into the free space on a wide row, drops to its own line on a phone. */
-  flex: 1 1 220px;
-  min-width: 0;
-}
 </style>
 
 <script lang="ts">
 import ProjectCard from '../ProjectCard.vue';
+import OwnerBar from '../../components/admin/OwnerBar.vue';
 import FeedbackNote from '../../components/admin/FeedbackNote.vue';
 import { apiFetch, apiJson } from '../../utils/api';
 import { computed, defineComponent, onMounted, Ref, ref, watch } from 'vue';
@@ -158,7 +148,7 @@ const loadAllProjects = (): Promise<ProjectType[]> => {
 
 export default defineComponent({
   name: 'ProjectsSection',
-  components: { FeedbackNote, ProjectCard, LoadingComponent, EditorDialog },
+  components: { OwnerBar, FeedbackNote, ProjectCard, LoadingComponent, EditorDialog },
   props: {
     section: {
       type: String as () => 'projects' | 'openSource',

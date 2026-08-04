@@ -6,12 +6,12 @@
 
       <!-- Owner-only strip, below the heading rather than wrapping it, so a signed-out page emits
            exactly the markup it did before in-place editing existed. -->
-      <div v-if="isAdmin" class="owner-bar">
+      <OwnerBar >
         <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Add a contact channel"
           class="text-capitalize" :disabled="busy" @click="openCreate">Add channel</v-btn>
         <InlineActions label="page copy" :remove="false" @edit="openPageEditor" />
-        <FeedbackNote v-if="!editorOpen && !pageEditorOpen && responseMessage" :message="responseMessage" :type="responseType" class="owner-bar__alert" />
-      </div>
+        <FeedbackNote v-if="!editorOpen && !pageEditorOpen && responseMessage" :message="responseMessage" :type="responseType" />
+      </OwnerBar>
 
       <p v-if="isAdmin && !channels.length" class="owner-hint">
         No channels yet — add the first one above.
@@ -27,13 +27,9 @@
       <div v-if="isAdmin" class="channel-tools">
         <!-- The owner is looking at a channel nobody else can see; say so rather than let it read
              as a rendering bug. -->
-        <span v-if="channel.show === false" class="channel-tools__flag">HIDDEN</span>
-        <v-btn class="channel-tools__btn" variant="text" density="comfortable" icon="mdi-arrow-up"
-          :disabled="busy || !canMove(channel, -1)" title="Move this channel up" aria-label="Move this channel up"
-          @click="moveChannel(channel, -1)"></v-btn>
-        <v-btn class="channel-tools__btn" variant="text" density="comfortable" icon="mdi-arrow-down"
-          :disabled="busy || !canMove(channel, 1)" title="Move this channel down" aria-label="Move this channel down"
-          @click="moveChannel(channel, 1)"></v-btn>
+        <StatusBadge v-if="channel.show === false" label="Hidden" title="Hidden from the public site" />
+        <ReorderControls noun="channel" :disabled="busy" :can-up="canMove(channel, -1)"
+          :can-down="canMove(channel, 1)" @up="moveChannel(channel, -1)" @down="moveChannel(channel, 1)" />
         <InlineActions label="channel" @edit="openEdit(channel)" @remove="removeChannel(channel)" />
       </div>
 
@@ -76,13 +72,9 @@
           </a>
 
           <div v-if="isAdmin" class="channel-tools channel-tools--row">
-            <span v-if="channel.show === false" class="channel-tools__flag">HIDDEN</span>
-            <v-btn class="channel-tools__btn" variant="text" density="comfortable" icon="mdi-arrow-up"
-              :disabled="busy || !canMove(channel, -1)" title="Move this channel up" aria-label="Move this channel up"
-              @click="moveChannel(channel, -1)"></v-btn>
-            <v-btn class="channel-tools__btn" variant="text" density="comfortable" icon="mdi-arrow-down"
-              :disabled="busy || !canMove(channel, 1)" title="Move this channel down"
-              aria-label="Move this channel down" @click="moveChannel(channel, 1)"></v-btn>
+            <StatusBadge v-if="channel.show === false" label="Hidden" title="Hidden from the public site" />
+            <ReorderControls noun="channel" :disabled="busy" :can-up="canMove(channel, -1)"
+          :can-down="canMove(channel, 1)" @up="moveChannel(channel, -1)" @down="moveChannel(channel, 1)" />
             <InlineActions label="channel" @edit="openEdit(channel)" @remove="removeChannel(channel)" />
           </div>
         </li>
@@ -165,6 +157,9 @@
 
 <script lang="ts">
 import { computed, ref, onMounted, onUnmounted, defineComponent } from 'vue';
+import ReorderControls from '../components/admin/ReorderControls.vue';
+import OwnerBar from '../components/admin/OwnerBar.vue';
+import StatusBadge from '../components/admin/StatusBadge.vue';
 import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import ContactInfo from '../components/ContactInfo.vue';
 import EditorDialog from '../components/admin/EditorDialog.vue';
@@ -238,7 +233,7 @@ const KIND_NAMES: Record<string, string> = {
 
 export default defineComponent({
   name: 'Contact',
-  components: { FeedbackNote, ContactInfo, EditorDialog, InlineActions },
+  components: { ReorderControls, OwnerBar, StatusBadge, FeedbackNote, ContactInfo, EditorDialog, InlineActions },
   setup() {
     const display = useDisplay();
     const settingsStore = useSettingsStore();
@@ -737,19 +732,7 @@ export default defineComponent({
   color: rgb(var(--v-theme-link-hover-color));
 }
 
-/* Owner-only row under the page intro. Wraps so the button never pushes the page sideways. */
-.owner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 1rem;
-}
 
-.owner-bar__alert {
-  flex: 1 1 220px;
-  min-width: 0;
-}
 
 .owner-hint {
   margin-top: 0.75rem !important;
@@ -781,15 +764,6 @@ export default defineComponent({
   opacity: 1;
 }
 
-.channel-tools__flag {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  padding: 1px 6px;
-  border-radius: 3px;
-  border: 1px dashed rgb(var(--v-theme-border-color));
-  color: rgb(var(--v-theme-gray-color));
-}
 
 /* Only the owner turns an "Elsewhere" row into a flex row; signed out it is the bare <a> it was.
    The controls sit at the end and drop onto their own line once the link needs the width. */

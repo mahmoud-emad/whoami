@@ -7,10 +7,10 @@
       </v-alert>
 
       <!-- Owner-only: write a post from the blog itself rather than the dashboard. -->
-      <div v-if="isAdmin" class="owner-bar">
+      <OwnerBar >
         <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Write a new post"
           class="text-capitalize" @click="openCreate">New post</v-btn>
-      </div>
+      </OwnerBar>
       <FeedbackNote v-if="isAdmin && !editorOpen && responseMessage" :message="responseMessage" :type="responseType" class="mt-3" />
     </div>
 
@@ -36,9 +36,8 @@
           <p class="article-link">
             <!-- Shown to everyone, not just the owner: a post sitting above newer ones needs to
                  say why it is there. -->
-            <span v-if="post.pinnedAt" class="post-pin" title="Pinned to the top">
-              <v-icon size="14">mdi-pin</v-icon>Pinned
-            </span>
+            <StatusBadge v-if="post.pinnedAt" label="Pinned" tone="accent" solid icon="mdi-pin"
+              title="Pinned to the top" />
             {{ post.title }}
           </p>
           <small class="published-date">Published on: {{ formatPostDate(post.createdAt || '') }}</small>
@@ -103,6 +102,8 @@
 
 <script lang="ts">
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
+import OwnerBar from '../components/admin/OwnerBar.vue';
+import StatusBadge from '../components/admin/StatusBadge.vue';
 import FeedbackNote from '../components/admin/FeedbackNote.vue';
 import { apiFetch, apiJson } from '../utils/api';
 import { useAPILoading, useSettingsStore } from '../store';
@@ -125,7 +126,7 @@ const emptyPost = (): PostType => ({ title: '', content: '' });
 
 export default {
   name: 'Blog',
-  components: { FeedbackNote, LoadingComponent, MarkdownView, MarkdownEditor, InlineActions, EditorDialog, ConfirmDialog, PostVotes },
+  components: { OwnerBar, StatusBadge, FeedbackNote, LoadingComponent, MarkdownView, MarkdownEditor, InlineActions, EditorDialog, ConfirmDialog, PostVotes },
   setup() {
     const apiLoading = useAPILoading();
     const settingsStore = useSettingsStore();
@@ -326,22 +327,6 @@ export default {
 </script>
 
 <style scoped>
-/* Reads as a status marker on the headline, not as part of the title. */
-.post-pin {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin-right: 0.5rem;
-  padding: 2px 7px;
-  border: 1px solid rgb(var(--v-theme-link-hover-color));
-  border-radius: 999px;
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgb(var(--v-theme-link-hover-color));
-  vertical-align: middle;
-}
 
 
 
@@ -401,13 +386,6 @@ export default {
   pointer-events: none;
 }
 
-/* ---- owner controls (never rendered signed out) ----------------------- */
-.owner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
 
 .post-card__actions {
   position: absolute;
