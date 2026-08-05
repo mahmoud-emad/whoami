@@ -357,13 +357,19 @@ export default {
 }
 
 /* Read-more on the left, votes on the right, wrapping to two rows on a phone. */
+/* Read more on the left, votes on the right — and the votes stay right whether or not the button
+   is there. `justify-content: space-between` only looked correct while both children existed; on a
+   short post, with the button absent, it pushed the lone votes control to the left instead. */
 .post-foot {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   margin-top: 1rem;
+}
+
+.post-foot :deep(.votes-wrap) {
+  margin-left: auto;
 }
 
 /* A long post is clipped rather than hidden, so the opening still reads from the listing. */
