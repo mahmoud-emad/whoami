@@ -24,18 +24,23 @@
 
     <!-- Blog Posts -->
     <div class="posts" v-else>
-      <v-card class="post-card mb-4 head-card" :class="{ 'post-card--editable': isAdmin }" v-for="post in posts"
+      <v-card class="post-card mb-4 head-card"
+        :class="{ 'post-card--editable': isAdmin, 'post-card--hidden': isAdmin && post.show === false }"
+        v-for="post in posts"
         :key="post.id" :style="{ background: 'transparent !important' }">
         <!-- Pinned to the card corner; the title gets extra right padding (only in the editable
              variant) so a long headline never runs under the buttons. -->
         <div v-if="isAdmin" class="post-card__actions">
-          <InlineActions label="post" pinnable :pinned="Boolean(post.pinnedAt)" @edit="openEdit(post)"
-            @remove="removePost(post)" @toggle-pinned="askPin(post)" />
+          <InlineActions label="post" pinnable :pinned="Boolean(post.pinnedAt)" hideable
+            :hidden="post.show === false" @edit="openEdit(post)" @remove="removePost(post)"
+            @toggle-pinned="askPin(post)" @toggle-hidden="toggleHidden(post)" />
         </div>
         <v-card-title>
           <p class="article-link">
             <!-- Shown to everyone, not just the owner: a post sitting above newer ones needs to
                  say why it is there. -->
+            <StatusBadge v-if="isAdmin && post.show === false" label="Hidden"
+              title="Hidden from the public blog" />
             <StatusBadge v-if="post.pinnedAt" label="Pinned" tone="accent" solid icon="mdi-pin"
               title="Pinned to the top" />
             {{ post.title }}
@@ -220,6 +225,27 @@ export default {
     };
 
     /**
+     * Take a post off the public blog, or put it back. Reversible, so unlike delete and unlike
+     * pinning it fires on the first click — there is nothing to warn about.
+     *
+     * The list is re-read rather than patched in place: the server decides who sees a hidden post,
+     * so its answer is the one worth rendering.
+     */
+    const toggleHidden = async (post: PostType) => {
+      if (post.id === undefined) return;
+      const nextShown = post.show === false;
+      try {
+        const body = { ...post, show: nextShown };
+        delete body.reactions;
+        await apiJson(`/posts/${post.id}`, { method: 'PUT', body: JSON.stringify(body) });
+        await loadPosts();
+        success(nextShown ? 'Post is public again.' : 'Post hidden from the blog.');
+      } catch (e: any) {
+        error(e?.message || 'Failed to change that.');
+      }
+    };
+
+    /**
      * Long enough to be worth clipping. Measured on the raw markdown rather than the rendered
      * height: the height is not known until after paint, and a threshold that moved as images
      * loaded would make the button appear and disappear under the reader.
@@ -296,6 +322,7 @@ export default {
       formatPostDate,
       toggleContent,
       isLong,
+      toggleHidden,
       pinDialog,
       pinTarget,
       pinning,
@@ -327,6 +354,12 @@ export default {
 </script>
 
 <style scoped>
+/* A hidden post stays on the owner's own listing, dimmed, because this page is where it is brought
+   back from. Visitors never receive it at all — the server filters it out. */
+.post-card--hidden {
+  opacity: 0.55;
+}
+
 
 
 

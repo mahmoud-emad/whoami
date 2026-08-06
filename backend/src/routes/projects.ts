@@ -1,7 +1,7 @@
 import express from 'express';
 import type { Request, Response, Router } from 'express';
 import { readDatabase, writeDatabase, nextId, updateById } from '../db';
-import { requireAuth } from '../auth/middleware';
+import { isOwner, requireAuth } from '../auth/middleware';
 import { log } from '../lib/logger';
 import type { DbRecord } from '../types';
 
@@ -14,7 +14,11 @@ export const projectsRouter: Router = express.Router();
 projectsRouter.get('/projects', async (req: Request, res: Response): Promise<void> => {
   try {
     const dbData = await readDatabase();
-    let projects = [...dbData.projects];
+    // Same rule as the posts: a hidden project reaches the owner's own page and nobody else's.
+    // Filtered before the count, so pagination reflects what the caller can actually see.
+    let projects = isOwner(req)
+      ? [...dbData.projects]
+      : dbData.projects.filter((project) => project.show !== false);
     const totalProjects = projects.length;
     if (req.query.sort === 'true') {
       projects.sort(

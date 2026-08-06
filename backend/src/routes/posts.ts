@@ -1,7 +1,7 @@
 import express from 'express';
 import type { Request, Response, Router } from 'express';
 import { readDatabase, writeDatabase, nextId, updateById } from '../db';
-import { requireAuth } from '../auth/middleware';
+import { isOwner, requireAuth } from '../auth/middleware';
 import { tallyAll } from './reactions';
 import { log } from '../lib/logger';
 import type { DbRecord } from '../types';
@@ -42,7 +42,10 @@ postsRouter.get('/posts', async (req: Request, res: Response): Promise<void> => 
     // Vote counts travel with the listing. Fetching them per post would be one request per card,
     // and the blog page would flash a column of zeroes while they arrived.
     const tallies = await tallyAll(req, dbData);
-    const data = sortPosts(dbData.posts).map((post) => ({
+    // A hidden post is the owner's draft: it stays on their own listing, dimmed, and never
+    // leaves the server for anyone else.
+    const visible = isOwner(req) ? dbData.posts : dbData.posts.filter((post) => post.show !== false);
+    const data = sortPosts(visible).map((post) => ({
       ...post,
       reactions: typeof post.id === 'number' ? tallies[post.id] : { up: 0, down: 0, mine: null },
     }));

@@ -284,6 +284,11 @@ export type PostType = {
    * most recently pinned post sorts above ones pinned earlier, which is what pinning is for.
    */
   pinnedAt?: string | null,
+  /**
+   * Off takes the post off the public blog, out of the API and out of search, without deleting it.
+   * Absent means visible, so every post written before this existed stays where it was.
+   */
+  show?: boolean,
   /** Served with the listing so the counts do not need one request per card. Never sent back. */
   reactions?: PostReactions,
 }
