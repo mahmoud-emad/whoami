@@ -35,7 +35,34 @@ mahmoud-emad.dev, www.mahmoud-emad.dev {
 	@assets path /assets/*
 	header @assets Cache-Control "public, max-age=31536000, immutable"
 
-	reverse_proxy 127.0.0.1:3000
+	# Everything else is the SPA entry point, and it must always be revalidated.
+	#
+	# index.html names the hashed bundles, so a stale copy of it asks for filenames the last
+	# deploy deleted and the app never boots. Without an explicit header the entry point had
+	# none at all, which leaves freshness to browser heuristics — a page that keeps loading
+	# assets that no longer exist, with no way for the visitor to know a reload would fix it.
+	#
+	# `no-cache` is revalidate-before-use, not "do not store": the ETag still makes it a 304
+	# on every deploy that did not change it, so this costs a conditional request, not a
+	# re-download.
+	@html not path /assets/* /uploads/* /api/*
+	header @html Cache-Control "no-cache"
+
+	reverse_proxy 127.0.0.1:3000 {
+		# Never let a "not found" inherit one of the cache headers above.
+		#
+		# The matchers are on the request path, so they apply whatever the answer turns out to
+		# be: a 404 for /assets/* was being handed back as immutable for a year. Most of the
+		# time that is harmless, because a hashed filename that is missing is missing forever
+		# — but a request that lands mid-deploy, after index.html has been replaced and before
+		# its bundles have, would cache the miss for an asset that exists moments later, and
+		# that visitor stays broken until they clear their cache.
+		@notfound status 404
+		handle_response @notfound {
+			header Cache-Control "no-store"
+			copy_response
+		}
+	}
 
 	log {
 		output file /var/log/caddy/access.log {

@@ -194,6 +194,14 @@ export const mountFrontend = (app: Express): void => {
       next();
       return;
     }
+    // A build artefact that express.static did not find does not exist, and answering with the
+    // SPA shell would hand the browser HTML under a .js URL: the script fails to parse, the app
+    // never boots, and because the proxy marks /assets/* immutable the broken response is then
+    // cached for a year. A 404 is both the truth and something a reload can recover from.
+    if (req.path.startsWith('/assets/')) {
+      res.status(404).type('txt').send('Not found');
+      return;
+    }
     try {
       const [rawHtml, configData] = await Promise.all([readIndexHtml(), readConfig()]);
       if (rawHtml.indexOf('</head>') === -1) throw new Error('index.html has no </head>');
