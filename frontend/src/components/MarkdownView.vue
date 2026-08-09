@@ -43,6 +43,17 @@ type TexmathPlugin = (_md: MarkdownIt, _options?: Record<string, unknown>) => vo
 let mathPromise: Promise<{ katex: unknown, texmath: TexmathPlugin }> | null = null;
 let mermaidPromise: Promise<typeof import('mermaid').default> | null = null;
 
+/**
+ * Counter for mermaid's render ids, at module scope rather than per component.
+ *
+ * `mermaid.render(id, ...)` puts a scratch element in the document under that id while it
+ * measures the diagram. The id therefore has to be unique across every instance on the page, not
+ * just within one: the blog renders each post through its own MarkdownView, so two instances
+ * counting from zero hand mermaid the same id and their scratch elements collide — both diagrams
+ * come out merged into one SVG. Only visible once two posts on a page each contain a diagram.
+ */
+let mermaidRenderId = 0;
+
 const loadHljs = () => (hljsPromise ??= import('highlight.js').then((m) => m.default));
 const loadMermaid = () => (mermaidPromise ??= import('mermaid').then((m) => m.default));
 const loadMath = () =>
@@ -223,10 +234,10 @@ export default defineComponent({
         flowchart: { htmlLabels: false },
       });
 
-      for (const [index, block] of blocks.entries()) {
+      for (const block of blocks) {
         const source = block.getAttribute('data-src') ?? block.textContent ?? '';
         try {
-          const { svg } = await mermaid.render(`md-mermaid-${token}-${index}`, source);
+          const { svg } = await mermaid.render(`md-mermaid-${(mermaidRenderId += 1)}`, source);
           if (token !== renderToken) return;
           const figure = document.createElement('div');
           figure.className = 'md-diagram';
