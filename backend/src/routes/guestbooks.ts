@@ -4,12 +4,25 @@ import { readConfig } from '../config/store';
 import { readDatabase, writeDatabase, nextId, updateById } from '../db';
 import { requireAuth } from '../auth/middleware';
 import { log } from '../lib/logger';
+import { fixedWindowLimiter } from '../lib/ratelimit';
 import type { AntiBotConfig, DbRecord } from '../types';
 
 /** `catch` binds `unknown` under `strict`, so the original's `error.message` needs unwrapping. */
 const errorMessage = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 
 export const guestbooksRouter: Router = express.Router();
+
+/**
+ * Per-IP write throttle on the public sign endpoint.
+ *
+ * The anti-bot question is one fixed answer to a publicly readable question, so it stops a naive
+ * crawler and nothing else: solve it once and the endpoint is scriptable. Every accepted entry
+ * rewrites the whole db.json, so the cap is on writes rather than on requests.
+ *
+ * Three in ten minutes. Signing a guestbook is a thing people do once, so this is far above any
+ * real visitor — including one who posts, spots a typo and asks to have it removed.
+ */
+const signLimiter = fixedWindowLimiter({ windowMs: 10 * 60 * 1000, max: 3 });
 
 // Guestbooks CRUD
 guestbooksRouter.get('/guestbooks', async (_req: Request, res: Response): Promise<void> => {
@@ -83,6 +96,16 @@ guestbooksRouter.post('/guestbooks', async (req: Request, res: Response): Promis
         res.status(400).json({ error: 'Website is not valid' });
         return;
       }
+    }
+
+    // Counted here, after validation, rather than on the way in: a visitor who gets the anti-bot
+    // question wrong twice and then answers it is not a spammer, and burning their allowance on
+    // the two failures would lock them out of their own message. Only entries that are about to
+    // be written count against the limit.
+    if (signLimiter.hit(req.ip || 'unknown')) {
+      log(`Guestbook rate limit hit by ${req.ip || 'unknown'}`, 'warn');
+      res.status(429).json({ error: 'Too many messages. Please try again later.' });
+      return;
     }
 
     const dbData = await readDatabase();

@@ -4,6 +4,7 @@ import type { Request, Response, Router } from 'express';
 import { readDatabase, writeDatabase } from '../db';
 import { readConfig, writeConfig } from '../config/store';
 import { log } from '../lib/logger';
+import { fixedWindowLimiter } from '../lib/ratelimit';
 import type { Database, DbRecord } from '../types';
 
 /** `catch` binds `unknown` under `strict`, so the original's `error.message` needs unwrapping. */
@@ -25,20 +26,7 @@ interface ReactionRecord extends DbRecord {
  * a loop over one post would otherwise be free. Deliberately generous — a reader changing their
  * mind a few times is normal, a script is not.
  */
-const WINDOW_MS = 60 * 1000;
-const MAX_VOTES_PER_WINDOW = 20;
-const voteWindows = new Map<string, { count: number, resetAt: number }>();
-
-const overVoteLimit = (ip: string): boolean => {
-  const now = Date.now();
-  const entry = voteWindows.get(ip);
-  if (!entry || now > entry.resetAt) {
-    voteWindows.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  entry.count += 1;
-  return entry.count > MAX_VOTES_PER_WINDOW;
-};
+const voteLimiter = fixedWindowLimiter({ windowMs: 60 * 1000, max: 20 });
 
 /**
  * Salt for the voter hash, generated once and kept in config.
@@ -150,7 +138,7 @@ reactionsRouter.post('/posts/:id/reactions', async (req: Request, res: Response)
       return;
     }
 
-    if (overVoteLimit(req.ip || 'unknown')) {
+    if (voteLimiter.hit(req.ip || 'unknown')) {
       res.status(429).json({ error: 'Too many votes. Try again in a minute.' });
       return;
     }
