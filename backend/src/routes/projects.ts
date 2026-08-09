@@ -10,6 +10,26 @@ const errorMessage = (error: unknown): string => (error instanceof Error ? error
 
 export const projectsRouter: Router = express.Router();
 
+/** A timestamp field as milliseconds, or 0 when it is missing or unparseable. */
+const at = (value: unknown): number => {
+  const ms = Date.parse(typeof value === 'string' ? value : '');
+  return Number.isNaN(ms) ? 0 : ms;
+};
+
+/**
+ * Project order: pinned projects first, then everything else in the order it already had.
+ *
+ * The same rule as the blog, for the same reason — within the pinned group the most recently
+ * pinned wins, so pinning something puts it above projects that were already pinned. Unpinned
+ * projects compare equal, and `sort` is stable, so the rest of the page does not move when
+ * something above it gets pinned.
+ *
+ * Sorted on the server rather than in the page, so the API and the browser cannot disagree about
+ * what "first" means. Applied before pagination, so a pinned project is on page one.
+ */
+export const sortProjects = (projects: DbRecord[]): DbRecord[] =>
+  [...projects].sort((a, b) => at(b.pinnedAt) - at(a.pinnedAt));
+
 // Projects CRUD
 projectsRouter.get('/projects', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -25,6 +45,9 @@ projectsRouter.get('/projects', async (req: Request, res: Response): Promise<voi
         (a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime()
       );
     }
+    // After the date sort, not folded into it: pinning has to win regardless of how the caller
+    // asked for the rest to be ordered.
+    projects = sortProjects(projects);
     const limit = parseInt(req.query.limit as string) || 10;
     const page = parseInt(req.query.page as string) || 1;
     const startIndex = (page - 1) * limit;

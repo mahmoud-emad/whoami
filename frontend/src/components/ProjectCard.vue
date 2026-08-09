@@ -4,7 +4,13 @@
     :class="{ 'project-card--hidden': editable && project.show === false }"
     :style="{ background: project.background + '!important' }" rel="noopener">
     <div class="project-logo">{{ project.title.toLocaleUpperCase() }}</div>
-    <h2 style="cursor: pointer; color: var(--v-theme-text-color);" @click="openLink(project)">{{ project.title }}</h2>
+    <div class="project-card__title">
+      <h2 style="cursor: pointer; color: var(--v-theme-text-color);" @click="openLink(project)">{{ project.title }}</h2>
+      <!-- Shown to everyone, not just the owner: a project sitting above the others needs to say
+           why it is there. -->
+      <StatusBadge v-if="project.pinnedAt" label="Pinned" tone="accent" solid icon="mdi-pin"
+        title="Pinned to the top" />
+    </div>
     <v-card-text class="ma-0 pa-0 mt-4 mb-4" style="min-height: 90px;">
       {{
         project.description
@@ -26,8 +32,9 @@
       <!-- The owner is looking at a card nobody else can see; say so rather than let the dimming
            read as a rendering fault. -->
       <StatusBadge v-if="project.show === false" label="Hidden" title="Hidden from the public site" />
-      <InlineActions label="project" hideable :hidden="project.show === false" @edit="$emit('edit', project)"
-        @remove="$emit('remove', project)" @toggle-hidden="$emit('toggle-hidden', project)" />
+      <InlineActions label="project" pinnable :pinned="Boolean(project.pinnedAt)" hideable
+        :hidden="project.show === false" @edit="$emit('edit', project)" @remove="$emit('remove', project)"
+        @toggle-pinned="$emit('toggle-pinned', project)" @toggle-hidden="$emit('toggle-hidden', project)" />
     </div>
   </v-card>
 </template>
@@ -53,7 +60,7 @@ export default {
       default: false
     }
   },
-  emits: ['edit', 'remove', 'toggle-hidden'],
+  emits: ['edit', 'remove', 'toggle-pinned', 'toggle-hidden'],
   setup() {
     // Handle Card Background Change
     const handleCardBackgroundChange = (e: any, project: ProjectType) => {
@@ -144,6 +151,15 @@ export default {
   opacity: 0.55;
 }
 
+
+/* Badge beside the heading rather than under it, so a pinned card is legible at a glance without
+   the title losing its own line. */
+.project-card__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
 .project-card__actions {
   display: flex;

@@ -20,7 +20,7 @@
         <v-col cols="12" xl='6' md="6" sm="6" xs="12" v-for="(project, index) in visibleProjects" :key="index"
           class="d-flex justify-start align-stretch">
           <ProjectCard :project="project" :editable="isAdmin" @edit="openEdit" @remove="removeProject"
-            @toggle-hidden="toggleProjectHidden" />
+            @toggle-pinned="askPin" @toggle-hidden="toggleProjectHidden" />
         </v-col>
       </v-row>
       <!-- Only shown when a GitHub profile is configured; there is no default account to link to. -->
@@ -37,6 +37,17 @@
       <v-pagination :disabled="apiLoadingStore.loading" v-model="pageNumber" :length="pageSize"
         rounded="circle"></v-pagination>
     </div>
+
+    <!--
+      Pinning changes what every visitor sees first, so it asks in words rather than arming in
+      place the way delete does.
+    -->
+    <ConfirmDialog v-if="isAdmin" v-model="pinDialog" :busy="pinning"
+      :title="pinTarget?.pinnedAt ? 'Unpin this project?' : 'Pin this project?'" :subject="pinTarget?.title || ''"
+      :message="pinTarget?.pinnedAt
+        ? 'It will drop back among the other projects. Nothing else changes.'
+        : 'It will move to the very top of the projects page for everyone, above every other project, including any that are already pinned.'"
+      :confirm-text="pinTarget?.pinnedAt ? 'Unpin' : 'Pin to top'" @confirm="confirmPin" />
 
     <!-- Create/edit shell. Mounted only for the owner, so a visitor never loads the form at all. -->
     <EditorDialog v-if="isAdmin" v-model="editorOpen" :title="editorTitle">
@@ -86,6 +97,7 @@ import { ProjectType } from '../types';
 import { useAPILoading, useSettingsStore } from '../store';
 import LoadingComponent from '../components/LoadingComponent.vue';
 import EditorDialog from '../components/admin/EditorDialog.vue';
+import ConfirmDialog from '../components/admin/ConfirmDialog.vue';
 import { useAdmin } from '../composables/useAdmin';
 import { useFormFeedback } from '../composables/useFormFeedback';
 import { deepClone, longTextRules, nameRules, selectRules, tagsRules, websiteRules } from '../utils';
@@ -105,7 +117,7 @@ const emptyProject = (): ProjectType => ({
 
 export default {
   name: 'Projects',
-  components: { OwnerBar, FeedbackNote, ProjectCard, LoadingComponent, EditorDialog },
+  components: { OwnerBar, FeedbackNote, ProjectCard, LoadingComponent, EditorDialog, ConfirmDialog },
   setup() {
     const projects: Ref<ProjectType[]> = ref([]);
 
@@ -213,6 +225,45 @@ export default {
     }
 
 
+    // Pin confirmation state. `pinTarget` is the project the open dialog is about.
+    const pinDialog = ref(false);
+    const pinTarget = ref<ProjectType | null>(null);
+    const pinning = ref(false);
+
+    const askPin = (project: ProjectType) => {
+      clear();
+      pinTarget.value = project;
+      pinDialog.value = true;
+    };
+
+    /**
+     * Write the pin and re-read the list.
+     *
+     * `pinnedAt` is set to now, so pinning something puts it above projects pinned earlier.
+     * Unpinning clears it. Not optimistic, unlike hiding: pinning reorders the whole page, and a
+     * grid that reshuffles and then reshuffles back on failure is worse than one that waits for
+     * the round trip.
+     */
+    const confirmPin = async () => {
+      const project = pinTarget.value;
+      if (!project || project.id === undefined) return;
+      pinning.value = true;
+      const wasPinned = Boolean(project.pinnedAt);
+      try {
+        await apiJson(`/projects/${project.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ ...project, pinnedAt: wasPinned ? null : new Date().toISOString() }),
+        });
+        pinDialog.value = false;
+        await reload();
+        success(wasPinned ? 'Project unpinned.' : 'Project pinned to the top.');
+      } catch (e: any) {
+        error(e?.message || 'Failed to change that.');
+      } finally {
+        pinning.value = false;
+      }
+    };
+
     /**
      * Hide or show a project. Reversible, so unlike delete it fires on the first click.
      *
@@ -290,6 +341,11 @@ export default {
       responseMessage,
       openCreate,
       visibleProjects,
+      pinDialog,
+      pinTarget,
+      pinning,
+      askPin,
+      confirmPin,
       toggleProjectHidden,
       openEdit,
       saveProject,

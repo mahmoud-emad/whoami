@@ -11,6 +11,11 @@ export type ProjectType = {
   background: string,
   type: 'project' | 'Open Source',
   /**
+   * When the project was pinned, or absent when it is not. A timestamp rather than a boolean so the
+   * most recently pinned project sorts above ones pinned earlier, which is what pinning is for.
+   */
+  pinnedAt?: string | null,
+  /**
    * Off takes the project off the public page and out of search, without deleting it. Absent means
    * visible, so every project written before this existed stays where it was.
    */
