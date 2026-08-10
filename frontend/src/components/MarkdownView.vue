@@ -3,7 +3,7 @@
     markdown-it runs with raw HTML disabled and the result goes through DOMPurify, so this v-html
     is fed markup the renderer itself produced rather than whatever was in the post body.
   -->
-  <div ref="root" class="md" v-html="html"></div>
+  <div ref="root" class="md" v-html="html" @click="onClick"></div>
 </template>
 
 <script lang="ts">
@@ -24,6 +24,7 @@ import { defineComponent, ref, computed, watch, onMounted, onBeforeUnmount, next
 import MarkdownItCtor, { type MarkdownIt } from 'markdown-it';
 import DOMPurify from 'dompurify';
 import { useTheme } from 'vuetify';
+import { useImageViewer } from '../composables/useImageViewer';
 
 /** Fenced blocks tagged `mermaid` are diagrams, not code; everything else goes to the highlighter. */
 const MERMAID_LANG = 'mermaid';
@@ -78,6 +79,27 @@ export default defineComponent({
   setup(props) {
     const root = ref<HTMLElement | null>(null);
     const theme = useTheme();
+    const { open: openImage } = useImageViewer();
+
+    /**
+     * Open a clicked image full screen.
+     *
+     * Delegated from the root rather than bound per image: the body is re-rendered from a computed
+     * `html` string whenever the content changes or a library lands, so per-element listeners would
+     * have to be re-attached after every one of those passes. One listener on a container that
+     * outlives them all cannot fall out of step.
+     *
+     * `currentSrc` over `src` so a responsive image opens the file the browser actually chose.
+     * Mermaid diagrams are inline <svg>, not <img>, so they are excluded by the type check rather
+     * than by a class name that could drift.
+     */
+    const onClick = (event: MouseEvent): void => {
+      const target = event.target;
+      if (!(target instanceof HTMLImageElement)) return;
+      // A linked image is a link first — the author wrote the href meaning it to be followed.
+      if (target.closest('a')) return;
+      openImage(target.currentSrc || target.src, target.alt);
+    };
 
     // Async upgrades. Each starts null, and the renderer is rebuilt once one arrives.
     const hljs = ref<Awaited<ReturnType<typeof loadHljs>> | null>(null);
@@ -268,7 +290,7 @@ export default defineComponent({
     );
     onBeforeUnmount(() => { renderToken += 1; });
 
-    return { root, html };
+    return { root, html, onClick };
   },
 });
 </script>
@@ -339,6 +361,14 @@ export default defineComponent({
   margin: 1.2rem 0;
   border: 1px solid rgb(var(--v-theme-border-color));
   border-radius: 6px;
+  /* The cursor is the only affordance saying the picture opens — nothing else about a rendered
+     image suggests it is clickable. */
+  cursor: zoom-in;
+}
+
+/* A linked image follows its link instead of opening, so it must not claim otherwise. */
+.md :deep(a img) {
+  cursor: pointer;
 }
 
 /* Inline code reads as a label; a block reads as a quote from a file. */

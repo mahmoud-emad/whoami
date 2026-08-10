@@ -2,6 +2,7 @@
 import { computed, defineAsyncComponent, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { useTheme } from 'vuetify';
 import ContainerLayout from "./layouts/ContainerLayout.vue";
+import ImageViewer from "./components/ImageViewer.vue";
 import { useRoute } from "vue-router";
 import { useSettingsStore } from "./store";
 import { useAdmin } from "./composables/useAdmin";
@@ -81,6 +82,10 @@ watch(
       <RouterView />
     </template>
   </ContainerLayout>
+
+  <!-- Mounted once for the whole app: any image on any page opens into this one overlay. Outside
+       ContainerLayout's v-if so it survives a backend blip closing the layout mid-view. -->
+  <ImageViewer />
 
   <v-dialog v-model="settingsStore.__local.serverUnreachable" persistent max-width="540">
     <v-card class="head-card pa-4 server-down-card">
