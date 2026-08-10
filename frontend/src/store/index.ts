@@ -94,7 +94,8 @@ const defaultProfile = () => ({
         projects: { title: 'Selected Work', emoji: '\ud83c\udfa8', intro: '', show: true, order: 3 },
         openSource: { title: 'Open Source', emoji: '\ud83c\udf1f', intro: '', show: true, order: 4 },
         problemSolving: { title: 'Problem Solving', emoji: '\ud83e\udde0', intro: '', show: true, order: 5 },
-        articles: { title: 'Articles', emoji: '\ud83d\udcdd', intro: '', show: true, order: 6 },
+        recentWrites: { title: 'Recent Writes', emoji: '\u270d\ufe0f', intro: '', show: true, order: 6 },
+        articles: { title: 'Articles', emoji: '\ud83d\udcdd', intro: '', show: true, order: 7 },
     } as SectionsConfig,
     pages: {
         contact: { title: 'Contact', intro: '' },

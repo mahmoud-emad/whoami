@@ -142,6 +142,7 @@ export type SectionsConfig = {
   projects: SectionConfig,
   openSource: SectionConfig,
   problemSolving: SectionConfig,
+  recentWrites: SectionConfig,
   articles: SectionConfig,
 }
 

@@ -166,7 +166,11 @@ export const defaultConfig: SiteConfig = {
       projects: { title: 'Selected Work', emoji: '🎨', intro: '', show: true, order: 3 },
       openSource: { title: 'Open Source', emoji: '🌟', intro: '', show: true, order: 4 },
       problemSolving: { title: 'Problem Solving', emoji: '🧠', intro: '', show: true, order: 5 },
-      articles: { title: 'Articles', emoji: '📝', intro: '', show: true, order: 6 },
+      recentWrites: { title: 'Recent Writes', emoji: '✍️', intro: '', show: true, order: 6 },
+      // Was 6. An install that predates recentWrites has articles: 6 saved and gains the new
+      // section at 6 too, since deepBackfill only adds missing keys and never rewrites stored
+      // ones. Home.vue resolves that tie by list position rather than leaving it to chance.
+      articles: { title: 'Articles', emoji: '📝', intro: '', show: true, order: 7 },
     },
     // Heading and intro copy for the standalone pages.
     pages: {

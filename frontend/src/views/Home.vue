@@ -17,6 +17,7 @@
         <ProjectsSection v-else-if="key === 'projects'" section="projects" />
         <ProjectsSection v-else-if="key === 'openSource'" section="openSource" />
         <ProplemSolvingSection v-else-if="key === 'problemSolving'" />
+        <RecentWritesSection v-else-if="key === 'recentWrites'" />
         <ArticleSection v-else-if="key === 'articles'" />
       </template>
     </div>
@@ -30,11 +31,19 @@ import ExperienceSection from '../components/home/ExperienceSection.vue';
 import ArticleSection from '../components/home/ArticlesSection.vue';
 import ProplemSolvingSection from '../components/home/ProblemSolvingSection.vue';
 import ProjectsSection from '../components/home/ProjectsSection.vue';
+import RecentWritesSection from '../components/home/RecentWritesSection.vue';
 import { useSettingsStore } from '../store';
 import { useAdmin } from '../composables/useAdmin';
 import type { SectionConfig } from '../types';
 
-type SectionKey = 'intro' | 'experience' | 'projects' | 'openSource' | 'problemSolving' | 'articles';
+type SectionKey =
+  | 'intro'
+  | 'experience'
+  | 'projects'
+  | 'openSource'
+  | 'problemSolving'
+  | 'recentWrites'
+  | 'articles';
 
 // Order used when settings are missing or a section has no `order` — the historical layout.
 const DEFAULT_ORDER: Record<SectionKey, number> = {
@@ -43,9 +52,18 @@ const DEFAULT_ORDER: Record<SectionKey, number> = {
   projects: 3,
   openSource: 4,
   problemSolving: 5,
-  articles: 6,
+  recentWrites: 6,
+  articles: 7,
 };
 
+/**
+ * Declaration order doubles as the tie-break, so it is load-bearing rather than cosmetic.
+ *
+ * A config written before `recentWrites` existed has `articles: 6` saved, and backfilling adds
+ * `recentWrites` at its default 6 without touching the stored value — two sections claiming the
+ * same slot. `Array.prototype.sort` is stable, so equal orders come out in the order they appear
+ * here: recentWrites, then articles. Reordering this list silently reorders those pages.
+ */
 const SECTION_KEYS = Object.keys(DEFAULT_ORDER) as SectionKey[];
 
 export default defineComponent({
@@ -55,7 +73,8 @@ export default defineComponent({
     ExperienceSection,
     ArticleSection,
     ProjectsSection,
-    ProplemSolvingSection
+    ProplemSolvingSection,
+    RecentWritesSection
   },
 
   setup() {

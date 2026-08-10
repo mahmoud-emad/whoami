@@ -27,7 +27,8 @@
       <v-card class="post-card mb-4 head-card"
         :class="{ 'post-card--editable': isAdmin, 'post-card--hidden': isAdmin && post.show === false }"
         v-for="post in posts"
-        :key="post.id" :style="{ background: 'transparent !important' }">
+        :key="post.id" :id="post.id !== undefined ? `post-${post.id}` : undefined"
+        :style="{ background: 'transparent !important' }">
         <!-- Pinned to the card corner; the title gets extra right padding (only in the editable
              variant) so a long headline never runs under the buttons. -->
         <div v-if="isAdmin" class="post-card__actions">
@@ -106,7 +107,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
+import { computed, defineAsyncComponent, nextTick, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import OwnerBar from '../components/admin/OwnerBar.vue';
 import StatusBadge from '../components/admin/StatusBadge.vue';
 import FeedbackNote from '../components/admin/FeedbackNote.vue';
@@ -135,6 +137,7 @@ export default {
   setup() {
     const apiLoading = useAPILoading();
     const settingsStore = useSettingsStore();
+    const route = useRoute();
     const posts = ref<PostType[]>([]);
     const errorMessage = ref<string | null>(null);
     const { isAdmin } = useAdmin();
@@ -157,9 +160,31 @@ export default {
     // Track which posts are expanded (each post has a boolean state)
     const expandedPosts = ref<Record<number, boolean>>({});
 
+    /**
+     * Scroll to the post named in the URL hash, once there is a card to scroll to.
+     *
+     * The browser's own hash handling runs at navigation time, when this page is still a loading
+     * skeleton and `#post-4` matches nothing — so arriving from a link on the home page would
+     * land at the top with no explanation. Running it after the posts render is the whole point.
+     *
+     * A hash naming a post that is hidden, deleted, or simply not there finds no element and
+     * leaves the reader at the top of the blog, which is the right fallback.
+     */
+    const scrollToHashedPost = async () => {
+      const hash = route.hash;
+      if (!/^#post-\d+$/.test(hash)) return;
+      await nextTick();
+      document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
     onMounted(async () => {
       await loadPosts();
+      await scrollToHashedPost();
     });
+
+    // Same page, new hash: vue-router reuses the component rather than remounting it, so clicking
+    // a second recent-writes link would otherwise do nothing at all.
+    watch(() => route.hash, () => { void scrollToHashedPost(); });
 
     const loadPosts = async () => {
       try {

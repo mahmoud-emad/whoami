@@ -68,6 +68,7 @@ const SECTION_KEYS: SectionKey[] = [
   'projects',
   'openSource',
   'problemSolving',
+  'recentWrites',
   'articles',
 ];
 
@@ -77,6 +78,7 @@ const LABELS: Record<SectionKey, string> = {
   projects: 'Projects',
   openSource: 'Open Source',
   problemSolving: 'Problem Solving',
+  recentWrites: 'Recent Writes',
   articles: 'Articles',
 };
 
