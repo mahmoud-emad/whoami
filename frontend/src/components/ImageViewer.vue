@@ -17,11 +17,20 @@
         :aria-label="alt ? `Image: ${alt}` : 'Image viewer'" @click="close">
         <img class="viewer__image" :src="src" :alt="alt" />
 
-        <!-- Decorative: the backdrop already closes, and this repeats it for anyone looking for
-             the familiar control. Kept out of the tab order for the same reason. -->
-        <button class="viewer__close" type="button" tabindex="-1" aria-hidden="true" title="Close">
+        <!--
+          Decorative: the backdrop already closes on click, and this just repeats it where people
+          look for the familiar control. The click reaches `close` by bubbling to the backdrop.
+
+          A <span> rather than a <button> on purpose. style.css paints every button with
+          `color: rgb(var(--v-theme-text-color)) !important`, which on this permanently dark
+          backdrop resolves to near-black under the light theme — an invisible X. Matching that
+          !important with another one would work and would leave the next person to edit this
+          wondering why. It was never a real button anyway: it is aria-hidden and unfocusable,
+          because the accessible ways out are Escape and clicking anywhere.
+        -->
+        <span class="viewer__close" aria-hidden="true" title="Close">
           <v-icon size="20">mdi-close</v-icon>
-        </button>
+        </span>
 
         <p v-if="alt" class="viewer__caption">{{ alt }}</p>
       </div>
@@ -96,6 +105,11 @@ onBeforeUnmount(() => {
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
 }
 
+/*
+  Fixed light-on-dark, not theme tokens. The backdrop is near-black under both themes, so a token
+  that flips with the theme would take the X with it — which is exactly how it went missing in
+  light mode. Everything inside this overlay is coloured against the backdrop, not the page.
+*/
 .viewer__close {
   position: absolute;
   top: clamp(0.75rem, 2vw, 1.25rem);
@@ -110,6 +124,11 @@ onBeforeUnmount(() => {
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.25);
   cursor: zoom-out;
+}
+
+/* VIcon renders its own element, so the colour has to reach it rather than stopping at the span. */
+.viewer__close :deep(.v-icon) {
+  color: #fff;
 }
 
 .viewer__caption {
