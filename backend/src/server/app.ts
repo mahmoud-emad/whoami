@@ -17,6 +17,7 @@ import { reactionsRouter } from '../routes/reactions';
 import { listsRouter } from '../routes/lists';
 import { booksRouter } from '../routes/books';
 import { uploadsRouter } from '../routes/uploads';
+import { cvRouter } from '../routes/cv';
 import { mountFrontend } from './frontend';
 
 const loggerMiddleware = (req: Request, _res: Response, next: NextFunction): void => {
@@ -42,6 +43,10 @@ export const createApp = (): Express => {
   // Uploaded files. redirect:false so GET /uploads reaches the listing route rather than being
   // redirected; cacheControl:false so the reverse proxy is the single source of Cache-Control.
   app.use('/uploads', express.static(UPLOADS_DIR, { redirect: false, cacheControl: false }));
+
+  // Root-mounted on purpose: /cv.pdf is a short address to hand out, so it cannot live under /api.
+  // Ahead of the frontend, or the SPA catch-all would answer it with index.html.
+  app.use(cvRouter);
 
   // Every API endpoint lives on this router. Keeping it off the root is what lets client side
   // routes like /projects coexist with the API resource of the same name.
