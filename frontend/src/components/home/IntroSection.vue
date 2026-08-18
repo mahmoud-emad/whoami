@@ -14,7 +14,7 @@
     <p v-if="bio" class="intro__bio">{{ bio }}</p>
 
     <div class="intro__actions">
-      <a v-if="resumeUrl" :href="resumeUrl" target="_blank" rel="noopener" class="intro__cta">
+      <a v-if="resumeHref" :href="resumeHref" target="_blank" rel="noopener" class="intro__cta">
         <v-icon size="16">mdi-file-document-outline</v-icon>
         Read the CV
       </a>
@@ -183,6 +183,24 @@ export default defineComponent({
     const role = computed<string>(() => settingsStore.profile?.role?.trim() || '');
     const resumeUrl = computed<string>(() => settingsStore.profile?.resumeUrl?.trim() || '');
 
+    /**
+     * Where the CV button actually points.
+     *
+     * `resumeUrl` is storage: the upload endpoint names files `<timestamp>-<random>.pdf` so two
+     * uploads cannot collide. That is the wrong thing to hand a reader — it is unreadable, and it
+     * changes every time the document is replaced, so anyone who copied it is left holding a link
+     * to an old resume. The server publishes /cv.pdf as a stable alias that resolves this same
+     * setting, so a locally uploaded resume is offered under that name instead.
+     *
+     * A resume hosted elsewhere keeps its own URL: the alias would only add a redirect through
+     * this server on the way to the same file.
+     */
+    const resumeHref = computed<string>(() => {
+      const url = resumeUrl.value;
+      if (!url) return '';
+      return /^https?:\/\//i.test(url) ? url : '/cv.pdf';
+    });
+
 
     const messageIndex = ref(0);
 
@@ -322,6 +340,7 @@ export default defineComponent({
       bio,
       role,
       resumeUrl,
+      resumeHref,
       resumeFile,
       uploadingResume,
       uploadResume,
