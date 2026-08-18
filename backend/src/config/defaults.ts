@@ -159,6 +159,10 @@ export const defaultConfig: SiteConfig = {
     // Work history. Was a hardcoded array inside ExperienceSection.vue.
     // { org, title, where, period, active, points[], show }
     experience: [],
+    // Kinds of work and what each covers: { label, detail, show }
+    expertise: [],
+    // Qualifications: { qualification, institution, period, show }
+    education: [],
     // Heading, intro, visibility and order for each home-page section.
     sections: {
       intro: { title: '', emoji: '', intro: '', show: true, order: 1 },
@@ -166,11 +170,13 @@ export const defaultConfig: SiteConfig = {
       projects: { title: 'Selected Work', emoji: '🎨', intro: '', show: true, order: 3 },
       openSource: { title: 'Open Source', emoji: '🌟', intro: '', show: true, order: 4 },
       problemSolving: { title: 'Problem Solving', emoji: '🧠', intro: '', show: true, order: 5 },
-      recentWrites: { title: 'Recent Writes', emoji: '✍️', intro: '', show: true, order: 6 },
-      // Was 6. An install that predates recentWrites has articles: 6 saved and gains the new
-      // section at 6 too, since deepBackfill only adds missing keys and never rewrites stored
-      // ones. Home.vue resolves that tie by list position rather than leaving it to chance.
-      articles: { title: 'Articles', emoji: '📝', intro: '', show: true, order: 7 },
+      expertise: { title: 'Expertise', emoji: '🧰', intro: '', show: true, order: 6 },
+      education: { title: 'Education', emoji: '🎓', intro: '', show: true, order: 7 },
+      recentWrites: { title: 'Recent Writes', emoji: '✍️', intro: '', show: true, order: 8 },
+      // These numbers only decide a fresh install. deepBackfill adds missing keys and never
+      // rewrites stored ones, so an older config keeps whatever order it already had and the new
+      // sections arrive alongside it — Home.vue's key list breaks any tie that produces.
+      articles: { title: 'Articles', emoji: '📝', intro: '', show: true, order: 9 },
     },
     // Heading and intro copy for the standalone pages.
     pages: {

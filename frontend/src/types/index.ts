@@ -89,6 +89,8 @@ export type ProfileType = {
   },
   more: MoreType,
   experience: ExperienceRole[],
+  expertise: ExpertiseArea[],
+  education: EducationEntry[],
   sections: SectionsConfig,
   pages: PagesConfig,
   channels: ContactChannel[],
@@ -127,6 +129,26 @@ export type ExperienceRole = {
   show: boolean,
 }
 
+/**
+ * One row of the expertise grid: a heading for a kind of work, and what that means in practice.
+ *
+ * A label plus prose rather than a list of tags, because "Rust, Docker, Kubernetes" as loose chips
+ * says nothing about which of them the person has actually run in production.
+ */
+export type ExpertiseArea = {
+  label: string,
+  detail: string,
+  show: boolean,
+}
+
+/** One qualification. `period` is free text, so "2014 - 2018" and "expected 2027" both work. */
+export type EducationEntry = {
+  qualification: string,
+  institution: string,
+  period: string,
+  show: boolean,
+}
+
 /** Heading, intro copy, visibility and position for one home-page section. */
 export type SectionConfig = {
   title: string,
@@ -142,6 +164,8 @@ export type SectionsConfig = {
   projects: SectionConfig,
   openSource: SectionConfig,
   problemSolving: SectionConfig,
+  expertise: SectionConfig,
+  education: SectionConfig,
   recentWrites: SectionConfig,
   articles: SectionConfig,
 }

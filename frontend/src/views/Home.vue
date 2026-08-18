@@ -17,6 +17,8 @@
         <ProjectsSection v-else-if="key === 'projects'" section="projects" />
         <ProjectsSection v-else-if="key === 'openSource'" section="openSource" />
         <ProplemSolvingSection v-else-if="key === 'problemSolving'" />
+        <ExpertiseSection v-else-if="key === 'expertise'" />
+        <EducationSection v-else-if="key === 'education'" />
         <RecentWritesSection v-else-if="key === 'recentWrites'" />
         <ArticleSection v-else-if="key === 'articles'" />
       </template>
@@ -32,6 +34,8 @@ import ArticleSection from '../components/home/ArticlesSection.vue';
 import ProplemSolvingSection from '../components/home/ProblemSolvingSection.vue';
 import ProjectsSection from '../components/home/ProjectsSection.vue';
 import RecentWritesSection from '../components/home/RecentWritesSection.vue';
+import ExpertiseSection from '../components/home/ExpertiseSection.vue';
+import EducationSection from '../components/home/EducationSection.vue';
 import { useSettingsStore } from '../store';
 import { useAdmin } from '../composables/useAdmin';
 import type { SectionConfig } from '../types';
@@ -42,6 +46,8 @@ type SectionKey =
   | 'projects'
   | 'openSource'
   | 'problemSolving'
+  | 'expertise'
+  | 'education'
   | 'recentWrites'
   | 'articles';
 
@@ -52,8 +58,10 @@ const DEFAULT_ORDER: Record<SectionKey, number> = {
   projects: 3,
   openSource: 4,
   problemSolving: 5,
-  recentWrites: 6,
-  articles: 7,
+  expertise: 6,
+  education: 7,
+  recentWrites: 8,
+  articles: 9,
 };
 
 /**
@@ -74,7 +82,9 @@ export default defineComponent({
     ArticleSection,
     ProjectsSection,
     ProplemSolvingSection,
-    RecentWritesSection
+    RecentWritesSection,
+    ExpertiseSection,
+    EducationSection
   },
 
   setup() {

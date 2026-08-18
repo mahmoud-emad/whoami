@@ -68,6 +68,8 @@ const SECTION_KEYS: SectionKey[] = [
   'projects',
   'openSource',
   'problemSolving',
+  'expertise',
+  'education',
   'recentWrites',
   'articles',
 ];
@@ -78,6 +80,8 @@ const LABELS: Record<SectionKey, string> = {
   projects: 'Projects',
   openSource: 'Open Source',
   problemSolving: 'Problem Solving',
+  expertise: 'Expertise',
+  education: 'Education',
   recentWrites: 'Recent Writes',
   articles: 'Articles',
 };
