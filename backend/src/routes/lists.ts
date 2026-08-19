@@ -1,7 +1,7 @@
 import express from 'express';
 import type { Request, Response, Router } from 'express';
 import { readDatabase, writeDatabase, nextId, updateById } from '../db';
-import { requireAuth } from '../auth/middleware';
+import { isOwner, requireAuth } from '../auth/middleware';
 import { log } from '../lib/logger';
 import type { Database, DbRecord } from '../types';
 
@@ -51,10 +51,15 @@ const findList = (list: DbRecord[], key: string): DbRecord | undefined => {
   return list.find((entry) => entry.slug === key || (!Number.isNaN(asId) && entry.id === asId));
 };
 
-listsRouter.get('/lists', async (_req: Request, res: Response): Promise<void> => {
+listsRouter.get('/lists', async (req: Request, res: Response): Promise<void> => {
   try {
     const dbData = await readDatabase();
-    const lists = listCollection(dbData);
+    // Same rule as the posts and the projects: a hidden list stays on the owner's own index,
+    // parked and badged, and never leaves the server for anyone else. This used to be enforced
+    // only in the browser, so "hidden" meant "not rendered" rather than "not sent".
+    const lists = isOwner(req)
+      ? listCollection(dbData)
+      : listCollection(dbData).filter((entry) => entry.show !== false);
     // The index only needs the cover: sending every item of every list would be the whole page
     // content for a link the reader may not follow.
     const data = lists.map((entry) => {
@@ -92,7 +97,12 @@ listsRouter.get('/lists/:key', async (req: Request, res: Response): Promise<void
   try {
     const dbData = await readDatabase();
     const entry = findList(listCollection(dbData), req.params.key);
-    if (!entry) {
+    // A hidden list answers exactly as a missing one does, to anyone but the owner. The index
+    // already omits it, and this is the door the index links to: without it, a URL that had once
+    // been public — or simply guessed from the title — still served every mission and item.
+    // Deliberately the same status and wording as "not found": a distinct "forbidden" would
+    // confirm the list exists, which is the thing being hidden.
+    if (!entry || (entry.show === false && !isOwner(req))) {
       res.status(404).json({ message: 'List not found' });
       return;
     }
