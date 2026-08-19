@@ -164,7 +164,11 @@ export default defineComponent({
         status: 'want' as BookStatus,
         emoji: '🗂',
         title: 'On the shelf',
-        intro: 'Queued up.',
+        // The shelf is deliberately ordered — shell, then the machine, the network, the syscall
+        // boundary, and kernel space last — and array order is what renders it. Without saying so
+        // the sequence reads as an unsorted pile, and the next person to add a book drops it
+        // wherever rather than in its place.
+        intro: 'Queued up, in the order I mean to read them.',
         books: byStatus('want'),
       },
     ]);
