@@ -274,6 +274,11 @@ export default defineComponent({
         apiLoading.setLoading(true);
         const res = await apiFetch(`/lists/${route.params.slug}`);
         if (res.status === 404) {
+          // Draining the body matters even though nothing reads it: a fetch response whose body is
+          // never consumed holds its connection open until the browser gets round to collecting it.
+          // Harmless while a 404 here meant a typo'd URL; this is now the ordinary way a visitor
+          // meets a hidden list, so it is a stuck connection on a page that looks finished.
+          await res.arrayBuffer().catch(() => undefined);
           notFound.value = true;
           doc.value = null;
           return;
