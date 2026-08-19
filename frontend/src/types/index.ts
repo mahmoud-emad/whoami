@@ -385,6 +385,32 @@ export type BookType = {
   createdAt?: string,
 }
 
+/** Where a course stands. Mirrors BookStatus, in the vocabulary of something you watch. */
+export type CourseStatus = 'watching' | 'done' | 'want'
+
+/**
+ * One course: a lecture series or a taught course being worked through.
+ *
+ * Deliberately its own type rather than a book with the fields renamed. A book has an author and an
+ * edition; a course has an institution and a term, and the two only look alike until you try to
+ * fill in the other one's fields.
+ */
+export type CourseType = {
+  id?: number,
+  title: string,
+  /** Who teaches it: "Stanford (CS107)", "MIT 6.5840". */
+  provider: string,
+  url: string,
+  status: CourseStatus,
+  /** Free text: "lecture 4", "half way". Only meaningful while watching. */
+  progress: string,
+  /** A line about why it is here, or what it was good for. */
+  note: string,
+  /** The term or year it was recorded, as text so "Fall 2020" and "2020" both work. */
+  year: string,
+  createdAt?: string,
+}
+
 /** What `GET /lists` returns: the cover of each list, without its items. */
 export type ListSummary = {
   id: number,

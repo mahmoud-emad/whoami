@@ -186,6 +186,7 @@ export const defaultConfig: SiteConfig = {
       guestbook: { title: 'Guestbook', intro: '' },
       guestbookNotice: { title: '', intro: '' },
       search: { title: 'Search', intro: '' },
+      courses: { title: 'Courses', intro: '' },
       notFound: { title: 'This page does not exist yet.', intro: '' },
     },
     // Contact channels. Replaces the five hardcoded blocks in Contact.vue.
