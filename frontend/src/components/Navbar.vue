@@ -126,29 +126,36 @@ export default defineComponent({
     ];
 
     /**
-     * How many people have signed the guestbook, shown beside that nav entry.
+     * Counts shown beside nav entries: guestbook signatures and published posts.
      *
      * Fetched once when the bar mounts. The bar lives in the layout, so it survives client-side
-     * navigation and this is one request per page load, not one per route change. A failure leaves
-     * it at null and the number simply does not render — a nav item is not worth an error state.
+     * navigation and this is one request per endpoint per page load, not one per route change.
+     * Both endpoints already filter for the viewer (hidden posts never reach a visitor), so the
+     * number matches what the page shows. A failure leaves the entry without a number — a nav
+     * item is not worth an error state.
      */
-    const guestbookCount = ref<number | null>(null);
+    const COUNTED_ROUTES: Record<string, string> = {
+      '/guestbook': '/guestbooks',
+      '/blog': '/posts',
+    };
+    const counts = ref<Record<string, number>>({});
 
-    onMounted(async () => {
-      try {
-        const res = await apiFetch('/guestbooks');
-        if (!res.ok) return;
-        const json = await res.json();
-        const total = typeof json.total === 'number' ? json.total : (json.data || []).length;
-        if (total > 0) guestbookCount.value = total;
-      } catch {
-        // Offline, or the guestbook is unreachable. The link still works without a number on it.
-      }
+    onMounted(() => {
+      Object.entries(COUNTED_ROUTES).forEach(async ([link, endpoint]) => {
+        try {
+          const res = await apiFetch(endpoint);
+          if (!res.ok) return;
+          const json = await res.json();
+          const total = typeof json.total === 'number' ? json.total : (json.data || []).length;
+          if (total > 0) counts.value = { ...counts.value, [link]: total };
+        } catch {
+          // Offline, or the endpoint is unreachable. The link still works without a number on it.
+        }
+      });
     });
 
-    /** Only the guestbook carries a count today; matched on the route so a renamed label is fine. */
-    const countFor = (link: string): number | null =>
-      link === '/guestbook' ? guestbookCount.value : null;
+    /** Matched on the route so a renamed label keeps its count. */
+    const countFor = (link: string): number | null => counts.value[link] ?? null;
 
     const brand = computed(() => (settingsStore.isSettingsLoaded() ? settingsStore.profile?.brand : undefined));
 
