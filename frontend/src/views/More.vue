@@ -48,7 +48,9 @@
       <div class="long-line opacity-80"></div>
       <section class="section">
         <h1>📦 Shoebox</h1>
-        <p v-if="shoeboxIntro" class="mb-3">{{ shoeboxIntro }}</p>
+        <!-- mb-6, not mb-3: the v-row below pulls up by 12px, which cancelled the 12px margin and
+             left the cards touching the intro. -->
+        <p v-if="shoeboxIntro" class="mb-6">{{ shoeboxIntro }}</p>
 
         <OwnerBar >
           <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-plus" title="Add a shoebox link"
