@@ -6,6 +6,8 @@ import { SERVE_FRONTEND } from '../config/runtime';
 import { readConfig } from '../config/store';
 import { escapeHtml, absoluteUrl } from '../lib/html';
 import { log } from '../lib/logger';
+import { readDatabase } from '../db';
+import { summarise } from '../routes/syndication';
 import type { SiteConfig } from '../types';
 
 const errorMessage = (error: unknown): string => (error instanceof Error ? error.message : String(error));
@@ -82,13 +84,20 @@ const buildRelMeLinks = (configData: SiteConfig | null | undefined): string[] =>
  * Build the <head> tags for one request. Falls back through meta -> profile so a site that never
  * touched the SEO tab still gets a real title and description instead of an empty tag.
  */
-const buildHeadTags = (configData: SiteConfig | null | undefined, req: Request): string => {
+const buildHeadTags = (
+  configData: SiteConfig | null | undefined,
+  req: Request,
+  page?: { title: string; description: string },
+): string => {
   const meta = asRecord(configData?.meta);
   const profile = asRecord(configData?.profile);
   const brand = asRecord(profile.brand);
 
-  const title = firstTruthy(meta.title, brand.displayName, profile.fullName, 'Portfolio');
-  const description = firstTruthy(meta.description, profile.bio);
+  const siteTitle = firstTruthy(meta.title, brand.displayName, profile.fullName, 'Portfolio');
+  // A single post carries its own title and summary, so a pasted link previews the post and not
+  // the site. Anything else keeps the site-wide values.
+  const title = page ? `${page.title} · ${siteTitle}` : siteTitle;
+  const description = page?.description || firstTruthy(meta.description, profile.bio);
   const siteUrl = firstTruthy(meta.siteUrl);
   const image = absoluteUrl(firstTruthy(meta.ogImage, brand.logoUrl), siteUrl);
   const favicon = firstTruthy(meta.faviconUrl, '/image.png');
@@ -107,7 +116,7 @@ const buildHeadTags = (configData: SiteConfig | null | undefined, req: Request):
   const tags = [
     `<title>${escapeHtml(title)}</title>`,
     `<link rel="icon" href="${escapeHtml(favicon)}" />`,
-    `<meta property="og:type" content="website" />`,
+    `<meta property="og:type" content="${page ? 'article' : 'website'}" />`,
     `<meta property="og:title" content="${escapeHtml(title)}" />`,
     `<meta name="twitter:title" content="${escapeHtml(title)}" />`,
     `<meta name="twitter:card" content="${image ? 'summary_large_image' : 'summary'}" />`,
@@ -120,6 +129,11 @@ const buildHeadTags = (configData: SiteConfig | null | undefined, req: Request):
   if (pageUrl) {
     tags.push(`<meta property="og:url" content="${escapeHtml(pageUrl)}" />`);
     tags.push(`<link rel="canonical" href="${escapeHtml(pageUrl)}" />`);
+  }
+  if (siteUrl) {
+    // Autodiscovery: lets a feed reader find the feed from any page of the site.
+    const feedUrl = `${siteUrl.replace(/\/+$/, '')}/feed.xml`;
+    tags.push(`<link rel="alternate" type="application/atom+xml" title="${escapeHtml(title)}" href="${escapeHtml(feedUrl)}" />`);
   }
   if (image) {
     tags.push(`<meta property="og:image" content="${escapeHtml(image)}" />`);
@@ -168,6 +182,20 @@ const stripReplaceableHeadTags = (html: string): string => {
  * dashboard, and a title that only updates on restart is a bug waiting to be reported.
  */
 let indexHtmlCache: string | null = null;
+/**
+ * The visible post a /blog/:uuid request is for, if any. A hidden post is a draft and gets the
+ * site-wide tags, exactly as it gets a 404 from the API: its title must not leak through a preview.
+ */
+const POST_PATH = /^\/blog\/([^/]+)\/?$/;
+const postHead = async (path: string): Promise<{ title: string; description: string } | undefined> => {
+  const uuid = POST_PATH.exec(path)?.[1];
+  if (!uuid) return undefined;
+  const db = await readDatabase();
+  const post = db.posts.find((p) => p.uuid === uuid && p.show !== false);
+  if (!post) return undefined;
+  return { title: String(post.title ?? ''), description: summarise(post.content) };
+};
+
 const readIndexHtml = async (): Promise<string> => {
   if (indexHtmlCache === null) indexHtmlCache = await fs.readFile(INDEX_HTML_PATH, 'utf8');
   return indexHtmlCache;
@@ -203,13 +231,13 @@ export const mountFrontend = (app: Express): void => {
       return;
     }
     try {
-      const [rawHtml, configData] = await Promise.all([readIndexHtml(), readConfig()]);
+      const [rawHtml, configData, page] = await Promise.all([readIndexHtml(), readConfig(), postHead(req.path)]);
       if (rawHtml.indexOf('</head>') === -1) throw new Error('index.html has no </head>');
       // Strip the static defaults before injecting, or the document ends up with two of
       // every tag and the first (generic) one wins.
       const html = stripReplaceableHeadTags(rawHtml);
       const closingHead = html.indexOf('</head>');
-      const tags = buildHeadTags(configData, req);
+      const tags = buildHeadTags(configData, req, page);
       res.type('html').send(html.slice(0, closingHead) + tags + html.slice(closingHead));
     } catch (error) {
       // Serving a page with weak SEO beats serving a 500. Any failure here — unreadable

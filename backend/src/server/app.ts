@@ -19,6 +19,7 @@ import { booksRouter } from '../routes/books';
 import { coursesRouter } from '../routes/courses';
 import { uploadsRouter } from '../routes/uploads';
 import { cvRouter } from '../routes/cv';
+import { syndicationRouter } from '../routes/syndication';
 import { mountFrontend } from './frontend';
 
 const loggerMiddleware = (req: Request, _res: Response, next: NextFunction): void => {
@@ -48,6 +49,9 @@ export const createApp = (): Express => {
   // Root-mounted on purpose: /cv.pdf is a short address to hand out, so it cannot live under /api.
   // Ahead of the frontend, or the SPA catch-all would answer it with index.html.
   app.use(cvRouter);
+
+  // /feed.xml, /sitemap.xml, /robots.txt: fixed addresses that readers and crawlers look up by name.
+  app.use(syndicationRouter);
 
   // Every API endpoint lives on this router. Keeping it off the root is what lets client side
   // routes like /projects coexist with the API resource of the same name.
