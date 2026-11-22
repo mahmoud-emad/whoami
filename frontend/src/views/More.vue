@@ -47,7 +47,7 @@
     <template v-if="shoebox.length || isAdmin">
       <div class="long-line opacity-80"></div>
       <section class="section">
-        <h1>📦 Shoebox</h1>
+        <h1 class="mb-2">📦 Shoebox</h1>
         <!-- mb-6, not mb-3: the v-row below pulls up by 12px, which cancelled the 12px margin and
              left the cards touching the intro. -->
         <p v-if="shoeboxIntro" class="mb-6">{{ shoeboxIntro }}</p>
